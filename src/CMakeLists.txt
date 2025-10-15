@@ -7,6 +7,16 @@ add_executable(${PROJECT_NAME}
         helper_functions.hpp
         audio.cpp
         audio.hpp
+        game_scenes.cpp
+        game_scenes.hpp
+        textures.cpp
+        textures.hpp
+        game_play_phases.cpp
+        game_play_phases.hpp
+        player.cpp
+        player.hpp
+        card.cpp
+        card.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

@@ -39,8 +39,7 @@ namespace constants
         3, 3, 3
     };
     inline constexpr int initialHandSize{3};
-
-    // UI
+     // UI
     //// HandZone
     inline constexpr int handZonePaddingRight{200};
     inline constexpr int handZoneBottomPadding{20};
