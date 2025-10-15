@@ -16,6 +16,7 @@ enum class GameTexture
     metal08,
     metal22,
     metal35,
+    wall13,
     panel01,
     panel05,
     cardBack,
@@ -24,12 +25,58 @@ enum class GameTexture
     scissorsCard
 };
 
+enum class GameScene
+{
+    invalid,
+    start,
+    playing,
+    gameOver
+};
+
+enum class CardType
+{
+    invalid,
+    rock,
+    paper,
+    scissors
+};
 
 struct Scene
 {
+    GameScene gameScene{};
     GameTexture background{};
     GameMusic music{};
 };
+
+struct Card
+{
+    raylib::Vector2 size{};
+    raylib::Vector2 pos{};
+    CardType type{};
+    bool faceUp{true};
+};
+
+struct Player
+{
+    int id{-1};
+    int score{};
+    std::vector<Card> deck{};
+    std::vector<Card> hand{};
+};
+
+void InitializePlayer(Player &player, std::random_device &rd)
+{
+    player.score = 0;
+    player.hand.clear();
+    //Use default deck for players for now.
+    player.deck.clear();
+    for (const int cardType: constants::defaultDeck)
+    {
+        player.deck.emplace_back(Card{.type = static_cast<CardType>(cardType)});
+    }
+
+    std::shuffle(player.deck.begin(), player.deck.end(), rd);
+}
 
 
 raylib::Texture2D &GetTexture(const GameTexture tex)
@@ -39,6 +86,7 @@ raylib::Texture2D &GetTexture(const GameTexture tex)
         {GameTexture::metal08, "resources/textures/metal_08.jpg"},
         {GameTexture::metal22, "resources/textures/metal_22.jpg"},
         {GameTexture::metal35, "resources/textures/metal_35.jpg"},
+        {GameTexture::wall13, "resources/textures/wall_13.png"},
         {GameTexture::panel01, "resources/textures/panel_01.png"},
         {GameTexture::panel05, "resources/textures/panel_05.png"},
         {GameTexture::cardBack, "resources/textures/cards/card_back.png"},
@@ -76,9 +124,30 @@ int main()
     InitAudioDevice();
     bool muteGame{true};
 
-    //Scene 1
+    GameScene currentScene{GameScene::start};
+
+    //Player 1
+    Player player1
+    {
+        .id = 1,
+        .score = 0
+    };
+    Player player2
+    {
+        .id = 2,
+        .score = 0
+    };
+
+    InitializePlayer(player1, rd);
+    InitializePlayer(player2, rd);
+
+    // int playerGoingFirst{2};
+
+
+    //GameScene::start ---------------------------------------------------------
     constexpr Scene startScene
     {
+        .gameScene = GameScene::start,
         .background = GameTexture::metal35,
         .music = GameMusic::start
     };
@@ -98,7 +167,15 @@ int main()
         .background = GameTexture::panel01,
         .state = ButtonState::enabled
     };
-    //Scene 1 end
+    //GameScene::start end -----------------------------------------------------
+    //GameScene::playing -------------------------------------------------------
+    constexpr Scene playingScene
+    {
+        .gameScene = GameScene::playing,
+        .background = GameTexture::wall13,
+        .music = GameMusic::playing
+
+    };
 
     while (!window.ShouldClose()) // Detect window close button or ESC key
     {
@@ -106,23 +183,57 @@ int main()
         SetMasterVolume(!muteGame);
 
         // Update --------------------------------------------------------------
-        //Updating Scene 1
-        UpdateButtonState(startButton,
-                          mousePosition,
-                          IsMouseButtonDown(MOUSE_BUTTON_LEFT),
-                          IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
-        if (startButton.wasPressed)
+        switch (currentScene)
         {
-            PlaySound(GameSound::buttonPress01);
+            case GameScene::invalid:
+                break;
+            case GameScene::start:
+            {
+                UpdateButtonState(startButton,
+                                  mousePosition,
+                                  IsMouseButtonDown(MOUSE_BUTTON_LEFT),
+                                  IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+                if (startButton.wasPressed)
+                {
+                    PlaySound(GameSound::buttonPress01);
+                    currentScene = GameScene::playing;
+                }
+                PlayMusic(startScene.music);
+                break;
+            }
+            case GameScene::playing:
+            {
+                PlayMusic(playingScene.music);
+                break;
+            }
+            case GameScene::gameOver:
+                break;
         }
-        PlayMusic(startScene.music);
+        //Updating Scene 1
 
         // Draw ----------------------------------------------------------------
         window.ClearBackground(RAYWHITE);
 
-        //Drawing Scene 1
-        GetTexture(startScene.background).Draw();
-        DrawButton(startButton, GetTexture(startButton.background));
+        switch (currentScene)
+        {
+            case GameScene::invalid:
+                break;
+            case GameScene::start:
+            {
+                GetTexture(startScene.background).Draw();
+                DrawButton(startButton, GetTexture(startButton.background));
+
+                break;
+            }
+            case GameScene::playing:
+            {
+                GetTexture(playingScene.background).Draw();
+
+                break;
+            }
+            case GameScene::gameOver:
+                break;
+        }
 
 
 #if (DEBUG)
