@@ -3,10 +3,11 @@
 #include "rlImGui.h"
 #include "raylib-cpp.hpp"
 #include "constants.hpp"
+#include "game_play_phases.hpp"
 
 namespace ImGuiSideBar
 {
-    void DrawSideBar(bool &muteGame)
+    void DrawSideBar(bool &muteGame, const GameplayPhase &currentPhase)
     {
         // start ImGui Content
         rlImGuiBegin();
@@ -26,6 +27,8 @@ namespace ImGuiSideBar
             ImGui::TextUnformatted(
                 ("Mouse X: " + std::to_string(GetMouseX())
                  + " / Mouse Y: " + std::to_string(GetMouseY())).c_str());
+            ImGui::SeparatorText("Game State");
+            ImGui::TextUnformatted(("Game Phase = " + GameplayPhaseToString(currentPhase)).c_str());
             ImGui::SeparatorText("Options");
             ImGui::Checkbox("Mute", &muteGame);
             ImGui::SeparatorText("Debug Actions");

@@ -7,12 +7,11 @@
 #include "raylib-cpp.hpp"
 #include "player.hpp"
 
-void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst)
+void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2,
+                          const int goingFirst, bool &player1HasDrawnThisTurn)
 {
     [[maybe_unused]] static float timeSinceStartOfPhase{};
     timeSinceStartOfPhase += GetFrameTime();
-
-    static bool player1HasDrawnThisTurn{};
 
     static float playerActionWaitTime{1};
 
@@ -52,14 +51,22 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         }
         case GameplayPhase::playerOneDrawing:
         {
-            //if player's deck is empty, skip drawing phase, or
-            //wait for Player 1 to draw a card (by clicking the deck button).
-            if (player1.deck.empty() || player1HasDrawnThisTurn)
+            //If Player 1 wants to draw but has no cards, it's Game Over
+            if (player1.deck.empty())
             {
+                currentPhase = GameplayPhase::gameOver;
+                break;
+            }
+
+            //Wait for Player 1 to draw a card (by clicking the deck button).
+            if (player1HasDrawnThisTurn)
+            {
+                player1HasDrawnThisTurn = false;
                 currentPhase = GameplayPhase::playerOnePlaying;
                 timeSinceStartOfPhase = 0;
                 break;
             }
+            //TODO: Handle other case here
             break;
         }
         case GameplayPhase::playerOnePlaying:
@@ -171,6 +178,10 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             }
             break;
         }
+        case GameplayPhase::gameOver:
+        {
+            break;
+        }
     }
 }
 
@@ -190,8 +201,7 @@ void DrawCardsFromDeckToHand(Player &player, int amount)
 
 void PutCardInPlay(Player &player)
 {
-    assert(player.heldCardIndex < 0 &&
-        "Trying to play a card of negative index.");
+    assert(player.heldCardIndex > -1 && "Trying to play a card of negative index.");
 
     //Copy the card from the hand to the inPlay field.
     player.cardInPlay = player.hand.at(static_cast<size_t>(player.heldCardIndex));
@@ -232,6 +242,30 @@ int BattleCards(const Card &card1, const Card &card2)
     }
     std::cerr << "Something went wrong with the Rock-Paper-Scissors logic." << "\n";
     return -1;
+}
+
+std::string GameplayPhaseToString(const GameplayPhase phase)
+{
+    switch (phase)
+    {
+        case GameplayPhase::uninitialized:
+            return "Uninitialized";
+        case GameplayPhase::initialHandDraw:
+            return "Initial Hand Draw";
+        case GameplayPhase::playerOneDrawing:
+            return "Player One Drawing";
+        case GameplayPhase::playerOnePlaying:
+            return "Player One Playing";
+        case GameplayPhase::playerTwoDrawing:
+            return "Player Two Drawing";
+        case GameplayPhase::playerTwoPlaying:
+            return "Player Two Playing";
+        case GameplayPhase::battle:
+            return "Battle";
+        case GameplayPhase::gameOver:
+            return "Game Over";
+    }
+    return "Error";
 }
 
 

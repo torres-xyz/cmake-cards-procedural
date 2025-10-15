@@ -83,31 +83,39 @@ void DrawCardPreview(const Card &card)
     cardTex.Draw(cardTexSourceRect, constants::cardPreviewZoneRec);
 }
 
-
 void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePosition,
                      GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst)
 {
-    static bool holdingCard{false};
-    //Update
-    //Update Buttons
-    Button &playerDeckButton = playingScene.playerDeckButton;
-    UpdateButtonState(playerDeckButton,
-                      mousePosition,
-                      IsMouseButtonDown(MOUSE_BUTTON_LEFT),
-                      IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
-    if (playerDeckButton.wasPressed)
-    {
-        PlaySound(GameSound::buttonPress01);
-        DrawCardsFromDeckToHand(player1, 1);
-    }
     //Update Music
     PlayMusic(playingScene.music);
 
+    //Scene Buttons
+    Button &playerDeckButton = playingScene.playerDeckButton;
+    playerDeckButton.state = ButtonState::disabled;
+
     //Running the gameplay
-    UpdateGameplayPhases(currentPhase, player1, player2, goingFirst);
+    static bool player1HasDrawnThisTurn;
+    [[maybe_unused]] int PlayerOneSelectedCardFromHand = -1;
+    UpdateGameplayPhases(currentPhase, player1, player2, goingFirst, player1HasDrawnThisTurn);
+
+    if (!player1.deck.empty() && (currentPhase == GameplayPhase::initialHandDraw || currentPhase == GameplayPhase::playerOneDrawing))
+    {
+        playerDeckButton.state = ButtonState::enabled;
+        UpdateButtonState(playerDeckButton,
+                          mousePosition,
+                          IsMouseButtonDown(MOUSE_BUTTON_LEFT),
+                          IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+
+        if (playerDeckButton.wasPressed)
+        {
+            PlaySound(GameSound::buttonPress01);
+            DrawCardsFromDeckToHand(player1, 1);
+            player1HasDrawnThisTurn = true;
+        }
+    }
 
     int hoveredCardIndex = -1;
-    bool p1HoldingCard{player1.heldCardIndex > -1};
+
     static raylib::Vector2 heldCardOffset{};
     //Position player 1 hand cards in the hand zone
     for (size_t i = 0; i < player1.hand.size(); ++i)
@@ -116,7 +124,7 @@ void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePos
         {
             hoveredCardIndex = static_cast<int>(i);
         }
-        if (p1HoldingCard && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        if (player1.heldCardIndex == -1 && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             if (CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
             {
@@ -124,7 +132,7 @@ void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePos
                 heldCardOffset = mousePosition - player1.hand.at(i).pos;
             }
         }
-        if (p1HoldingCard && player1.heldCardIndex == static_cast<int>(i))
+        if (player1.heldCardIndex == static_cast<int>(i))
         {
             player1.hand.at(i).pos = mousePosition - heldCardOffset;
             continue;
@@ -132,7 +140,8 @@ void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePos
 
         //Set the other cards in the hand slightly apart from each other.
         const int int_i = static_cast<int>(i);
-        const raylib::Rectangle cardRect{
+        const raylib::Rectangle cardRect
+        {
             static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + constants::cardWidth * int_i),
             static_cast<float>(constants::handZonePosY + 4),
             constants::cardWidth,
@@ -142,6 +151,7 @@ void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePos
         player1.hand.at(i).pos = raylib::Vector2{cardRect.x, cardRect.y};
         player1.hand.at(i).faceUp = true;
     }
+
     if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
     {
         // if (CanPlayHeldCard())
@@ -181,11 +191,11 @@ void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePos
         DrawCard(cardInPlayCopy);
     }
     // Drawing Preview Zone Card
-    if (p1HoldingCard)
+    if (player1.heldCardIndex != -1)
     {
         DrawCardPreview(player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex)));
     }
-    else if (hoveredCardIndex != -1)
+    if (hoveredCardIndex != -1)
     {
         DrawCardPreview(player1.hand.at(static_cast<std::size_t>(hoveredCardIndex)));
     }
@@ -195,7 +205,7 @@ void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePos
         if (player1.heldCardIndex == static_cast<int>(i)) continue;
         DrawCard(player1.hand.at(i));
     }
-    if (holdingCard)
+    if (player1.heldCardIndex != -1)
     {
         DrawCard(player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex)));
     }

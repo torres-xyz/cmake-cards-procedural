@@ -124,7 +124,7 @@ int main()
 
 
 #if (DEBUG)
-        ImGuiSideBar::DrawSideBar(muteGame);
+        ImGuiSideBar::DrawSideBar(muteGame, currentPhase);
 #endif
         EndDrawing();
 
