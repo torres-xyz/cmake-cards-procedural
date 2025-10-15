@@ -42,7 +42,7 @@ void RunStartingScene(StartingScene &startingScene,
                       GameScene &currentScene,
                       const Vector2 &mousePosition);
 
-void RunPlayingScene(PlayingScene &playingScene, const Vector2 &mousePosition,
+void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePosition,
                      GameplayPhase &currentPhase, Player &player1, Player &player2,
                      int goingFirst);
 

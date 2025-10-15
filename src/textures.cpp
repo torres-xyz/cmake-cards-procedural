@@ -4,7 +4,7 @@
 
 #include "card.hpp"
 
-raylib::Texture2D &GetTexture(const GameTexture tex)
+raylib::Texture2D const &GetTexture(const GameTexture tex)
 {
     static const std::map<GameTexture, std::string> gameTextureToPathMap
     {
@@ -31,6 +31,11 @@ raylib::Texture2D &GetTexture(const GameTexture tex)
     }
 
     return gameTextureToTexture2DMap.at(tex);
+}
+
+raylib::Texture2D const &GetTexture(const CardType type)
+{
+    return GetTexture(GetGameTextureFromCardType(type));
 }
 
 GameTexture GetGameTextureFromCardType(const CardType type)

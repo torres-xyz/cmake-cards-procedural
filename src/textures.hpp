@@ -18,6 +18,8 @@ enum class GameTexture
     scissorsCard
 };
 
-raylib::Texture2D &GetTexture(GameTexture tex);
+raylib::Texture2D const &GetTexture(GameTexture tex);
+
+raylib::Texture2D const &GetTexture(CardType type);
 
 GameTexture GetGameTextureFromCardType(CardType type);

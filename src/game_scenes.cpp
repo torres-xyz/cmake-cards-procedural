@@ -54,8 +54,38 @@ void DrawCard(const Card &card)
     cardTex.Draw(cardTexSourceRect, cardTextDestRect);
 }
 
-void RunPlayingScene(PlayingScene &playingScene, const Vector2 &mousePosition,
-                     GameplayPhase &currentPhase, Player &player1, Player &player2, int goingFirst)
+bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
+{
+    return CheckCollisionPointRec
+    (
+        point,
+        raylib::Rectangle
+        {
+            card.pos.x,
+            card.pos.y,
+            card.size.x,
+            card.size.y
+        }
+    );
+}
+
+void DrawCardPreview(const Card &card)
+{
+    const raylib::Texture2D &cardTex = GetTexture(card.type);
+
+    const raylib::Rectangle cardTexSourceRect
+    {
+        0, 0,
+        static_cast<float>(cardTex.GetWidth()),
+        static_cast<float>(cardTex.GetHeight())
+    };
+
+    cardTex.Draw(cardTexSourceRect, constants::cardPreviewZoneRec);
+}
+
+
+void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePosition,
+                     GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst)
 {
     static bool holdingCard{false};
     //Update
@@ -76,7 +106,54 @@ void RunPlayingScene(PlayingScene &playingScene, const Vector2 &mousePosition,
     //Running the gameplay
     UpdateGameplayPhases(currentPhase, player1, player2, goingFirst);
 
-    //Place player 1 hand cards on the screen
+    int hoveredCardIndex = -1;
+    bool p1HoldingCard{player1.heldCardIndex > -1};
+    static raylib::Vector2 heldCardOffset{};
+    //Position player 1 hand cards in the hand zone
+    for (size_t i = 0; i < player1.hand.size(); ++i)
+    {
+        if (CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
+        {
+            hoveredCardIndex = static_cast<int>(i);
+        }
+        if (p1HoldingCard && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            if (CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
+            {
+                player1.heldCardIndex = static_cast<int>(i);
+                heldCardOffset = mousePosition - player1.hand.at(i).pos;
+            }
+        }
+        if (p1HoldingCard && player1.heldCardIndex == static_cast<int>(i))
+        {
+            player1.hand.at(i).pos = mousePosition - heldCardOffset;
+            continue;
+        }
+
+        //Set the other cards in the hand slightly apart from each other.
+        const int int_i = static_cast<int>(i);
+        const raylib::Rectangle cardRect{
+            static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + constants::cardWidth * int_i),
+            static_cast<float>(constants::handZonePosY + 4),
+            constants::cardWidth,
+            constants::cardHeight
+        };
+
+        player1.hand.at(i).pos = raylib::Vector2{cardRect.x, cardRect.y};
+        player1.hand.at(i).faceUp = true;
+    }
+    if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+    {
+        // if (CanPlayHeldCard())
+        // {
+        //     m_gameManager.SetPlayerOneSelectedCardFromHand(m_heldCardIndex);
+        // }
+
+        //Reset Held-Card values
+        player1.heldCardIndex = -1;
+        heldCardOffset = Vector2Zero();
+    }
+
 
     //Draw
     GetTexture(playingScene.background).Draw();
@@ -102,6 +179,15 @@ void RunPlayingScene(PlayingScene &playingScene, const Vector2 &mousePosition,
             constants::playerTwoCardPlayfieldPosY
         };
         DrawCard(cardInPlayCopy);
+    }
+    // Drawing Preview Zone Card
+    if (p1HoldingCard)
+    {
+        DrawCardPreview(player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex)));
+    }
+    else if (hoveredCardIndex != -1)
+    {
+        DrawCardPreview(player1.hand.at(static_cast<std::size_t>(hoveredCardIndex)));
     }
     // Draw Cards in Hand, with the one being held drawn last, on top.
     for (size_t i = 0; i < player1.hand.size(); ++i)
