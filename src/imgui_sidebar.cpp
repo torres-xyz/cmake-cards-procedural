@@ -6,7 +6,7 @@
 
 namespace ImGuiSideBar
 {
-    void DrawSideBar()
+    void DrawSideBar(bool &muteGame)
     {
         // start ImGui Content
         rlImGuiBegin();
@@ -26,11 +26,14 @@ namespace ImGuiSideBar
             ImGui::TextUnformatted(
                 ("Mouse X: " + std::to_string(GetMouseX())
                  + " / Mouse Y: " + std::to_string(GetMouseY())).c_str());
+            ImGui::SeparatorText("Options");
+            ImGui::Checkbox("Mute", &muteGame);
             ImGui::SeparatorText("Debug Actions");
             ImGui::TextUnformatted("My Text inside the window");
         }
         ImGui::End();
 
+        // ImGui::ShowDemoWindow();
         // end ImGui Content
         rlImGuiEnd();
     }

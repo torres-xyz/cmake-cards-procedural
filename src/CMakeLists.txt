@@ -5,6 +5,8 @@ add_executable(${PROJECT_NAME}
         button.cpp
         button.hpp
         helper_functions.hpp
+        audio.cpp
+        audio.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

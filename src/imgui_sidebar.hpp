@@ -2,5 +2,5 @@
 
 namespace ImGuiSideBar
 {
-    void DrawSideBar();
+    void DrawSideBar(bool &muteGame);
 }
