@@ -4,7 +4,7 @@
 #include "helper_functions.hpp"
 
 
-void DrawButton(const Button &button, const std::map<GameTexture, raylib::Texture2D> &texMap)
+void DrawButton(const Button &button, const raylib::Texture2D &texture)
 {
     Color currentColor{MAGENTA};
     switch (button.state)
@@ -40,11 +40,9 @@ void DrawButton(const Button &button, const std::map<GameTexture, raylib::Textur
                 0
     };
 
-    const raylib::Texture2D &texture = texMap.at(button.background);
     DrawTextureNPatch(texture, panelNPatchInfo, button.rectangle, {0, 0}, 0, currentColor);
 
     HelperFunctions::DrawTextCenteredInRec(button.text.c_str(), button.fontSize, BLACK, button.rectangle);
-
 }
 
 void UpdateButtonState(Button &button, const Vector2 &mousePos, const bool lMouseBtnDown, const bool lMouseBtnRlsd)

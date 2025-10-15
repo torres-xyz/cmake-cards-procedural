@@ -23,6 +23,6 @@ struct Button
     bool wasPressed{false};
 };
 
-void DrawButton(const Button &button, const std::map<GameTexture, raylib::Texture2D> &texMap);
+void DrawButton(const Button &button, const raylib::Texture2D &texture);
 
 void UpdateButtonState(Button &button, const Vector2 &mousePos, bool lMouseBtnDown, bool lMouseBtnRlsd);
