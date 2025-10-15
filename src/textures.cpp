@@ -2,6 +2,8 @@
 
 #include <map>
 
+#include "card.hpp"
+
 raylib::Texture2D &GetTexture(const GameTexture tex)
 {
     static const std::map<GameTexture, std::string> gameTextureToPathMap
@@ -29,4 +31,17 @@ raylib::Texture2D &GetTexture(const GameTexture tex)
     }
 
     return gameTextureToTexture2DMap.at(tex);
+}
+
+GameTexture GetGameTextureFromCardType(const CardType type)
+{
+    static const std::map<CardType, GameTexture> cardTypeToTextureMap
+    {
+        {CardType::invalid, GameTexture::invalid},
+        {CardType::paper, GameTexture::paperCard},
+        {CardType::rock, GameTexture::rockCard},
+        {CardType::scissors, GameTexture::scissorsCard},
+    };
+
+    return cardTypeToTextureMap.at(type);
 };

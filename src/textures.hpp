@@ -1,6 +1,8 @@
 #pragma once
 #include "raylib-cpp.hpp"
 
+enum class CardType;
+
 enum class GameTexture
 {
     invalid,
@@ -17,3 +19,5 @@ enum class GameTexture
 };
 
 raylib::Texture2D &GetTexture(GameTexture tex);
+
+GameTexture GetGameTextureFromCardType(CardType type);
