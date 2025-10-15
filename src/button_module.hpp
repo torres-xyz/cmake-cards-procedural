@@ -16,6 +16,8 @@ enum class ButtonState
 struct Button
 {
     raylib::Rectangle rectangle{};
+    std::string text{};
+    float fontSize{};
     GameTexture background{};
     ButtonState state{};
     bool wasPressed{false};
@@ -24,3 +26,4 @@ struct Button
 void DrawButton(const Button &button, const std::map<GameTexture, raylib::Texture2D> &texMap);
 
 void UpdateButtonState(Button &button, const Vector2 &mousePos, bool lMouseBtnDown, bool lMouseBtnRlsd);
+

@@ -4,6 +4,7 @@ add_executable(${PROJECT_NAME}
         imgui_sidebar.hpp
         button_module.cpp
         button_module.hpp
+        helper_functions.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

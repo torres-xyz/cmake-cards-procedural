@@ -74,7 +74,9 @@ int main()
             static_cast<float>(startGameButtonWidth),
             static_cast<float>(startGameButtonHeight)
         },
-        .background = GameTexture::metal08,
+        .text = "Star Game",
+        .fontSize = 20,
+        .background = GameTexture::panel01,
         .state = ButtonState::enabled
     };
     //Scene 1 end
