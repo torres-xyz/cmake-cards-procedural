@@ -26,4 +26,3 @@ struct Button
 void DrawButton(const Button &button, const std::map<GameTexture, raylib::Texture2D> &texMap);
 
 void UpdateButtonState(Button &button, const Vector2 &mousePos, bool lMouseBtnDown, bool lMouseBtnRlsd);
-

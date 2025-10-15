@@ -1,7 +1,8 @@
-#include "button_module.hpp"
+#include "button.hpp"
 #include <map>
 
 #include "helper_functions.hpp"
+
 
 void DrawButton(const Button &button, const std::map<GameTexture, raylib::Texture2D> &texMap)
 {

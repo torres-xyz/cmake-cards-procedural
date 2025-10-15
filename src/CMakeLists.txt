@@ -2,8 +2,8 @@ add_executable(${PROJECT_NAME}
         main.cpp
         imgui_sidebar.cpp
         imgui_sidebar.hpp
-        button_module.cpp
-        button_module.hpp
+        button.cpp
+        button.hpp
         helper_functions.hpp
 )
 
