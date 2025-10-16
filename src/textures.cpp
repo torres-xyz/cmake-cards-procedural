@@ -12,6 +12,7 @@ raylib::Texture2D const &GetTexture(const GameTexture tex)
         {GameTexture::metal22, "resources/textures/metal_22.jpg"},
         {GameTexture::metal35, "resources/textures/metal_35.jpg"},
         {GameTexture::wall13, "resources/textures/wall_13.png"},
+        {GameTexture::wood11, "resources/textures/wood_11.png"},
         {GameTexture::panel01, "resources/textures/panel_01.png"},
         {GameTexture::panel05, "resources/textures/panel_05.png"},
         {GameTexture::cardBack, "resources/textures/cards/card_back.png"},

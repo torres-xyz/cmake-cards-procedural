@@ -46,7 +46,7 @@ int main()
 
     InitializePlayer(player1, rd);
     InitializePlayer(player2, rd);
-    int playerGoingFirst{2};
+    constexpr int playerGoingFirst{2};
     GameplayPhase currentPhase{GameplayPhase::initialHandDraw};
 
 
@@ -81,6 +81,7 @@ int main()
         .gameScene = GameScene::playing,
         .background = GameTexture::wall13,
         .cardPreviewZoneTex = GameTexture::metal08,
+        .playfield = GameTexture::wood11,
         .music = GameMusic::playing,
         .playerDeckButton
         {
@@ -124,7 +125,7 @@ int main()
 
 
 #if (DEBUG)
-        ImGuiSideBar::DrawSideBar(muteGame, currentPhase);
+        ImGuiSideBar::DrawSideBar(muteGame, currentPhase, player1, player2);
 #endif
         EndDrawing();
 

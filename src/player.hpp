@@ -1,11 +1,7 @@
 #pragma once
+#include <random>
 #include <vector>
 #include "card.hpp"
-
-namespace std
-{
-    class random_device;
-}
 
 struct Player
 {
@@ -14,6 +10,7 @@ struct Player
     std::vector<Card> deck{};
     std::vector<Card> hand{};
     Card cardInPlay{};
+    bool isHoldingACard{};
     int heldCardIndex{-1};
 };
 

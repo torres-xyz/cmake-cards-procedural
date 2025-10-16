@@ -17,6 +17,13 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             timeSinceStartOfPhase = 0;
         }
     };
+    auto HaveBothPlayersPlayed
+    {
+        [player1, player2]() {
+            return player1.cardInPlay.type != CardType::invalid &&
+                   player2.cardInPlay.type != CardType::invalid;
+        }
+    };
 
     timeSinceStartOfPhase += GetFrameTime();
 
@@ -30,6 +37,9 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         }
         case GameplayPhase::initialHandDraw:
         {
+            player1.cardInPlay.type = CardType::invalid;
+            player2.cardInPlay.type = CardType::invalid;
+
             //Auto draw initial hand for P2
             if (player2.hand.size() != constants::initialHandSize)
             {
@@ -51,6 +61,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
                 ChangePhase(GameplayPhase::playerTwoPlaying);
                 break;
             }
+
             break;
         }
         case GameplayPhase::playerOneDrawing:
@@ -74,22 +85,13 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         }
         case GameplayPhase::playerOnePlaying:
         {
-            if (player1.cardInPlay.type == CardType::invalid &&
-                player1.heldCardIndex > -1)
+            if (HaveBothPlayersPlayed())
             {
-                PutCardInPlay(player1);
-
-                //Have both played
-                if (player1.cardInPlay.type != CardType::invalid &&
-                    player2.cardInPlay.type != CardType::invalid)
-                {
-                    ChangePhase(GameplayPhase::battle);
-                }
-                else
-                {
-                    ChangePhase(GameplayPhase::playerTwoDrawing);
-                }
-                break;
+                ChangePhase(GameplayPhase::battle);
+            }
+            else if (player2.cardInPlay.type == CardType::invalid)
+            {
+                ChangePhase(GameplayPhase::playerTwoDrawing);
             }
             break;
         }
@@ -115,9 +117,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             player2.heldCardIndex = 0;
             PutCardInPlay(player2);
 
-            //Have both played
-            if (player1.cardInPlay.type != CardType::invalid &&
-                player2.cardInPlay.type != CardType::invalid)
+            if (HaveBothPlayersPlayed())
             {
                 ChangePhase(GameplayPhase::battle);
             }
@@ -202,10 +202,26 @@ void PutCardInPlay(Player &player)
 
     //Copy the card from the hand to the inPlay field.
     player.cardInPlay = player.hand.at(static_cast<size_t>(player.heldCardIndex));
-    // //Make sure it is facing up
-    // player.cardInPlay.faceUp = true;
+
+    if (player.id == 1)
+    {
+        player.cardInPlay.pos = raylib::Vector2
+        {
+            constants::playerOnePlayfieldCardZoneRect.x,
+            constants::playerOnePlayfieldCardZoneRect.y
+        };
+    }
+    else if (player.id == 2)
+    {
+        player.cardInPlay.pos = raylib::Vector2
+        {
+            constants::playerTwoPlayfieldCardZoneRect.x,
+            constants::playerTwoPlayfieldCardZoneRect.y
+        };
+    }
+
     //Then remove that card from the hand.
-    player.hand.erase(player.hand.begin() + static_cast<long>(player.heldCardIndex));
+    player.hand.erase(player.hand.begin() + player.heldCardIndex);
     //The player is now not holding any card.
     player.heldCardIndex = -1;
 }

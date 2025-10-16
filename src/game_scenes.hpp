@@ -34,6 +34,7 @@ struct PlayingScene
     GameScene gameScene{};
     GameTexture background{};
     GameTexture cardPreviewZoneTex{};
+    GameTexture playfield{};
     GameMusic music{};
     Button playerDeckButton{};
 };

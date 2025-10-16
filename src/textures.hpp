@@ -10,6 +10,7 @@ enum class GameTexture
     metal22,
     metal35,
     wall13,
+    wood11,
     panel01,
     panel05,
     cardBack,

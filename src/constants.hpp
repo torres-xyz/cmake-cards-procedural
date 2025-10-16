@@ -39,7 +39,7 @@ namespace constants
         3, 3, 3
     };
     inline constexpr int initialHandSize{3};
-     // UI
+    // UI
     //// HandZone
     inline constexpr int handZonePaddingRight{200};
     inline constexpr int handZoneBottomPadding{20};
@@ -72,6 +72,14 @@ namespace constants
     inline constexpr int playfieldHeight{cardHeight * 2 + 10};
     inline constexpr int playfieldPosX{screenWidth / 2 - playfieldWidth / 2};
     inline constexpr int playfieldPosY{screenHeight / 2 - playfieldHeight / 2};
+    inline constexpr Rectangle playfieldRec
+    {
+        playfieldPosX,
+        playfieldPosY,
+        playfieldWidth,
+        playfieldHeight
+    };
+
     inline constexpr Color playfieldColor{SKYBLUE};
     //// Playfield - P1
     inline constexpr Rectangle playerOnePlayfieldCardZoneRect
@@ -82,10 +90,13 @@ namespace constants
         cardHeight
     };
     //// Playfield - P2
-    inline constexpr int playerTwoCardPlayfieldPosX{
-        playfieldPosX - 10 + playfieldWidth - cardWidth
+    inline constexpr Rectangle playerTwoPlayfieldCardZoneRect
+    {
+        playfieldPosX - 10 + playfieldWidth - cardWidth,
+        playfieldPosX + 10,
+        cardWidth,
+        cardHeight
     };
-    inline constexpr int playerTwoCardPlayfieldPosY{playfieldPosX + 10};
     //// Card Preview Zone
     inline constexpr Rectangle cardPreviewZoneRec
     {
