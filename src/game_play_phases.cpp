@@ -6,10 +6,11 @@
 #include "player.hpp"
 
 void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2,
-                          const int goingFirst, bool &player1HasDrawnThisTurn)
+                          const int goingFirst, bool &player1HasDrawnThisTurn, std::random_device &rd)
 {
     static float timeSinceStartOfPhase{};
-    static float playerActionWaitTime{1};
+    static constexpr float playerActionWaitTime{1};
+
     auto ChangePhase
     {
         [&currentPhase](const GameplayPhase nextPhase) {
@@ -24,21 +25,32 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
                    player2.cardInPlay.type != CardType::invalid;
         }
     };
+    auto HasPlayerPlayed
+    {
+        [](const Player &player) {
+            return player.cardInPlay.type != CardType::invalid;
+        }
+    };
 
     timeSinceStartOfPhase += GetFrameTime();
-
 
     switch (currentPhase)
     {
         case GameplayPhase::uninitialized:
         {
-            std::cerr << "Gameplay Phase is uninitialized. Something went wrong\n";
+            //Reset everything gameplay wise
+            InitializePlayer(player1, rd);
+            InitializePlayer(player2, rd);
+
+            ChangePhase(GameplayPhase::initialHandDraw);
+
             break;
         }
         case GameplayPhase::initialHandDraw:
         {
             player1.cardInPlay.type = CardType::invalid;
             player2.cardInPlay.type = CardType::invalid;
+            player1HasDrawnThisTurn = false;
 
             //Auto draw initial hand for P2
             if (player2.hand.size() != constants::initialHandSize)
@@ -66,10 +78,10 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         }
         case GameplayPhase::playerOneDrawing:
         {
-            //If Player 1 wants to draw but has no cards, it's Game Over
+            //if player's deck is empty, skip drawing phase
             if (player1.deck.empty())
             {
-                currentPhase = GameplayPhase::gameOver;
+                ChangePhase(GameplayPhase::playerOnePlaying);
                 break;
             }
 
@@ -80,16 +92,22 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
                 ChangePhase(GameplayPhase::playerOnePlaying);
                 break;
             }
-            //TODO: Handle other case here
             break;
         }
         case GameplayPhase::playerOnePlaying:
         {
+            //Wait until player 1 has played
+            if (!HasPlayerPlayed(player1))
+            {
+                break;
+            }
+
+            //If player 2 has also played we battle, otherwise it must be player 2's turn next.
             if (HaveBothPlayersPlayed())
             {
                 ChangePhase(GameplayPhase::battle);
             }
-            else if (player2.cardInPlay.type == CardType::invalid)
+            else if (!HasPlayerPlayed(player2))
             {
                 ChangePhase(GameplayPhase::playerTwoDrawing);
             }
@@ -100,7 +118,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             //if player's deck is empty, skip drawing phase
             if (player2.deck.empty())
             {
-                currentPhase = GameplayPhase::playerTwoPlaying;
+                ChangePhase(GameplayPhase::playerTwoPlaying);
                 break;
             }
             //Player 2 draws automatically
@@ -154,12 +172,12 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             //Remove the played cards
             player1.cardInPlay.type = CardType::invalid;
             player2.cardInPlay.type = CardType::invalid;
-
             player1HasDrawnThisTurn = false;
 
-            if (player1.hand.empty() || player2.hand.empty())
+            if (player1.hand.empty() && player1.deck.empty() &&
+                player2.hand.empty() && player2.deck.empty())
             {
-                //GameOver
+                ChangePhase(GameplayPhase::gameOver);
             }
 
             //After the battle, give the turn to the player who went first
@@ -202,6 +220,7 @@ void PutCardInPlay(Player &player)
 
     //Copy the card from the hand to the inPlay field.
     player.cardInPlay = player.hand.at(static_cast<size_t>(player.heldCardIndex));
+    player.cardInPlay.faceUp = false;
 
     if (player.id == 1)
     {

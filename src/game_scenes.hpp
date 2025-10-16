@@ -1,4 +1,6 @@
 #pragma once
+#include <random>
+
 #include "button.hpp"
 
 struct Player;
@@ -14,16 +16,9 @@ enum class GameScene
     gameOver
 };
 
-struct Scene //base for reference?
-{
-    GameScene gameScene{};
-    GameTexture background{};
-    GameMusic music{};
-};
-
 struct StartingScene
 {
-    GameScene gameScene{};
+    GameScene gameScene{GameScene::starting};
     GameTexture background{};
     GameMusic music{};
     Button startButton{};
@@ -31,7 +26,7 @@ struct StartingScene
 
 struct PlayingScene
 {
-    GameScene gameScene{};
+    GameScene gameScene{GameScene::playing};
     GameTexture background{};
     GameTexture cardPreviewZoneTex{};
     GameTexture playfield{};
@@ -39,12 +34,17 @@ struct PlayingScene
     Button playerDeckButton{};
 };
 
-void RunStartingScene(StartingScene &startingScene,
-                      GameScene &currentScene,
-                      const Vector2 &mousePosition);
+struct GameOverScene
+{
+    GameScene gameScene{GameScene::gameOver};
+    GameTexture background{};
+    GameMusic music{};
+    Button playAgainButton{};
+};
 
-void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePosition,
-                     GameplayPhase &currentPhase, Player &player1, Player &player2,
-                     int goingFirst);
+void RunStartingScene(StartingScene &startingScene, GameScene &currentScene);
 
+void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase,
+                     Player &player1, Player &player2, int goingFirst, std::random_device &rd);
 
+void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase);

@@ -30,23 +30,14 @@ int main()
     InitAudioDevice();
     bool muteGame{true};
 
-    GameScene currentScene{GameScene::starting};
-
     //Player 1
-    Player player1
-    {
-        .id = 1,
-        .score = 0
-    };
-    Player player2
-    {
-        .id = 2,
-        .score = 0
-    };
+    Player player1{.id = 1};
+    Player player2{.id = 2};
 
     InitializePlayer(player1, rd);
     InitializePlayer(player2, rd);
     constexpr int playerGoingFirst{2};
+    GameScene currentScene{GameScene::starting};
     GameplayPhase currentPhase{GameplayPhase::initialHandDraw};
 
 
@@ -73,7 +64,6 @@ int main()
             .state = ButtonState::enabled
         }
     };
-
     //GameScene::start end -----------------------------------------------------
     //GameScene::playing -------------------------------------------------------
     PlayingScene playingScene
@@ -98,10 +88,35 @@ int main()
             .state = ButtonState::enabled
         },
     };
+    //GameScene::playing end ---------------------------------------------------
+    //GameScene::gameOver start ------------------------------------------------
+    constexpr int playAgainButtonWidth{200};
+    constexpr int playAgainButtonHeight{100};
+    GameOverScene gameOverScene
+    {
+        .gameScene = GameScene::gameOver,
+        .background = GameTexture::metal22,
+        .music = GameMusic::gameOver,
+        .playAgainButton
+        {
+            .rectangle = raylib::Rectangle
+            {
+                constants::screenWidth * 0.5f - static_cast<float>(playAgainButtonWidth) * 0.5f,
+                constants::screenHeight * 0.5f - static_cast<float>(playAgainButtonHeight) * 0.5f,
+                static_cast<float>(playAgainButtonWidth),
+                static_cast<float>(playAgainButtonHeight)
+            },
+            .text = "Restart Game",
+            .fontSize = 20,
+            .background = GameTexture::panel01,
+            .state = ButtonState::enabled
+        }
+    };
+    //GameScene::gameOver end --------------------------------------------------
 
     while (!window.ShouldClose()) // Detect window close button or ESC key
     {
-        Vector2 mousePos = GetMousePosition();
+        [[maybe_unused]] Vector2 mousePos = GetMousePosition();
         SetMasterVolume(!muteGame);
 
         switch (currentScene)
@@ -110,17 +125,25 @@ int main()
                 break;
             case GameScene::starting:
             {
-                RunStartingScene(startingScene, currentScene, mousePos);
+                RunStartingScene(startingScene, currentScene);
                 break;
             }
             case GameScene::playing:
             {
-                RunPlayingScene(playingScene, mousePos, currentPhase,
-                                player1, player2, playerGoingFirst);
+                RunPlayingScene(playingScene, currentPhase,
+                                player1, player2, playerGoingFirst, rd);
+
+                if (currentPhase == GameplayPhase::gameOver)
+                {
+                    currentScene = GameScene::gameOver;
+                }
                 break;
             }
             case GameScene::gameOver:
+            {
+                RunGameOverScene(gameOverScene, currentScene, currentPhase);
                 break;
+            }
         }
 
 

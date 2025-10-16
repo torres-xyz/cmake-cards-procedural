@@ -8,8 +8,9 @@
 #include "player.hpp"
 #include "textures.hpp"
 
-void RunStartingScene(StartingScene &startingScene, GameScene &currentScene, const Vector2 &mousePosition)
+void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
 {
+    const raylib::Vector2 mousePosition = GetMousePosition();
     Button &startButton = startingScene.startButton;
     // Update
     // Update Buttons
@@ -70,10 +71,19 @@ bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
     );
 }
 
-void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePosition,
-                     GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst)
+void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst, std::random_device &rd)
 {
+    const raylib::Vector2 mousePosition = GetMousePosition();
     static bool player1HasDrawnThisTurn;
+    static raylib::Vector2 heldCardOffset{};
+    int hoveredCardIndex{-1};
+
+    if (currentPhase == GameplayPhase::uninitialized)
+    {
+        player1HasDrawnThisTurn = false;
+        heldCardOffset = raylib::Vector2{0, 0};
+        hoveredCardIndex = -1;
+    }
 
     auto UpdateDeckButton{
         [&player1, currentPhase, &playingScene, mousePosition]()-> void {
@@ -117,14 +127,12 @@ void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePos
     PlayMusic(playingScene.music);
 
     //Running the gameplay
-    UpdateGameplayPhases(currentPhase, player1, player2, goingFirst, player1HasDrawnThisTurn);
+    UpdateGameplayPhases(currentPhase, player1, player2, goingFirst, player1HasDrawnThisTurn, rd);
 
     //Scene Buttons
     UpdateDeckButton();
 
     //Handle Card Positioning
-    static raylib::Vector2 heldCardOffset{};
-    int hoveredCardIndex{-1};
 
     //If we let go of the LMB
     if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
@@ -246,3 +254,31 @@ void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePos
         DrawCard(player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex)));
     }
 }
+
+void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase)
+{
+    const raylib::Vector2 mousePosition = GetMousePosition();
+
+    Button &playAgainButton = gameOverScene.playAgainButton;
+    // Update
+    // Update Buttons
+    UpdateButtonState(playAgainButton,
+                      mousePosition,
+                      IsMouseButtonDown(MOUSE_BUTTON_LEFT),
+                      IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+    if (playAgainButton.wasPressed)
+    {
+        PlaySound(GameSound::buttonPress01);
+
+        gameplayPhase = GameplayPhase::uninitialized;
+        currentScene = GameScene::playing;
+    }
+
+    // Update Music
+    PlayMusic(gameOverScene.music);
+
+    //Draw
+    GetTexture(gameOverScene.background).Draw();
+    DrawButton(playAgainButton, GetTexture(playAgainButton.background));
+}
+

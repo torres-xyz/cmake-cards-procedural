@@ -8,7 +8,7 @@
 
 namespace ImGuiSideBar
 {
-    void DrawSideBar(bool &muteGame, const GameplayPhase &currentPhase,
+    void DrawSideBar(bool &muteGame, GameplayPhase &currentPhase,
                      const Player &player1, const Player &player2)
     {
         // start ImGui Content
@@ -34,6 +34,11 @@ namespace ImGuiSideBar
             ImGui::SeparatorText("Options");
             ImGui::Checkbox("Mute", &muteGame);
             ImGui::SeparatorText("Debug Actions");
+            if (ImGui::Button("Set Game Phase to Game Over"))
+            {
+                currentPhase = GameplayPhase::gameOver;
+            }
+
             ImGui::TextUnformatted("My Text inside the window");
         }
         ImGui::End();
