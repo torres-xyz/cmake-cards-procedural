@@ -1,8 +1,6 @@
 #include "game_play_phases.hpp"
-
 #include <cassert>
 #include <iostream>
-
 #include "constants.hpp"
 #include "raylib-cpp.hpp"
 #include "player.hpp"
@@ -10,10 +8,18 @@
 void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2,
                           const int goingFirst, bool &player1HasDrawnThisTurn)
 {
-    [[maybe_unused]] static float timeSinceStartOfPhase{};
+    static float timeSinceStartOfPhase{};
+    static float playerActionWaitTime{1};
+    auto ChangePhase
+    {
+        [&currentPhase](const GameplayPhase nextPhase) {
+            currentPhase = nextPhase;
+            timeSinceStartOfPhase = 0;
+        }
+    };
+
     timeSinceStartOfPhase += GetFrameTime();
 
-    static float playerActionWaitTime{1};
 
     switch (currentPhase)
     {
@@ -37,14 +43,12 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             }
             if (goingFirst == 1)
             {
-                currentPhase = GameplayPhase::playerOnePlaying;
-                timeSinceStartOfPhase = 0;
+                ChangePhase(GameplayPhase::playerOnePlaying);
                 break;
             }
             if (goingFirst == 2)
             {
-                currentPhase = GameplayPhase::playerTwoPlaying;
-                timeSinceStartOfPhase = 0;
+                ChangePhase(GameplayPhase::playerTwoPlaying);
                 break;
             }
             break;
@@ -62,8 +66,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             if (player1HasDrawnThisTurn)
             {
                 player1HasDrawnThisTurn = false;
-                currentPhase = GameplayPhase::playerOnePlaying;
-                timeSinceStartOfPhase = 0;
+                ChangePhase(GameplayPhase::playerOnePlaying);
                 break;
             }
             //TODO: Handle other case here
@@ -80,13 +83,11 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
                 if (player1.cardInPlay.type != CardType::invalid &&
                     player2.cardInPlay.type != CardType::invalid)
                 {
-                    timeSinceStartOfPhase = 0;
-                    currentPhase = GameplayPhase::battle;
+                    ChangePhase(GameplayPhase::battle);
                 }
                 else
                 {
-                    timeSinceStartOfPhase = 0;
-                    currentPhase = GameplayPhase::playerTwoDrawing;
+                    ChangePhase(GameplayPhase::playerTwoDrawing);
                 }
                 break;
             }
@@ -103,8 +104,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             //Player 2 draws automatically
             DrawCardsFromDeckToHand(player2, 1);
 
-            timeSinceStartOfPhase = 0;
-            currentPhase = GameplayPhase::playerTwoPlaying;
+            ChangePhase(GameplayPhase::playerTwoPlaying);
             break;
         }
         case GameplayPhase::playerTwoPlaying:
@@ -119,13 +119,11 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             if (player1.cardInPlay.type != CardType::invalid &&
                 player2.cardInPlay.type != CardType::invalid)
             {
-                timeSinceStartOfPhase = 0;
-                currentPhase = GameplayPhase::battle;
+                ChangePhase(GameplayPhase::battle);
             }
             else
             {
-                timeSinceStartOfPhase = 0;
-                currentPhase = GameplayPhase::playerOneDrawing;
+                ChangePhase(GameplayPhase::playerOneDrawing);
             }
             break;
         }
@@ -167,14 +165,13 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             //After the battle, give the turn to the player who went first
             if (goingFirst == 1)
             {
-                timeSinceStartOfPhase = 0;
-                currentPhase = GameplayPhase::playerOneDrawing;
+                ChangePhase(GameplayPhase::playerOneDrawing);
                 break;
             }
             if (goingFirst == 2)
             {
-                timeSinceStartOfPhase = 0;
-                currentPhase = GameplayPhase::playerTwoDrawing;
+                ChangePhase(GameplayPhase::playerTwoDrawing);
+                break;
             }
             break;
         }
@@ -185,7 +182,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
     }
 }
 
-void DrawCardsFromDeckToHand(Player &player, int amount)
+void DrawCardsFromDeckToHand(Player &player, const int amount)
 {
     assert(amount <= static_cast<int>(player.deck.size())
         && "Trying to draw more cards than player has in its deck.\n");

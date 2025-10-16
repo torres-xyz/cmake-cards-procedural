@@ -69,76 +69,75 @@ bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
     );
 }
 
-void DrawCardPreview(const Card &card)
-{
-    const raylib::Texture2D &cardTex = GetTexture(card.type);
-
-    const raylib::Rectangle cardTexSourceRect
-    {
-        0, 0,
-        static_cast<float>(cardTex.GetWidth()),
-        static_cast<float>(cardTex.GetHeight())
-    };
-
-    cardTex.Draw(cardTexSourceRect, constants::cardPreviewZoneRec);
-}
-
 void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePosition,
                      GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst)
 {
+    static bool player1HasDrawnThisTurn;
+
+    auto UpdateDeckButton
+    {
+        [&player1, currentPhase, &playingScene, mousePosition]() {
+            Button &playerDeckButton = playingScene.playerDeckButton;
+            playerDeckButton.state = ButtonState::disabled;
+
+            if (!player1.deck.empty() && (currentPhase == GameplayPhase::initialHandDraw || currentPhase == GameplayPhase::playerOneDrawing))
+            {
+                playerDeckButton.state = ButtonState::enabled;
+                UpdateButtonState(playerDeckButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+
+                if (playerDeckButton.wasPressed)
+                {
+                    PlaySound(GameSound::buttonPress01);
+                    DrawCardsFromDeckToHand(player1, 1);
+                    player1HasDrawnThisTurn = true;
+                }
+            }
+        }
+    };
+
+
     //Update Music
     PlayMusic(playingScene.music);
 
-    //Scene Buttons
-    Button &playerDeckButton = playingScene.playerDeckButton;
-    playerDeckButton.state = ButtonState::disabled;
-
     //Running the gameplay
-    static bool player1HasDrawnThisTurn;
     [[maybe_unused]] int PlayerOneSelectedCardFromHand = -1;
     UpdateGameplayPhases(currentPhase, player1, player2, goingFirst, player1HasDrawnThisTurn);
 
-    if (!player1.deck.empty() && (currentPhase == GameplayPhase::initialHandDraw || currentPhase == GameplayPhase::playerOneDrawing))
-    {
-        playerDeckButton.state = ButtonState::enabled;
-        UpdateButtonState(playerDeckButton,
-                          mousePosition,
-                          IsMouseButtonDown(MOUSE_BUTTON_LEFT),
-                          IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+    //Scene Buttons
+    UpdateDeckButton();
 
-        if (playerDeckButton.wasPressed)
-        {
-            PlaySound(GameSound::buttonPress01);
-            DrawCardsFromDeckToHand(player1, 1);
-            player1HasDrawnThisTurn = true;
-        }
-    }
-
-    int hoveredCardIndex = -1;
-
+    //Handle Card Positioning
     static raylib::Vector2 heldCardOffset{};
-    //Position player 1 hand cards in the hand zone
+    int hoveredCardIndex{-1};
+
+    //If we let go of the LMB we let go of the held card
+    if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+    {
+        player1.heldCardIndex = -1;
+    }
+    //Place cards in the Hand Zone or Update Held Card
     for (size_t i = 0; i < player1.hand.size(); ++i)
     {
-        if (CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
-        {
-            hoveredCardIndex = static_cast<int>(i);
-        }
-        if (player1.heldCardIndex == -1 && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            if (CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
-            {
-                player1.heldCardIndex = static_cast<int>(i);
-                heldCardOffset = mousePosition - player1.hand.at(i).pos;
-            }
-        }
-        if (player1.heldCardIndex == static_cast<int>(i))
+        //Move the card we are holding with the mouse
+        if (i == static_cast<size_t>(player1.heldCardIndex))
         {
             player1.hand.at(i).pos = mousePosition - heldCardOffset;
             continue;
         }
 
-        //Set the other cards in the hand slightly apart from each other.
+        //If trying to click and hold a card
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
+            CheckCollisionPointCard(mousePosition, player1.hand.at(i)) &&
+            player1.heldCardIndex == -1)
+        {
+            player1.heldCardIndex = static_cast<int>(i);
+            heldCardOffset = mousePosition - player1.hand.at(i).pos;
+
+            //Don't position this card in the hand zone.
+            continue;
+        }
+
+        //Set cards in the hand slightly apart from each other.
         const int int_i = static_cast<int>(i);
         const raylib::Rectangle cardRect
         {
@@ -150,61 +149,51 @@ void RunPlayingScene(PlayingScene &playingScene, const raylib::Vector2 &mousePos
 
         player1.hand.at(i).pos = raylib::Vector2{cardRect.x, cardRect.y};
         player1.hand.at(i).faceUp = true;
+
+        //Handle hovering
+        if (CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
+        {
+            hoveredCardIndex = static_cast<int>(i);
+        }
     }
 
-    if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-    {
-        // if (CanPlayHeldCard())
-        // {
-        //     m_gameManager.SetPlayerOneSelectedCardFromHand(m_heldCardIndex);
-        // }
-
-        //Reset Held-Card values
-        player1.heldCardIndex = -1;
-        heldCardOffset = Vector2Zero();
-    }
-
-
-    //Draw
+    //  Draw
     GetTexture(playingScene.background).Draw();
-    DrawButton(playerDeckButton, GetTexture(playerDeckButton.background));
+    DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
 
-    //Draw Played Cards
-    if (player1.cardInPlay.type != CardType::invalid)
+    //Draw Hovered Card or Held Card in the Preview Zone
+    if (hoveredCardIndex != -1 || player1.heldCardIndex != -1)
     {
-        Card cardInPlayCopy = player1.cardInPlay;
-        cardInPlayCopy.pos = raylib::Vector2
+        //Prefer showing our held card.
+        int cardIndexToDisplay{};
+        if (player1.heldCardIndex != -1) cardIndexToDisplay = player1.heldCardIndex;
+        else if (hoveredCardIndex != -1) cardIndexToDisplay = hoveredCardIndex;
+        else return;
+
+        const raylib::Texture2D &cardTex = GetTexture(player1.hand.at(static_cast<std::size_t>(cardIndexToDisplay)).type);
+
+        const raylib::Rectangle cardTexSourceRect
         {
-            constants::playerOnePlayfieldCardZoneRect.x,
-            constants::playerOnePlayfieldCardZoneRect.y
+            0, 0,
+            static_cast<float>(cardTex.GetWidth()),
+            static_cast<float>(cardTex.GetHeight())
         };
-        DrawCard(cardInPlayCopy);
+
+        cardTex.Draw(cardTexSourceRect, constants::cardPreviewZoneRec);
     }
-    if (player2.cardInPlay.type != CardType::invalid)
+    else
     {
-        Card cardInPlayCopy = player2.cardInPlay;
-        cardInPlayCopy.pos = raylib::Vector2
-        {
-            constants::playerTwoCardPlayfieldPosX,
-            constants::playerTwoCardPlayfieldPosY
-        };
-        DrawCard(cardInPlayCopy);
+        //Draw the Preview Zone background
+        GetTexture(playingScene.cardPreviewZoneTex).Draw(constants::cardPreviewZoneRec, constants::cardPreviewZoneRec);
     }
-    // Drawing Preview Zone Card
-    if (player1.heldCardIndex != -1)
-    {
-        DrawCardPreview(player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex)));
-    }
-    if (hoveredCardIndex != -1)
-    {
-        DrawCardPreview(player1.hand.at(static_cast<std::size_t>(hoveredCardIndex)));
-    }
-    // Draw Cards in Hand, with the one being held drawn last, on top.
+
+    //Draw Cards in Hand, ...
     for (size_t i = 0; i < player1.hand.size(); ++i)
     {
         if (player1.heldCardIndex == static_cast<int>(i)) continue;
         DrawCard(player1.hand.at(i));
     }
+    //... with the one being held drawn last, on top.
     if (player1.heldCardIndex != -1)
     {
         DrawCard(player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex)));
