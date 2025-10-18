@@ -1,10 +1,6 @@
-#include <iostream>
 #include <random> // for std::random_device
 #include "constants.hpp"
-// #include "raylib.h"
-#include <map>
 #include "raylib-cpp.hpp"
-#include "imgui.h"
 #include "imgui_sidebar.hpp"
 #include "rlImGui.h"
 #include "button.hpp"
@@ -13,7 +9,6 @@
 #include "textures.hpp"
 #include "game_scenes.hpp"
 #include "player.hpp"
-
 
 int main()
 {
