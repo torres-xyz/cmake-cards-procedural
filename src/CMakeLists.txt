@@ -1,6 +1,6 @@
 add_library(${PROJECT_NAME}
         STATIC
-        run.cpp # aka main.cpp
+        program.cpp # the true main.cpp
         imgui_sidebar.cpp
         imgui_sidebar.hpp
         button.cpp
@@ -19,7 +19,6 @@ add_library(${PROJECT_NAME}
         card.cpp
         card.hpp
 )
-target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD_REQUIRED ON
@@ -45,12 +44,12 @@ add_dependencies(${PROJECT_NAME} copy_resources)
 include(FetchContent)
 
 target_link_libraries(${PROJECT_NAME}
-        PRIVATE
+        PUBLIC # Set to public so our Tests can have access to the headers in our dependencies
         raylib_cpp
         imgui
         rlimgui)
 
-add_executable(bootstrap
-        bootstrap.cpp # will call run.main()
+add_executable(main
+        main.cpp # will call run.main()
 )
-target_link_libraries(bootstrap PRIVATE ${PROJECT_NAME}})
+target_link_libraries(main PRIVATE ${PROJECT_NAME})

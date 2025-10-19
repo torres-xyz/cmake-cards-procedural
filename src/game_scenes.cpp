@@ -204,7 +204,9 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     //  Draw
     GetTexture(playingScene.background).Draw();
     DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
-    GetTexture(playingScene.playfield).Draw(constants::playfieldRec, constants::playfieldRec);
+    GetTexture(playingScene.playfield).Draw(
+        Rectangle{0, 0, constants::playfieldRec.width, constants::playfieldRec.height},
+        constants::playfieldRec);
 
     //Draw Hovered Card or Held Card in the Preview Zone
     if (hoveredCardIndex != -1 || player1.isHoldingACard)

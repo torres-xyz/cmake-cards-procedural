@@ -35,7 +35,6 @@ int run()
     GameScene currentScene{GameScene::starting};
     GameplayPhase currentPhase{GameplayPhase::initialHandDraw};
 
-
     //GameScene::start ---------------------------------------------------------
     constexpr int startGameButtonWidth{200};
     constexpr int startGameButtonHeight{100};
@@ -90,7 +89,7 @@ int run()
     GameOverScene gameOverScene
     {
         .gameScene = GameScene::gameOver,
-        .background = GameTexture::metal22,
+        .background = GameTexture::wood11,
         .music = GameMusic::gameOver,
         .playAgainButton
         {
