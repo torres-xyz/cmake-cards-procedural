@@ -1,5 +1,6 @@
-add_executable(${PROJECT_NAME}
-        main.cpp
+add_library(${PROJECT_NAME}
+        STATIC
+        run.cpp # aka main.cpp
         imgui_sidebar.cpp
         imgui_sidebar.hpp
         button.cpp
@@ -18,6 +19,7 @@ add_executable(${PROJECT_NAME}
         card.cpp
         card.hpp
 )
+target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD_REQUIRED ON
@@ -47,3 +49,8 @@ target_link_libraries(${PROJECT_NAME}
         raylib_cpp
         imgui
         rlimgui)
+
+add_executable(bootstrap
+        bootstrap.cpp # will call run.main()
+)
+target_link_libraries(bootstrap PRIVATE ${PROJECT_NAME}})

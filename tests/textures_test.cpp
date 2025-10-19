@@ -1,5 +1,5 @@
-#include "../src/textures.hpp"
 #include <cstdlib>
+#include "../src/textures.hpp"
 #include "../src/card.hpp"
 
 void GetGameTextureFromCardType_ReturnsTexture()

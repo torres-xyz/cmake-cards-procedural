@@ -10,7 +10,7 @@
 #include "game_scenes.hpp"
 #include "player.hpp"
 
-int main()
+int run()
 {
     // Initialization ----------------------------------------------------------
     std::random_device rd{};

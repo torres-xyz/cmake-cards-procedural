@@ -1,7 +1,5 @@
 #include "textures.hpp"
-
 #include <map>
-
 #include "card.hpp"
 
 raylib::Texture2D const &GetTexture(const GameTexture tex)
