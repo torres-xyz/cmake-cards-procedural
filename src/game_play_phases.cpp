@@ -1,6 +1,8 @@
 #include "game_play_phases.hpp"
 #include <cassert>
 #include <iostream>
+
+#include "audio.hpp"
 #include "constants.hpp"
 #include "raylib-cpp.hpp"
 #include "player.hpp"
@@ -151,9 +153,15 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             if (timeSinceStartOfPhase < playerActionWaitTime)
                 break;
 
-            //reveal played cards
-            player1.cardInPlay.faceUp = true;
-            player2.cardInPlay.faceUp = true;
+            if (player1.cardInPlay.faceUp == false ||
+                player2.cardInPlay.faceUp == false)
+            {
+                //Play sound
+                PlaySound(GameSound::cardPlace01);
+                //reveal played cards
+                player1.cardInPlay.faceUp = true;
+                player2.cardInPlay.faceUp = true;
+            }
 
             //Wait a bit more after revealing the cards
             if (timeSinceStartOfPhase < playerActionWaitTime + 1)
@@ -209,6 +217,7 @@ void DrawCardsFromDeckToHand(Player &player, const int amount)
     {
         Card drawnCard = player.deck.back();
         drawnCard.pos = raylib::Vector2{-1000, -1000};
+        drawnCard.faceUp = false;
         player.hand.push_back(drawnCard);
         player.deck.pop_back();
     }
@@ -243,6 +252,9 @@ void PutCardInPlay(Player &player)
     player.hand.erase(player.hand.begin() + player.heldCardIndex);
     //The player is now not holding any card.
     player.heldCardIndex = -1;
+
+    //Play sound
+    PlaySound(GameSound::cardPlace01);
 }
 
 int BattleCards(const Card &card1, const Card &card2)

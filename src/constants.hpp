@@ -40,7 +40,7 @@ namespace constants
     };
     inline constexpr int initialHandSize{3};
     // UI
-    //// HandZone
+    //// Player 1 HandZone
     inline constexpr int handZonePaddingRight{200};
     inline constexpr int handZoneBottomPadding{20};
     inline constexpr int handZoneHeight{100};
@@ -56,6 +56,8 @@ namespace constants
         handZoneWidth,
         handZoneHeight
     };
+    ////Player 2 Hand Zone
+
     inline constexpr Color handZoneColor{BLUE};
     //// Players' Scores
     inline constexpr int scoreDisplayPaddingX{20};

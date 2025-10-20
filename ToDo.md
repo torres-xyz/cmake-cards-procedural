@@ -1,0 +1,61 @@
+# To Do
+
+- [ ] Implement a complex card game.
+- [ ] Store a library of available cards and card lists better (currently they
+  are just being declared in a vector<int> in constants.hpp).
+- [ ] Custom font (Aoboshi One, perhaps).
+- [ ] Animate opponent's cards being played.
+- [ ] Make Player 2 play a random card from its hand. (With the deck shuffled
+  this is no longer very relevant until there's more complex gameplay).
+
+## Lower Priority
+
+- [ ] Load assets on demand.
+- [ ] Unit testing framework.
+- [ ] Analyse memory usage.
+
+### Features for portfolio
+
+- [ ] Multiplayer Networking.
+
+# Done
+
+- [x] Give both players the same starting deck of cards.
+- [x] Scene management.
+- [x] Center text in rectangles.
+- [x] Only reveal the cards after both players have played.
+- [x] Start screen.
+- [x] Announce winner when the game ends.
+- [x] Switch to raylib-cpp for automatic memory management.
+- [x] Integrate Dear Imgui for debugging purposes.
+- [x] Button to restart the game when it ends.
+- [x] Move cards with mouse.
+    - [x] Create a Card Manager that deals with moving all the cards around.
+- [x] Start adding Textures.
+    - [x] TextureLoader
+        - [x] Add ability to resize the textures being used in CardManager.
+    - [x] Use textures also in the Field.
+        - [x] The Field should not own/copy cards.
+        - [x] Remove PlayField class.
+    - [x] Add card back texture.
+        - [x] Make player's card also be facing down when played.
+- [x] Draw big card preview zone.
+- [x] More forgiving card snapping zone.
+- [x] Refactor scene handling so that each scene is a class.
+- [x] Deck button to draw cards.
+    - [x] 1 - Make players not draw their whole hands.
+    - [x] 1.5 - Give buttons a deactivated state.
+- [x] Introduce GamePhases states.
+    - [x] Add a drawing step each turn.
+    - [x] Remove turn owner variable, get this info from the Gameplay Phase.
+    - [x] Dim player one play zone to indicate they have to draw first each turn.
+- [x] Display Gameplay Phase on the screen.
+- [x] Give buttons textures.
+    - [x] Draw opponent's hand, face down.
+- [x] Give both players shuffled decks.
+- [x] Sound effects.
+    - [x] Create Audio Manager so that we don't load the same sounds.
+    - [x] Button presses.
+    - [x] Background music.
+    - [x] Playing cards.
+- [x] Display other player's hand, face down.

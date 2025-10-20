@@ -255,6 +255,31 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     {
         DrawCard(player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex)));
     }
+
+    //Draw Player 2 Hand
+    constexpr float p2HandZoneWidth{500};
+    const raylib::Rectangle player2HandZone
+    {
+        constants::screenWidth - p2HandZoneWidth - 20,
+        constants::handZoneBottomPadding,
+        p2HandZoneWidth,
+        constants::handZoneRec.height
+    };
+    // player2HandZone.Draw(GRAY);
+    for (std::size_t i = 0; i < player2.hand.size(); ++i)
+    {
+        const auto index = static_cast<float>(i);
+
+        //Set the cards in the hand slightly apart from each other.
+        const raylib::Vector2 cardPos{
+            player2HandZone.x + 2 * (index + 1) + constants::cardWidth * index,
+            player2HandZone.y + 4,
+        };
+
+        player2.hand.at(i).pos = cardPos;
+        player2.hand.at(i).faceUp = false;
+        DrawCard(player2.hand.at(i));
+    }
 }
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase)
