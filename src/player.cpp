@@ -3,10 +3,13 @@
 #include <random>
 #include "constants.hpp"
 
-void InitializePlayer(Player &player, std::random_device &rd)
+void InitializePlayerWithDeck(Player &player, std::random_device &rd)
 {
     player.score = 0;
     player.hand.clear();
+    player.cardInPlay.type = CardType::invalid;
+    player.isHoldingACard = false;
+    player.heldCardIndex = -1;
     //Use default deck for players for now.
     player.deck.clear();
     for (const int cardType: constants::defaultDeck)

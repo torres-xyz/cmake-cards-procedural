@@ -39,8 +39,8 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         case GameplayPhase::uninitialized:
         {
             //Reset everything gameplay wise
-            InitializePlayer(player1, rd);
-            InitializePlayer(player2, rd);
+            InitializePlayerWithDeck(player1, rd);
+            InitializePlayerWithDeck(player2, rd);
 
             ChangePhase(GameplayPhase::initialHandDraw);
 

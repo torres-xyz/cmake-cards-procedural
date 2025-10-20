@@ -29,8 +29,8 @@ int run()
     Player player1{.id = 1};
     Player player2{.id = 2};
 
-    InitializePlayer(player1, rd);
-    InitializePlayer(player2, rd);
+    InitializePlayerWithDeck(player1, rd);
+    InitializePlayerWithDeck(player2, rd);
     constexpr int playerGoingFirst{2};
     GameScene currentScene{GameScene::starting};
     GameplayPhase currentPhase{GameplayPhase::initialHandDraw};

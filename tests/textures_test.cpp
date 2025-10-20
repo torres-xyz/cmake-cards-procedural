@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <catch2/catch_test_macros.hpp>
 #include "../src/textures.hpp"
 #include "../src/card.hpp"

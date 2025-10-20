@@ -14,4 +14,4 @@ struct Player
     int heldCardIndex{-1};
 };
 
-void InitializePlayer(Player &player, std::random_device &rd);
+void InitializePlayerWithDeck(Player &player, std::random_device &rd);
