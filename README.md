@@ -10,6 +10,10 @@ Brian Will's ["Object-Oriented Programming is Bad" video](https://www.youtube.co
 - dear imgui - [GitHub](https://github.com/ocornut/imgui)
 - rlimgui - [GitHub](https://github.com/raylib-extras/rlImGui)
 
+### For testing:
+
+- catch2 - [GitHub](https://github.com/catchorg/Catch2)
+
 ## Assets Used
 
 ### Textures

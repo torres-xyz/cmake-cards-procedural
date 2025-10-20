@@ -1,6 +1,14 @@
+include(FetchContent)
+FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v3.11.0
+        SYSTEM
+)
+FetchContent_MakeAvailable(Catch2)
+
 set(TESTS unit_tests)
 add_executable(${TESTS}
-        unit_tests.cpp
         textures_test.cpp)
 set_target_properties(${TESTS} PROPERTIES
         CXX_STANDARD_REQUIRED ON
@@ -11,7 +19,18 @@ target_compile_features(${TESTS} PRIVATE cxx_std_23)
 # From https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-warning-and-error-levels/
 target_compile_options(${TESTS} PRIVATE -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion)
 
-target_link_libraries(unit_tests PRIVATE ${PROJECT_NAME})
+# Adding the resources' folder.
+add_custom_target(copy_resources_tests
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        ${CMAKE_CURRENT_LIST_DIR}/../src/resources
+        $<TARGET_FILE_DIR:${TESTS}>/../resources #copy to the same place as the executable
+)
+add_dependencies(${TESTS} copy_resources_tests)
 
-target_include_directories(unit_tests PRIVATE ../src)
-add_test(NAME GetGameTextureFromCardType_ReturnsTexture COMMAND unit_tests GetGameTextureFromCardType_ReturnsTexture)
+target_link_libraries(${TESTS} PRIVATE ${PROJECT_NAME} Catch2::Catch2WithMain)
+
+# we use a catch_discover_tests() command defined in the module provided by Catch2
+#to automatically detect all test cases from unit_tests and register them with CTest
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(Catch)
+catch_discover_tests(unit_tests)
