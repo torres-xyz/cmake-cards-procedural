@@ -1,4 +1,8 @@
 #pragma once
+#include <map>
+#include <string>
+#include "raylib-cpp.hpp"
+
 
 enum class GameSound
 {
@@ -15,4 +19,10 @@ enum class GameMusic
 
 void PlaySound(GameSound sound);
 
+raylib::Sound &GetSoundFromLibrary(GameSound sound);
+
 void PlayMusic(GameMusic music);
+
+raylib::Music &GetMusicFromLibrary(GameMusic music);
+
+

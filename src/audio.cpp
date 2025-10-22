@@ -1,9 +1,15 @@
 #include "audio.hpp"
 #include <map>
 #include <string>
+#include <cassert>
 #include "raylib-cpp.hpp"
 
 void PlaySound(const GameSound sound)
+{
+    GetSoundFromLibrary(sound).Play();
+}
+
+raylib::Sound &GetSoundFromLibrary(GameSound sound)
 {
     static const std::map<GameSound, std::string> gameSoundToPathMap
     {
@@ -20,10 +26,22 @@ void PlaySound(const GameSound sound)
                 raylib::Sound(gameSoundToPathMap.at(sound))
             });
     }
-    gameSoundToSoundMap.at(sound).Play();
+    return gameSoundToSoundMap.at(sound);
 }
 
+
 void PlayMusic(const GameMusic music)
+{
+    const raylib::Music &musicToPlay = GetMusicFromLibrary(music);
+    if (!IsMusicStreamPlaying(musicToPlay))
+    {
+        PlayMusicStream(musicToPlay);
+        return;
+    }
+    UpdateMusicStream(musicToPlay);
+}
+
+raylib::Music &GetMusicFromLibrary(GameMusic music)
 {
     static const std::map<GameMusic, std::string> m_gameMusicToPathMap
     {
@@ -42,12 +60,5 @@ void PlayMusic(const GameMusic music)
                 raylib::Music(m_gameMusicToPathMap.at(music))
             });
     }
-
-    const raylib::Music &musicToPlay = gameMusicToMusicMap.at(music);
-    if (!IsMusicStreamPlaying(musicToPlay))
-    {
-        PlayMusicStream(musicToPlay);
-        return;
-    }
-    UpdateMusicStream(musicToPlay);
+    return gameMusicToMusicMap.at(music);
 }
