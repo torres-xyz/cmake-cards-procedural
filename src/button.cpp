@@ -45,7 +45,12 @@ void DrawButton(const Button &button, const raylib::Texture2D &texture)
     HelperFunctions::DrawTextCenteredInRec(button.text.c_str(), button.fontSize, BLACK, button.rectangle);
 }
 
-void UpdateButtonState(Button &button, const Vector2 &mousePos, const bool lMouseBtnDown, const bool lMouseBtnRlsd)
+///
+/// @param button Button reference
+/// @param mousePos Use GetMousePosition()
+/// @param pressed Use IsMouseButtonDown(MOUSE_BUTTON_LEFT)
+/// @param released Use IsMouseButtonReleased(MOUSE_BUTTON_LEFT)
+void UpdateButtonState(Button &button, const Vector2 &mousePos, const bool pressed, const bool released)
 {
     if (button.state == ButtonState::disabled) return;
 
@@ -53,7 +58,7 @@ void UpdateButtonState(Button &button, const Vector2 &mousePos, const bool lMous
 
     if (CheckCollisionPointRec(mousePos, button.rectangle))
     {
-        if (lMouseBtnDown)
+        if (pressed)
         {
             button.state = ButtonState::pressed;
         }
@@ -61,7 +66,7 @@ void UpdateButtonState(Button &button, const Vector2 &mousePos, const bool lMous
         {
             button.state = ButtonState::hovered;
         }
-        if (lMouseBtnRlsd)
+        if (released)
         {
             button.wasPressed = true;
         }
