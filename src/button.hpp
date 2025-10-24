@@ -25,4 +25,4 @@ struct Button
 
 void DrawButton(const Button &button, const raylib::Texture2D &texture);
 
-void UpdateButtonState(Button &button, const Vector2 &mousePos, bool lMouseBtnDown, bool lMouseBtnRlsd);
+void UpdateButtonState(Button &button, const Vector2 &mousePos);

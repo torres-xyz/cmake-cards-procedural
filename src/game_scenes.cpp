@@ -15,9 +15,7 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
     // Update
     // Update Buttons
     UpdateButtonState(startButton,
-                      mousePosition,
-                      IsMouseButtonDown(MOUSE_BUTTON_LEFT),
-                      IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+                      mousePosition);
     if (startButton.wasPressed)
     {
         PlaySound(GameSound::buttonPress01);
@@ -93,7 +91,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
             if (!player1.deck.empty() && (currentPhase == GameplayPhase::initialHandDraw || currentPhase == GameplayPhase::playerOneDrawing))
             {
                 playerDeckButton.state = ButtonState::enabled;
-                UpdateButtonState(playerDeckButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+                UpdateButtonState(playerDeckButton, mousePosition);
 
                 if (playerDeckButton.wasPressed)
                 {
@@ -289,10 +287,7 @@ void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, Gam
     Button &playAgainButton = gameOverScene.playAgainButton;
     // Update
     // Update Buttons
-    UpdateButtonState(playAgainButton,
-                      mousePosition,
-                      IsMouseButtonDown(MOUSE_BUTTON_LEFT),
-                      IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+    UpdateButtonState(playAgainButton, mousePosition);
     if (playAgainButton.wasPressed)
     {
         PlaySound(GameSound::buttonPress01);
