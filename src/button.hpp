@@ -17,7 +17,7 @@ struct Button
     std::string text{};
     float fontSize{};
     GameTexture background{};
-    ButtonState state{};
+    ButtonState state{ButtonState::enabled};
     bool wasPressed{false};
 };
 

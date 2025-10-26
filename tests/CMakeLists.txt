@@ -11,7 +11,8 @@ set(TESTS_NAME unit_tests)
 add_executable(${TESTS_NAME}
         textures_test.cpp
         player_test.cpp
-        audio_test.cpp)
+        audio_test.cpp
+        button_test.cpp)
 
 set_target_properties(${TESTS_NAME} PROPERTIES
         CXX_STANDARD_REQUIRED ON
