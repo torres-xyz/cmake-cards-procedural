@@ -10,8 +10,6 @@
 
 ## Lower Priority
 
-- [ ] Load assets on demand.
-- [ ] Unit testing framework.
 - [ ] Analyse memory usage.
 
 ### Features for portfolio
@@ -59,3 +57,5 @@
     - [x] Background music.
     - [x] Playing cards.
 - [x] Display other player's hand, face down.
+- [x] Load assets on demand.
+- [x] Unit testing framework.

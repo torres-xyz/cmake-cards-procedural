@@ -186,6 +186,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
                 player2.hand.empty() && player2.deck.empty())
             {
                 ChangePhase(GameplayPhase::gameOver);
+                break;
             }
 
             //After the battle, give the turn to the player who went first
