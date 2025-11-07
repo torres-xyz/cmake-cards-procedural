@@ -13,7 +13,8 @@ enum class GameScene
     invalid,
     starting,
     playing,
-    gameOver
+    gameOver,
+    prototyping
 };
 
 struct StartingScene
@@ -42,9 +43,17 @@ struct GameOverScene
     Button playAgainButton{};
 };
 
+struct PrototypingScene
+{
+    GameTexture background{};
+
+};
+
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene);
 
 void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase,
                      Player &player1, Player &player2, int goingFirst, std::random_device &rd);
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase);
+
+void RunPrototypingScene(PrototypingScene &scene);

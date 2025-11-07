@@ -6,6 +6,7 @@ raylib::Texture2D const &GetTexture(const GameTexture tex)
 {
     static const std::map<GameTexture, std::string> gameTextureToPathMap
     {
+        {GameTexture::invalid, "resources/textures/invalid_tex.png"},
         {GameTexture::metal08, "resources/textures/metal_08.jpg"},
         {GameTexture::metal22, "resources/textures/metal_22.jpg"},
         {GameTexture::metal35, "resources/textures/metal_35.jpg"},
@@ -47,5 +48,9 @@ GameTexture GetGameTextureFromCardType(const CardType type)
         {CardType::scissors, GameTexture::scissorsCard},
     };
 
-    return cardTypeToTextureMap.at(type);
+    if (cardTypeToTextureMap.contains(type))
+    {
+        return cardTypeToTextureMap.at(type);
+    }
+    return GameTexture::invalid;
 };

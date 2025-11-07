@@ -108,6 +108,20 @@ int run()
     };
     //GameScene::gameOver end --------------------------------------------------
 
+    //Prototyping Scene
+    constexpr bool usePrototypingScene{true};
+    if (usePrototypingScene)
+    {
+        currentScene = GameScene::prototyping;
+    }
+    PrototypingScene prototypingScene
+    {
+        .background = GameTexture::wood11
+    };
+
+
+    //Test Scene end
+
     while (!window.ShouldClose()) // Detect window close button or ESC key
     {
         [[maybe_unused]] Vector2 mousePos = GetMousePosition();
@@ -136,6 +150,11 @@ int run()
             case GameScene::gameOver:
             {
                 RunGameOverScene(gameOverScene, currentScene, currentPhase);
+                break;
+            }
+            case GameScene::prototyping:
+            {
+                RunPrototypingScene(prototypingScene);
                 break;
             }
         }

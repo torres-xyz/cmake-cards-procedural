@@ -56,6 +56,30 @@ void DrawCard(const Card &card)
     cardTex.Draw(cardTexSourceRect, cardTextDestRect);
 }
 
+void DrawCardAdvanced(const Card &card)
+{
+    const raylib::Texture2D &cardTex = GetTexture(
+        card.faceUp
+            ? GetGameTextureFromCardType(card.type)
+            : GameTexture::cardBack);
+
+    const raylib::Rectangle cardTexSourceRect
+    {
+        0, 0,
+        static_cast<float>(cardTex.GetWidth()),
+        static_cast<float>(cardTex.GetHeight())
+    };
+    const raylib::Rectangle cardTextDestRect
+    {
+        card.pos.x,
+        card.pos.y,
+        card.size.x,
+        card.size.y
+    };
+
+    cardTex.Draw(cardTexSourceRect, cardTextDestRect);
+}
+
 bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
 {
     return CheckCollisionPointRec
@@ -307,5 +331,30 @@ void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, Gam
     //Draw
     GetTexture(gameOverScene.background).Draw();
     DrawButton(playAgainButton, GetTexture(playAgainButton.background));
+}
+
+void RunPrototypingScene(PrototypingScene& prototypingScene)
+{
+    static const Card advancedCardProt
+    {
+        .size = {constants::cardWidth * 3, constants::cardHeight * 3},
+        .pos = {100, 100},
+        .type = CardType::prototypeCard,
+        .faceUp = true,
+        .name = "Lorem Ipsum",
+        .bodyText = "Id aspernatur consequuntur eos ut quia vero. Voluptas "
+                    "beatae ut temporibus consectetur eveniet placeat adipisci. "
+                    "Dignissimos aut et recusandae voluptates harum. Enim non et "
+                    "facilis. Nemo reiciendis dolores dolores illum omnis "
+                    "voluptatem.",
+        .banner = CardBanner::form,
+        .body = 3000,
+        .mind = 2000,
+        .soul = 1000
+    };
+
+    //Draw
+    GetTexture(prototypingScene.background).Draw();
+    DrawCardAdvanced(advancedCardProt);
 }
 
