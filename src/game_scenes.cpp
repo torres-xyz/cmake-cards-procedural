@@ -420,7 +420,7 @@ void RunPrototypingScene(PrototypingScene &prototypingScene)
 
     advancedCardProt.size = raylib::Vector2{
         GetMousePosition().x - advancedCardProt.pos.x,
-        GetMousePosition().y - advancedCardProt.pos.y,
+        (GetMousePosition().x - advancedCardProt.pos.x) * (1 / constants::cardAspectRatio),
     };
     // Card advancedCardProt_x2 = advancedCardProt;
     // advancedCardProt_x2.size = raylib::Vector2{constants::cardWidth * 2, constants::cardHeight * 2};
