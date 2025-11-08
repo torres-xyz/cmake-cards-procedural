@@ -7,6 +7,7 @@
 #include "game_play_phases.hpp"
 #include "player.hpp"
 #include "textures.hpp"
+#include "helper_functions.hpp"
 
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
 {
@@ -58,18 +59,36 @@ void DrawCard(const Card &card)
 
 void DrawCardAdvanced(const Card &card)
 {
-    const raylib::Texture2D &cardTex = GetTexture(
-        card.faceUp
-            ? GetGameTextureFromCardType(card.type)
-            : GameTexture::cardBack);
+    if (card.faceUp == false)
+    {
+        const raylib::Texture2D &cardBackTex = GetTexture(GameTexture::cardBack);
 
-    const raylib::Rectangle cardTexSourceRect
+        const raylib::Rectangle cardBackTexSourceRect
+        {
+            0, 0,
+            static_cast<float>(cardBackTex.GetWidth()),
+            static_cast<float>(cardBackTex.GetHeight())
+        };
+        const raylib::Rectangle cardBackTextDestRect
+        {
+            card.pos.x,
+            card.pos.y,
+            card.size.x,
+            card.size.y
+        };
+
+        cardBackTex.Draw(cardBackTexSourceRect, cardBackTextDestRect);
+        return;
+    }
+
+    const raylib::Texture2D &cardFrameTex = GetTexture(card.banner);
+    const raylib::Rectangle cardFrameTexSourceRect
     {
         0, 0,
-        static_cast<float>(cardTex.GetWidth()),
-        static_cast<float>(cardTex.GetHeight())
+        static_cast<float>(cardFrameTex.GetWidth()),
+        static_cast<float>(cardFrameTex.GetHeight())
     };
-    const raylib::Rectangle cardTextDestRect
+    const raylib::Rectangle cardFrameTexDestRect
     {
         card.pos.x,
         card.pos.y,
@@ -77,7 +96,53 @@ void DrawCardAdvanced(const Card &card)
         card.size.y
     };
 
-    cardTex.Draw(cardTexSourceRect, cardTextDestRect);
+    //Draw Card Frame
+    cardFrameTex.Draw(cardFrameTexSourceRect, cardFrameTexDestRect);
+
+    //if a card is being drawn at 1x size, don't render the text
+    if (card.size.x <= constants::cardWidth) return;
+
+    [[maybe_unused]] float cardAspectRatio = static_cast<float>(card.size.x) / static_cast<float>(card.size.y);
+
+    //Draw Card Name
+    DrawText(card.name.c_str(),
+             static_cast<int>(card.pos.x + card.size.x * 0.1),
+             static_cast<int>(card.pos.y + card.size.y * 0.05),
+             static_cast<int>(card.size.y * 0.05),
+             LIGHTGRAY);
+
+    //Draw Card Text
+    constexpr float margin{5};
+    constexpr float textBoxPosXRelativePosition{(51.0f + margin) / 750.0f};
+    constexpr float textBoxPosYRelativePosition{(548.0f + margin) / 1050.0f};
+    constexpr float textBoxRelativeWidth = {(652.0f - margin * 2) / 750.0f};
+    constexpr float textBoxRelativeHeight = {(346.0f - margin * 2) / 1050.0f};
+
+    const raylib::Rectangle textBoxRect
+    {
+        card.pos.x + card.size.x * textBoxPosXRelativePosition,
+        card.pos.y + card.size.y * textBoxPosYRelativePosition,
+        card.size.x * textBoxRelativeWidth,
+        card.size.y * textBoxRelativeHeight
+    };
+    DrawRectangleRec(textBoxRect, GRAY);
+
+    HelperFunctions::DrawTextBoxed
+    (
+        GetFontDefault(),
+        card.bodyText.c_str(),
+        textBoxRect,
+        card.size.y * 0.03f,
+        1,
+        true,
+        WHITE);
+
+    return;
+    DrawText(card.name.c_str(),
+             static_cast<int>(card.pos.x + card.size.x * 0.1),
+             static_cast<int>(card.pos.y) + 11,
+             static_cast<int>(20),
+             LIGHTGRAY);
 }
 
 bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
@@ -333,28 +398,47 @@ void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, Gam
     DrawButton(playAgainButton, GetTexture(playAgainButton.background));
 }
 
-void RunPrototypingScene(PrototypingScene& prototypingScene)
+void RunPrototypingScene(PrototypingScene &prototypingScene)
 {
-    static const Card advancedCardProt
+    static Card advancedCardProt
     {
-        .size = {constants::cardWidth * 3, constants::cardHeight * 3},
+        .size = {constants::cardWidth, constants::cardHeight},
         .pos = {100, 100},
         .type = CardType::prototypeCard,
         .faceUp = true,
         .name = "Lorem Ipsum",
         .bodyText = "Id aspernatur consequuntur eos ut quia vero. Voluptas "
-                    "beatae ut temporibus consectetur eveniet placeat adipisci. "
-                    "Dignissimos aut et recusandae voluptates harum. Enim non et "
-                    "facilis. Nemo reiciendis dolores dolores illum omnis "
-                    "voluptatem.",
+        "beatae ut temporibus consectetur eveniet placeat adipisci. "
+        "Dignissimos aut et recusandae voluptates harum. Enim non et "
+        "facilis. Nemo reiciendis dolores dolores illum omnis "
+        "voluptatem.",
         .banner = CardBanner::form,
         .body = 3000,
         .mind = 2000,
         .soul = 1000
     };
 
+    advancedCardProt.size = raylib::Vector2{
+        GetMousePosition().x - advancedCardProt.pos.x,
+        GetMousePosition().y - advancedCardProt.pos.y,
+    };
+    // Card advancedCardProt_x2 = advancedCardProt;
+    // advancedCardProt_x2.size = raylib::Vector2{constants::cardWidth * 2, constants::cardHeight * 2};
+    // advancedCardProt_x2.pos.x = 200;
+    //
+    // Card advancedCardProt_x3 = advancedCardProt;
+    // advancedCardProt_x3.size = raylib::Vector2{constants::cardWidth * 3, constants::cardHeight * 3};
+    // advancedCardProt_x3.pos.x = 400;
+    //
+    // Card advancedCardProt_x4 = advancedCardProt;
+    // advancedCardProt_x4.size = raylib::Vector2{constants::cardWidth * 4, constants::cardHeight * 4};
+    // advancedCardProt_x4.pos.x = 700;
+
     //Draw
     GetTexture(prototypingScene.background).Draw();
     DrawCardAdvanced(advancedCardProt);
+    // DrawCardAdvanced(advancedCardProt_x2);
+    // DrawCardAdvanced(advancedCardProt_x3);
+    // DrawCardAdvanced(advancedCardProt_x4);
 }
 

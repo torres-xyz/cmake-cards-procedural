@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib-cpp.hpp"
 
+enum class CardBanner;
 enum class CardType;
 
 enum class GameTexture
@@ -16,11 +17,21 @@ enum class GameTexture
     cardBack,
     paperCard,
     rockCard,
-    scissorsCard
+    scissorsCard,
+    cardFrame_Form,
+    cardFrame_Flow,
+    cardFrame_Strategy,
+    cardFrame_Instinct,
+    cardFrame_Hope,
+    cardFrame_Despair
 };
 
 raylib::Texture2D const &GetTexture(GameTexture tex);
 
 raylib::Texture2D const &GetTexture(CardType type);
 
+raylib::Texture2D const &GetTexture(CardBanner banner);
+
 GameTexture GetGameTextureFromCardType(CardType type);
+
+GameTexture GetGameTextureFromBannerType(CardBanner banner);
