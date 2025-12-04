@@ -57,6 +57,38 @@ void DrawCard(const Card &card)
     cardTex.Draw(cardTexSourceRect, cardTextDestRect);
 }
 
+void DrawTextInsideCard(const char *text, const Card &card, const float x, const float y,
+                        const float width, const float height, const float margin,
+                        const float fontMultiplier, const bool drawGrayBox)
+{
+    //Coords
+    const float textPosX{(x + margin) / constants::cardTextureWidth};
+    const float textPosY{(y + margin) / constants::cardTextureHeight};
+    const float textWidth{(width - margin * 2) / constants::cardTextureWidth};
+    const float textHeight{(height - margin * 2) / constants::cardTextureHeight};
+    const raylib::Rectangle nameBoxRect
+    {
+        card.pos.x + card.size.x * textPosX,
+        card.pos.y + card.size.y * textPosY,
+        card.size.x * textWidth,
+        card.size.y * textHeight
+    };
+    if (drawGrayBox)
+    {
+        DrawRectangleRec(nameBoxRect, GRAY);
+    }
+    HelperFunctions::DrawTextBoxed
+    (
+        GetFontDefault(),
+        text,
+        nameBoxRect,
+        card.size.y * fontMultiplier,
+        1,
+        true,
+        WHITE
+    );
+}
+
 void DrawCardAdvanced(const Card &card)
 {
     if (card.faceUp == false)
@@ -102,47 +134,10 @@ void DrawCardAdvanced(const Card &card)
     //if a card is being drawn at 1x size, don't render the text
     if (card.size.x <= constants::cardWidth) return;
 
-    [[maybe_unused]] float cardAspectRatio = static_cast<float>(card.size.x) / static_cast<float>(card.size.y);
-
-    //Draw Card Name
-    DrawText(card.name.c_str(),
-             static_cast<int>(card.pos.x + card.size.x * 0.1),
-             static_cast<int>(card.pos.y + card.size.y * 0.05),
-             static_cast<int>(card.size.y * 0.05),
-             LIGHTGRAY);
-
-    //Draw Card Text
+    //Hard coded numbers based on the texture pixel positions of these elements.
     constexpr float margin{5};
-    constexpr float textBoxPosXRelativePosition{(51.0f + margin) / 750.0f};
-    constexpr float textBoxPosYRelativePosition{(548.0f + margin) / 1050.0f};
-    constexpr float textBoxRelativeWidth = {(652.0f - margin * 2) / 750.0f};
-    constexpr float textBoxRelativeHeight = {(346.0f - margin * 2) / 1050.0f};
-
-    const raylib::Rectangle textBoxRect
-    {
-        card.pos.x + card.size.x * textBoxPosXRelativePosition,
-        card.pos.y + card.size.y * textBoxPosYRelativePosition,
-        card.size.x * textBoxRelativeWidth,
-        card.size.y * textBoxRelativeHeight
-    };
-    DrawRectangleRec(textBoxRect, GRAY);
-
-    HelperFunctions::DrawTextBoxed
-    (
-        GetFontDefault(),
-        card.bodyText.c_str(),
-        textBoxRect,
-        card.size.y * 0.03f,
-        1,
-        true,
-        WHITE);
-
-    return;
-    DrawText(card.name.c_str(),
-             static_cast<int>(card.pos.x + card.size.x * 0.1),
-             static_cast<int>(card.pos.y) + 11,
-             static_cast<int>(20),
-             LIGHTGRAY);
+    DrawTextInsideCard(card.name.c_str(), card, 49, 45, 523, 56, margin, 0.04f, true);
+    DrawTextInsideCard(card.bodyText.c_str(), card, 49, 532, 626, 337, margin, 0.03f, true);
 }
 
 bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)

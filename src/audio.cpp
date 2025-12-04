@@ -1,7 +1,6 @@
 #include "audio.hpp"
 #include <map>
 #include <string>
-#include <cassert>
 #include "raylib-cpp.hpp"
 
 void PlaySound(const GameSound sound)

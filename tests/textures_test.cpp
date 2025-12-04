@@ -18,3 +18,26 @@ TEST_CASE("GetTexture(CardType type) returns a Texture", "[textures]")
     REQUIRE(GetTexture(CardType::rock).GetId() == GetTexture(GameTexture::rockCard).GetId());
     REQUIRE(GetTexture(CardType::scissors).GetId() == GetTexture(GameTexture::scissorsCard).GetId());
 }
+
+TEST_CASE("Card Textures have the correct dimensions")
+{
+    const raylib::Window window(0, 0, "Tests");
+
+    REQUIRE(GetTexture(CardBanner::form).GetHeight() == constants::cardTextureHeight);
+    REQUIRE(GetTexture(CardBanner::form).GetWidth() == constants::cardTextureWidth);
+
+    REQUIRE(GetTexture(CardBanner::flow).GetHeight() == constants::cardTextureHeight);
+    REQUIRE(GetTexture(CardBanner::flow).GetWidth() == constants::cardTextureWidth);
+
+    REQUIRE(GetTexture(CardBanner::strategy).GetHeight() == constants::cardTextureHeight);
+    REQUIRE(GetTexture(CardBanner::strategy).GetWidth() == constants::cardTextureWidth);
+
+    REQUIRE(GetTexture(CardBanner::instinct).GetHeight() == constants::cardTextureHeight);
+    REQUIRE(GetTexture(CardBanner::instinct).GetWidth() == constants::cardTextureWidth);
+
+    REQUIRE(GetTexture(CardBanner::hope).GetHeight() == constants::cardTextureHeight);
+    REQUIRE(GetTexture(CardBanner::hope).GetWidth() == constants::cardTextureWidth);
+
+    REQUIRE(GetTexture(CardBanner::despair).GetHeight() == constants::cardTextureHeight);
+    REQUIRE(GetTexture(CardBanner::despair).GetWidth() == constants::cardTextureWidth);
+}
