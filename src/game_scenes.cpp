@@ -66,7 +66,7 @@ void DrawTextInsideCard(const char *text, const Card &card, const float x, const
     const float textPosY{(y + margin) / constants::cardTextureHeight};
     const float textWidth{(width - margin * 2) / constants::cardTextureWidth};
     const float textHeight{(height - margin * 2) / constants::cardTextureHeight};
-    const raylib::Rectangle nameBoxRect
+    const raylib::Rectangle textBoxRect
     {
         card.pos.x + card.size.x * textPosX,
         card.pos.y + card.size.y * textPosY,
@@ -75,13 +75,13 @@ void DrawTextInsideCard(const char *text, const Card &card, const float x, const
     };
     if (drawGrayBox)
     {
-        DrawRectangleRec(nameBoxRect, GRAY);
+        DrawRectangleRec(textBoxRect, GRAY);
     }
     HelperFunctions::DrawTextBoxed
     (
         GetFontDefault(),
         text,
-        nameBoxRect,
+        textBoxRect,
         card.size.y * fontMultiplier,
         1,
         true,
@@ -113,6 +113,30 @@ void DrawCardAdvanced(const Card &card)
         return;
     }
 
+    //Card Art
+    const raylib::Texture2D &cardArtTex = GetCardArtTexture(card.id);
+    const raylib::Rectangle cardArtTexSourceRect
+    {
+        0, 0,
+        static_cast<float>(cardArtTex.GetWidth()),
+        static_cast<float>(cardArtTex.GetHeight())
+    };
+
+    // constexpr float artMargin = 2.0;
+    constexpr float artPosX{46.0f / constants::cardTextureWidth};
+    constexpr float artPosY{123.0f / constants::cardTextureHeight};
+    constexpr float artWidth{static_cast<float>(constants::cardArtTextureWidth) / constants::cardTextureWidth};
+    constexpr float artHeight{static_cast<float>(constants::cardArtTextureHeight) / constants::cardTextureHeight};
+    const raylib::Rectangle cardArtTexDestRect
+    {
+        card.pos.x + card.size.x * artPosX,
+        card.pos.y + card.size.y * artPosY,
+        card.size.x * artWidth,
+        card.size.y * artHeight
+    };
+    cardArtTex.Draw(cardArtTexSourceRect, cardArtTexDestRect);
+
+    //Card Frame
     const raylib::Texture2D &cardFrameTex = GetTexture(card.banner);
     const raylib::Rectangle cardFrameTexSourceRect
     {
@@ -127,8 +151,6 @@ void DrawCardAdvanced(const Card &card)
         card.size.x,
         card.size.y
     };
-
-    //Draw Card Frame
     cardFrameTex.Draw(cardFrameTexSourceRect, cardFrameTexDestRect);
 
     //if a card is being drawn at 1x size, don't render the text
@@ -136,8 +158,11 @@ void DrawCardAdvanced(const Card &card)
 
     //Hard coded numbers based on the texture pixel positions of these elements.
     constexpr float margin{5};
-    DrawTextInsideCard(card.name.c_str(), card, 49, 45, 523, 56, margin, 0.04f, true);
-    DrawTextInsideCard(card.bodyText.c_str(), card, 49, 532, 626, 337, margin, 0.03f, true);
+    DrawTextInsideCard(card.name.c_str(), card, 49, 45, 523, 56, margin, 0.04f, false);
+    DrawTextInsideCard(card.bodyText.c_str(), card, 49, 532, 626, 337, margin, 0.03f, false);
+    DrawTextInsideCard(std::to_string(card.body).c_str(), card, 65, 894, 161, 77, margin, 0.05f, false);
+    DrawTextInsideCard(std::to_string(card.mind).c_str(), card, 280, 894, 161, 77, margin, 0.05f, false);
+    DrawTextInsideCard(std::to_string(card.soul).c_str(), card, 494, 894, 161, 77, margin, 0.05f, false);
 }
 
 bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
@@ -401,6 +426,7 @@ void RunPrototypingScene(PrototypingScene &prototypingScene)
         .pos = {100, 100},
         .type = CardType::prototypeCard,
         .faceUp = true,
+        .id = CardID::firstCard,
         .name = "Lorem Ipsum",
         .bodyText = "Id aspernatur consequuntur eos ut quia vero. Voluptas "
         "beatae ut temporibus consectetur eveniet placeat adipisci. "

@@ -1,4 +1,5 @@
 #pragma once
+#include "card.hpp"
 #include "raylib-cpp.hpp"
 
 enum class CardBanner;
@@ -31,6 +32,8 @@ raylib::Texture2D const &GetTexture(GameTexture tex);
 raylib::Texture2D const &GetTexture(CardType type);
 
 raylib::Texture2D const &GetTexture(CardBanner banner);
+
+raylib::Texture2D const &GetCardArtTexture(CardID cardId);
 
 GameTexture GetGameTextureFromCardType(CardType type);
 

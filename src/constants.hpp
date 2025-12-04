@@ -28,6 +28,8 @@ namespace constants
     inline constexpr float cardAspectRatio{static_cast<float>(cardWidth) / static_cast<float>(cardHeight)};
     inline constexpr int cardTextureWidth{cardWidth * 10};
     inline constexpr int cardTextureHeight{cardHeight * 10};
+    inline constexpr int cardArtTextureWidth{630};
+    inline constexpr int cardArtTextureHeight{388};
 
     // Decks
     // using a vector<int> instead of vector<Card> to avoid circular dependency

@@ -49,6 +49,27 @@ raylib::Texture2D const &GetTexture(const CardBanner banner)
     return GetTexture(GetGameTextureFromBannerType(banner));
 }
 
+raylib::Texture2D const &GetCardArtTexture(const CardID cardId)
+{
+    static const std::unordered_map<CardID, std::string> cardIDToArtTexturePathMap
+    {
+        {CardID::invalid, "resources/textures/invalid_tex.png"},
+        {CardID::firstCard, "resources/textures/card-art/first_card_art_min.png"},
+    };
+    static std::unordered_map<CardID, raylib::Texture2D> cardIDToTexture2DMap{};
+
+    if (!cardIDToTexture2DMap.contains(cardId))
+    {
+        cardIDToTexture2DMap.insert(
+            {
+                cardId,
+                raylib::Texture2D(cardIDToArtTexturePathMap.at(cardId))
+            });
+    }
+
+    return cardIDToTexture2DMap.at(cardId);
+}
+
 GameTexture GetGameTextureFromBannerType(const CardBanner banner)
 {
     static const std::unordered_map<CardBanner, GameTexture> cardBannerToTextureMap

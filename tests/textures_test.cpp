@@ -19,6 +19,14 @@ TEST_CASE("GetTexture(CardType type) returns a Texture", "[textures]")
     REQUIRE(GetTexture(CardType::scissors).GetId() == GetTexture(GameTexture::scissorsCard).GetId());
 }
 
+TEST_CASE("GetCardArtTexture(CardID cardId) returns a Texture")
+{
+    const raylib::Window window(0, 0, "Tests");
+
+    REQUIRE(GetCardArtTexture(CardID::firstCard).IsValid());
+}
+
+
 TEST_CASE("Card Textures have the correct dimensions")
 {
     const raylib::Window window(0, 0, "Tests");
