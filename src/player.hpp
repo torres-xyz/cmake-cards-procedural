@@ -15,3 +15,5 @@ struct Player
 };
 
 void InitializePlayerWithDeck(Player &player, std::random_device &rd);
+
+void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd);

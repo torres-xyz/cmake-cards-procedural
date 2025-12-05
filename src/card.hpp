@@ -30,12 +30,14 @@ enum class CardBanner
 
 struct Card
 {
-    raylib::Vector2 size
+    //TODO: convert size and pos into card Rectangle
+    raylib::Rectangle rect
     {
+        0, 0,
         constants::cardWidth,
         constants::cardHeight
+
     };
-    raylib::Vector2 pos{};
     CardType type{CardType::invalid};
     bool faceUp{true};
 

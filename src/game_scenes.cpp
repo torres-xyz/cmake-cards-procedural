@@ -48,8 +48,8 @@ void DrawCard(const Card &card)
     };
     const raylib::Rectangle cardTextDestRect
     {
-        card.pos.x,
-        card.pos.y,
+        card.rect.x,
+        card.rect.y,
         constants::cardWidth,
         constants::cardHeight
     };
@@ -57,7 +57,7 @@ void DrawCard(const Card &card)
     cardTex.Draw(cardTexSourceRect, cardTextDestRect);
 }
 
-void DrawTextInsideCard(const char *text, const Card &card, const float x, const float y,
+void DrawTextInsideCard(const char *text, const raylib::Rectangle &destRect, const float x, const float y,
                         const float width, const float height, const float margin,
                         const float fontMultiplier, const bool drawGrayBox)
 {
@@ -68,10 +68,10 @@ void DrawTextInsideCard(const char *text, const Card &card, const float x, const
     const float textHeight{(height - margin * 2) / constants::cardTextureHeight};
     const raylib::Rectangle textBoxRect
     {
-        card.pos.x + card.size.x * textPosX,
-        card.pos.y + card.size.y * textPosY,
-        card.size.x * textWidth,
-        card.size.y * textHeight
+        destRect.x + destRect.width * textPosX,
+        destRect.y + destRect.height * textPosY,
+        destRect.width * textWidth,
+        destRect.height * textHeight
     };
     if (drawGrayBox)
     {
@@ -82,14 +82,14 @@ void DrawTextInsideCard(const char *text, const Card &card, const float x, const
         GetFontDefault(),
         text,
         textBoxRect,
-        card.size.y * fontMultiplier,
+        destRect.height * fontMultiplier,
         1,
         true,
         WHITE
     );
 }
 
-void DrawCardAdvanced(const Card &card)
+void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
 {
     if (card.faceUp == false)
     {
@@ -103,10 +103,10 @@ void DrawCardAdvanced(const Card &card)
         };
         const raylib::Rectangle cardBackTextDestRect
         {
-            card.pos.x,
-            card.pos.y,
-            card.size.x,
-            card.size.y
+            destinationRect.x,
+            destinationRect.y,
+            destinationRect.width,
+            destinationRect.height
         };
 
         cardBackTex.Draw(cardBackTexSourceRect, cardBackTextDestRect);
@@ -129,10 +129,10 @@ void DrawCardAdvanced(const Card &card)
     constexpr float artHeight{static_cast<float>(constants::cardArtTextureHeight) / constants::cardTextureHeight};
     const raylib::Rectangle cardArtTexDestRect
     {
-        card.pos.x + card.size.x * artPosX,
-        card.pos.y + card.size.y * artPosY,
-        card.size.x * artWidth,
-        card.size.y * artHeight
+        destinationRect.x + destinationRect.width * artPosX,
+        destinationRect.y + destinationRect.height * artPosY,
+        destinationRect.width * artWidth,
+        destinationRect.height * artHeight
     };
     cardArtTex.Draw(cardArtTexSourceRect, cardArtTexDestRect);
 
@@ -146,23 +146,23 @@ void DrawCardAdvanced(const Card &card)
     };
     const raylib::Rectangle cardFrameTexDestRect
     {
-        card.pos.x,
-        card.pos.y,
-        card.size.x,
-        card.size.y
+        destinationRect.x,
+        destinationRect.y,
+        destinationRect.width,
+        destinationRect.height
     };
     cardFrameTex.Draw(cardFrameTexSourceRect, cardFrameTexDestRect);
 
     //if a card is being drawn at 1x size, don't render the text
-    if (card.size.x <= constants::cardWidth) return;
+    if (destinationRect.width <= constants::cardWidth) return;
 
     //Hard coded numbers based on the texture pixel positions of these elements.
     constexpr float margin{5};
-    DrawTextInsideCard(card.name.c_str(), card, 49, 45, 523, 56, margin, 0.04f, false);
-    DrawTextInsideCard(card.bodyText.c_str(), card, 49, 532, 626, 337, margin, 0.03f, false);
-    DrawTextInsideCard(std::to_string(card.body).c_str(), card, 65, 894, 161, 77, margin, 0.05f, false);
-    DrawTextInsideCard(std::to_string(card.mind).c_str(), card, 280, 894, 161, 77, margin, 0.05f, false);
-    DrawTextInsideCard(std::to_string(card.soul).c_str(), card, 494, 894, 161, 77, margin, 0.05f, false);
+    DrawTextInsideCard(card.name.c_str(), destinationRect, 49, 45, 523, 56, margin, 0.04f, false);
+    DrawTextInsideCard(card.bodyText.c_str(), destinationRect, 49, 532, 626, 337, margin, 0.03f, false);
+    DrawTextInsideCard(std::to_string(card.body).c_str(), destinationRect, 65, 894, 161, 77, margin, 0.05f, false);
+    DrawTextInsideCard(std::to_string(card.mind).c_str(), destinationRect, 280, 894, 161, 77, margin, 0.05f, false);
+    DrawTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margin, 0.05f, false);
 }
 
 bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
@@ -172,10 +172,10 @@ bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
         point,
         raylib::Rectangle
         {
-            card.pos.x,
-            card.pos.y,
-            card.size.x,
-            card.size.y
+            card.rect.x,
+            card.rect.y,
+            card.rect.width,
+            card.rect.height
         }
     );
 }
@@ -252,15 +252,8 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
             player1.cardInPlay.type == CardType::invalid)
         {
             const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardIndex));
-            const Rectangle cardRec
-            {
-                heldCard.pos.x,
-                heldCard.pos.y,
-                heldCard.size.x,
-                heldCard.size.y
-            };
 
-            if (CheckCollisionRecs(cardRec, constants::playfieldRec))
+            if (CheckCollisionRecs(heldCard.rect, constants::playfieldRec))
             {
                 PutCardInPlay(player1);
             }
@@ -274,7 +267,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         //Move the card we are holding with the mouse
         if (static_cast<int>(i) == player1.heldCardIndex)
         {
-            player1.hand.at(i).pos = mousePosition - heldCardOffset;
+            player1.hand.at(i).rect.SetPosition(mousePosition - heldCardOffset);
             continue;
         }
 
@@ -284,7 +277,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
             !player1.isHoldingACard)
         {
             SetPlayerHeldCard(static_cast<int>(i));
-            heldCardOffset = mousePosition - player1.hand.at(i).pos;
+            heldCardOffset = mousePosition - player1.hand.at(i).rect.GetPosition();
 
             //Don't position this card in the hand zone.
             continue;
@@ -300,7 +293,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
             constants::cardHeight
         };
 
-        player1.hand.at(i).pos = raylib::Vector2{newCardRect.x, newCardRect.y};
+        player1.hand.at(i).rect.SetPosition(raylib::Vector2{newCardRect.x, newCardRect.y});
         player1.hand.at(i).faceUp = true;
 
         //Handle hovering
@@ -310,7 +303,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         }
     }
 
-    //  Draw
+    //Draw
     GetTexture(playingScene.background).Draw();
     DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
     GetTexture(playingScene.playfield).Draw(
@@ -326,16 +319,8 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         else if (hoveredCardIndex != -1) cardIndexToDisplay = hoveredCardIndex;
         else return;
 
-        const raylib::Texture2D &cardTex = GetTexture(player1.hand.at(static_cast<std::size_t>(cardIndexToDisplay)).type);
-
-        const raylib::Rectangle cardTexSourceRect
-        {
-            0, 0,
-            static_cast<float>(cardTex.GetWidth()),
-            static_cast<float>(cardTex.GetHeight())
-        };
-
-        cardTex.Draw(cardTexSourceRect, constants::cardPreviewZoneRec);
+        const Card &cardInHand{player1.hand.at(static_cast<std::size_t>(cardIndexToDisplay))};
+        DrawCardAdvanced(cardInHand, constants::cardPreviewZoneRec);
     }
     else
     {
@@ -346,23 +331,27 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     //Draw Cards in the playfield
     if (player1.cardInPlay.type != CardType::invalid)
     {
-        DrawCard(player1.cardInPlay);
+        // DrawCard(player1.cardInPlay);
+        DrawCardAdvanced(player1.cardInPlay, player1.cardInPlay.rect);
     }
     if (player2.cardInPlay.type != CardType::invalid)
     {
-        DrawCard(player2.cardInPlay);
+        DrawCardAdvanced(player2.cardInPlay, player2.cardInPlay.rect);
+        // DrawCard(player2.cardInPlay);
     }
 
     //Draw Cards in Hand, ...
     for (size_t i = 0; i < player1.hand.size(); ++i)
     {
         if (player1.heldCardIndex == static_cast<int>(i)) continue;
-        DrawCard(player1.hand.at(i));
+        // DrawCard(player1.hand.at(i));
+        DrawCardAdvanced(player1.hand.at(i), player1.hand.at(i).rect);
     }
     //... with the one being held drawn last, on top.
     if (player1.isHoldingACard)
     {
-        DrawCard(player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex)));
+        const Card &heldCard{player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex))};
+        DrawCardAdvanced(heldCard, heldCard.rect);
     }
 
     //Draw Player 2 Hand
@@ -385,7 +374,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
             player2HandZone.y + 4,
         };
 
-        player2.hand.at(i).pos = cardPos;
+        player2.hand.at(i).rect.SetPosition(cardPos);
         player2.hand.at(i).faceUp = false;
         DrawCard(player2.hand.at(i));
     }
@@ -422,8 +411,12 @@ void RunPrototypingScene(PrototypingScene &prototypingScene)
 {
     static Card advancedCardProt
     {
-        .size = {constants::cardWidth, constants::cardHeight},
-        .pos = {100, 100},
+        .rect = {
+            constants::cardWidth,
+            constants::cardHeight,
+            100,
+            100
+        },
         .type = CardType::prototypeCard,
         .faceUp = true,
         .id = CardID::firstCard,
@@ -439,10 +432,11 @@ void RunPrototypingScene(PrototypingScene &prototypingScene)
         .soul = 1000
     };
 
-    advancedCardProt.size = raylib::Vector2{
-        GetMousePosition().x - advancedCardProt.pos.x,
-        (GetMousePosition().x - advancedCardProt.pos.x) * (1 / constants::cardAspectRatio),
-    };
+    // advancedCardProt.size = raylib::Vector2{
+    //     GetMousePosition().x - advancedCardProt.pos.x,
+    //     (GetMousePosition().x - advancedCardProt.pos.x) * (1 / constants::cardAspectRatio),
+    // };
+
     // Card advancedCardProt_x2 = advancedCardProt;
     // advancedCardProt_x2.size = raylib::Vector2{constants::cardWidth * 2, constants::cardHeight * 2};
     // advancedCardProt_x2.pos.x = 200;
@@ -457,7 +451,7 @@ void RunPrototypingScene(PrototypingScene &prototypingScene)
 
     //Draw
     GetTexture(prototypingScene.background).Draw();
-    DrawCardAdvanced(advancedCardProt);
+    DrawCardAdvanced(advancedCardProt, constants::cardPreviewZoneRec);
     // DrawCardAdvanced(advancedCardProt_x2);
     // DrawCardAdvanced(advancedCardProt_x3);
     // DrawCardAdvanced(advancedCardProt_x4);

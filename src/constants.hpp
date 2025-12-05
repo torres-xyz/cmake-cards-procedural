@@ -40,6 +40,7 @@ namespace constants
         2, 2, 2,
         3, 3, 3
     };
+    inline constexpr int initialDeckSize{10};
     inline constexpr int initialHandSize{3};
     // UI
     //// Player 1 HandZone

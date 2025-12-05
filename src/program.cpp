@@ -29,8 +29,11 @@ int run()
     Player player1{.id = 1};
     Player player2{.id = 2};
 
-    InitializePlayerWithDeck(player1, rd);
-    InitializePlayerWithDeck(player2, rd);
+    // InitializePlayerWithDeck(player1, rd);
+    // InitializePlayerWithDeck(player2, rd);
+    InitializePlayerWithAdvancedDeck(player1, rd);
+    InitializePlayerWithAdvancedDeck(player2, rd);
+
     constexpr int playerGoingFirst{2};
     GameScene currentScene{GameScene::starting};
     GameplayPhase currentPhase{GameplayPhase::initialHandDraw};
@@ -109,7 +112,7 @@ int run()
     //GameScene::gameOver end --------------------------------------------------
 
     //Prototyping Scene
-    constexpr bool usePrototypingScene{true};
+    constexpr bool usePrototypingScene{false};
     if (usePrototypingScene)
     {
         currentScene = GameScene::prototyping;

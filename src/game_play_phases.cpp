@@ -217,7 +217,7 @@ void DrawCardsFromDeckToHand(Player &player, const int amount)
     for (int i = 0; i < amount; ++i)
     {
         Card drawnCard = player.deck.back();
-        drawnCard.pos = raylib::Vector2{-1000, -1000};
+        drawnCard.rect.SetPosition(raylib::Vector2{-1000, -1000});
         drawnCard.faceUp = false;
         player.hand.push_back(drawnCard);
         player.deck.pop_back();
@@ -234,18 +234,20 @@ void PutCardInPlay(Player &player)
 
     if (player.id == 1)
     {
-        player.cardInPlay.pos = raylib::Vector2
-        {
+        player.cardInPlay.rect = raylib::Rectangle{
             constants::playerOnePlayfieldCardZoneRect.x,
-            constants::playerOnePlayfieldCardZoneRect.y
+            constants::playerOnePlayfieldCardZoneRect.y,
+            constants::cardWidth,
+            constants::cardHeight
         };
     }
     else if (player.id == 2)
     {
-        player.cardInPlay.pos = raylib::Vector2
-        {
+        player.cardInPlay.rect = raylib::Rectangle{
             constants::playerTwoPlayfieldCardZoneRect.x,
-            constants::playerTwoPlayfieldCardZoneRect.y
+            constants::playerTwoPlayfieldCardZoneRect.y,
+            constants::cardWidth,
+            constants::cardHeight
         };
     }
 
