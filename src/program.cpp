@@ -84,6 +84,20 @@ int run()
             .background = GameTexture::panel01,
             .state = ButtonState::enabled
         },
+        .endTurnButton
+        {
+            .rectangle
+            {
+                constants::screenWidth - 150 - 50,
+                300,
+                150,
+                60,
+            },
+            .text = "End Turn",
+            .fontSize = 20,
+            .background = GameTexture::panel05,
+            .state = ButtonState::enabled
+        }
     };
     //GameScene::playing end ---------------------------------------------------
     //GameScene::gameOver start ------------------------------------------------

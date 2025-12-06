@@ -33,6 +33,7 @@ struct PlayingScene
     GameTexture playfield{};
     GameMusic music{};
     Button playerDeckButton{};
+    Button endTurnButton{};
 };
 
 struct GameOverScene

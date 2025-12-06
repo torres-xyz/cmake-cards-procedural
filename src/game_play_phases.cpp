@@ -8,7 +8,7 @@
 #include "player.hpp"
 
 void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2,
-                          const int goingFirst, bool &player1HasDrawnThisTurn, std::random_device &rd)
+                          const int goingFirst, std::random_device &rd)
 {
     static float timeSinceStartOfPhase{};
     static constexpr float playerActionWaitTime{1};
@@ -52,7 +52,8 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         {
             player1.cardInPlay.type = CardType::invalid;
             player2.cardInPlay.type = CardType::invalid;
-            player1HasDrawnThisTurn = false;
+
+            player1.hasDrawnThisTurn = false;
 
             //Auto draw initial hand for P2
             if (player2.hand.size() != constants::initialHandSize)
@@ -88,9 +89,9 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             }
 
             //Wait for Player 1 to draw a card (by clicking the deck button).
-            if (player1HasDrawnThisTurn)
+            if (player1.hasDrawnThisTurn)
             {
-                player1HasDrawnThisTurn = false;
+                player1.hasDrawnThisTurn = false;
                 ChangePhase(GameplayPhase::playerOnePlaying);
                 break;
             }
@@ -100,6 +101,10 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         {
             //Wait until player 1 has played
             if (!HasPlayerPlayed(player1))
+            {
+                break;
+            }
+            if (!player1.hasPassedTheTurn)
             {
                 break;
             }
@@ -153,20 +158,6 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             if (timeSinceStartOfPhase < playerActionWaitTime)
                 break;
 
-            if (player1.cardInPlay.faceUp == false ||
-                player2.cardInPlay.faceUp == false)
-            {
-                //Play sound
-                PlaySound(GameSound::cardPlace01);
-                //reveal played cards
-                player1.cardInPlay.faceUp = true;
-                player2.cardInPlay.faceUp = true;
-            }
-
-            //Wait a bit more after revealing the cards
-            if (timeSinceStartOfPhase < playerActionWaitTime + 1)
-                break;
-
             const int turnWinner = BattleCards(player1.cardInPlay, player2.cardInPlay);
             if (turnWinner == 1)
             {
@@ -180,7 +171,8 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             //Remove the played cards
             player1.cardInPlay.type = CardType::invalid;
             player2.cardInPlay.type = CardType::invalid;
-            player1HasDrawnThisTurn = false;
+            player1.hasDrawnThisTurn = false;
+            player1.hasPassedTheTurn = false;
 
             if (player1.hand.empty() && player1.deck.empty() &&
                 player2.hand.empty() && player2.deck.empty())
@@ -230,7 +222,7 @@ void PutCardInPlay(Player &player)
 
     //Copy the card from the hand to the inPlay field.
     player.cardInPlay = player.hand.at(static_cast<size_t>(player.heldCardIndex));
-    player.cardInPlay.faceUp = false;
+    player.cardInPlay.faceUp = true;
 
     if (player.id == 1)
     {
@@ -268,9 +260,9 @@ int BattleCards(const Card &card1, const Card &card2)
     if (card1.soul > highestStatCard1) highestStatCard1 = card1.soul;
 
     int highestStatCard2{0};
-    if (card2.body > highestStatCard1) highestStatCard2 = card2.body;
-    if (card2.mind > highestStatCard1) highestStatCard2 = card2.mind;
-    if (card2.soul > highestStatCard1) highestStatCard2 = card2.soul;
+    if (card2.body > highestStatCard2) highestStatCard2 = card2.body;
+    if (card2.mind > highestStatCard2) highestStatCard2 = card2.mind;
+    if (card2.soul > highestStatCard2) highestStatCard2 = card2.soul;
 
     if (highestStatCard1 > highestStatCard2)
     {

@@ -183,13 +183,11 @@ bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
 void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst, std::random_device &rd)
 {
     const raylib::Vector2 mousePosition = GetMousePosition();
-    static bool player1HasDrawnThisTurn;
     static raylib::Vector2 heldCardOffset{};
     int hoveredCardIndex{-1};
 
     if (currentPhase == GameplayPhase::uninitialized)
     {
-        player1HasDrawnThisTurn = false;
         heldCardOffset = raylib::Vector2{0, 0};
         hoveredCardIndex = -1;
     }
@@ -208,7 +206,27 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
                 {
                     PlaySound(GameSound::buttonPress01);
                     DrawCardsFromDeckToHand(player1, 1);
-                    player1HasDrawnThisTurn = true;
+                    player1.hasDrawnThisTurn = true;
+                }
+            }
+        }
+    };
+
+    auto UpdateEndTurnButton{
+        [&player1, currentPhase, &playingScene, mousePosition]()-> void {
+            Button &endTurnButton = playingScene.endTurnButton;
+            endTurnButton.state = ButtonState::disabled;
+
+            if (currentPhase == GameplayPhase::playerOnePlaying
+                && player1.cardInPlay.type != CardType::invalid)
+            {
+                endTurnButton.state = ButtonState::enabled;
+                UpdateButtonState(endTurnButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+
+                if (endTurnButton.wasPressed)
+                {
+                    PlaySound(GameSound::buttonPress01);
+                    player1.hasPassedTheTurn = true;
                 }
             }
         }
@@ -236,10 +254,11 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     PlayMusic(playingScene.music);
 
     //Running the gameplay
-    UpdateGameplayPhases(currentPhase, player1, player2, goingFirst, player1HasDrawnThisTurn, rd);
+    UpdateGameplayPhases(currentPhase, player1, player2, goingFirst, rd);
 
     //Scene Buttons
     UpdateDeckButton();
+    UpdateEndTurnButton();
 
     //Handle Card Positioning
     constexpr int cardWidth{constants::cardWidth * 2};
@@ -309,6 +328,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     //Draw ---------------------------------------------------------------------
     GetTexture(playingScene.background).Draw();
     DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
+    DrawButton(playingScene.endTurnButton, GetTexture(playingScene.endTurnButton.background));
     GetTexture(playingScene.playfield).Draw(
         Rectangle{
             0,

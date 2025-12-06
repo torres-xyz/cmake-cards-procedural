@@ -18,7 +18,7 @@ enum class GameplayPhase
 };
 
 void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2,
-                          int goingFirst, bool &player1HasDrawnThisTurn, std::random_device &rd);
+                          int goingFirst, std::random_device &rd);
 
 void DrawCardsFromDeckToHand(Player &player, int amount);
 

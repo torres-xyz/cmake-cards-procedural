@@ -12,6 +12,8 @@ struct Player
     Card cardInPlay{};
     bool isHoldingACard{};
     int heldCardIndex{-1};
+    bool hasDrawnThisTurn{false};
+    bool hasPassedTheTurn{false};
 };
 
 void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd);
