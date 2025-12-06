@@ -306,7 +306,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         }
     }
 
-    //Draw
+    //Draw ---------------------------------------------------------------------
     GetTexture(playingScene.background).Draw();
     DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
     GetTexture(playingScene.playfield).Draw(

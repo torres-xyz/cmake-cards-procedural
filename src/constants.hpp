@@ -117,10 +117,4 @@ namespace constants
         cardPreviewZoneRec.width,
         cardPreviewZoneRec.height
     };
-
-
-    //// End Turn Button
-    inline constexpr int endTurnButtonPaddingRight{20};
-    inline constexpr int endTurnButtonPaddingTop{20};
-    inline constexpr Color endTurnButtonColor{GRAY};
 }
