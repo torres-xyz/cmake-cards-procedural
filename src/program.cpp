@@ -121,8 +121,6 @@ int run()
     {
         .background = GameTexture::wood11
     };
-
-
     //Test Scene end
 
     while (!window.ShouldClose()) // Detect window close button or ESC key
@@ -152,7 +150,8 @@ int run()
             }
             case GameScene::gameOver:
             {
-                RunGameOverScene(gameOverScene, currentScene, currentPhase);
+                RunGameOverScene(gameOverScene, currentScene, currentPhase,
+                                 player1, player2);
                 break;
             }
             case GameScene::prototyping:

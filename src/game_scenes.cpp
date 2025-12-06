@@ -154,7 +154,7 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
     cardFrameTex.Draw(cardFrameTexSourceRect, cardFrameTexDestRect);
 
     //if a card is being drawn at 1x size, don't render the text
-    if (destinationRect.width <= constants::cardWidth) return;
+    // if (destinationRect.width <= constants::cardWidth) return;
 
     //Hard coded numbers based on the texture pixel positions of these elements.
     constexpr float margin{5};
@@ -242,6 +242,8 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     UpdateDeckButton();
 
     //Handle Card Positioning
+    constexpr int cardWidth{constants::cardWidth * 2};
+    constexpr int cardHeight{constants::cardHeight * 2};
 
     //If we let go of the LMB
     if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
@@ -268,6 +270,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         if (static_cast<int>(i) == player1.heldCardIndex)
         {
             player1.hand.at(i).rect.SetPosition(mousePosition - heldCardOffset);
+            player1.hand.at(i).rect.SetSize(cardWidth, cardHeight);
             continue;
         }
 
@@ -287,13 +290,13 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         const int int_i = static_cast<int>(i);
         const raylib::Rectangle newCardRect
         {
-            static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + constants::cardWidth * int_i),
+            static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + cardWidth * int_i),
             static_cast<float>(constants::handZonePosY + 4),
-            constants::cardWidth,
-            constants::cardHeight
+            cardWidth,
+            cardHeight
         };
 
-        player1.hand.at(i).rect.SetPosition(raylib::Vector2{newCardRect.x, newCardRect.y});
+        player1.hand.at(i).rect = newCardRect;
         player1.hand.at(i).faceUp = true;
 
         //Handle hovering
@@ -307,7 +310,12 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     GetTexture(playingScene.background).Draw();
     DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
     GetTexture(playingScene.playfield).Draw(
-        Rectangle{0, 0, constants::playfieldRec.width, constants::playfieldRec.height},
+        Rectangle{
+            0,
+            0,
+            constants::playfieldRec.width,
+            constants::playfieldRec.height
+        },
         constants::playfieldRec);
 
     //Draw Hovered Card or Held Card in the Preview Zone
@@ -332,10 +340,12 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     if (player1.cardInPlay.type != CardType::invalid)
     {
         // DrawCard(player1.cardInPlay);
+        player1.cardInPlay.rect.SetSize(cardWidth, cardHeight);
         DrawCardAdvanced(player1.cardInPlay, player1.cardInPlay.rect);
     }
     if (player2.cardInPlay.type != CardType::invalid)
     {
+        player2.cardInPlay.rect.SetSize(cardWidth, cardHeight);
         DrawCardAdvanced(player2.cardInPlay, player2.cardInPlay.rect);
         // DrawCard(player2.cardInPlay);
     }
@@ -380,7 +390,8 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     }
 }
 
-void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase)
+void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
+                      const Player &player1, const Player &player2)
 {
     const raylib::Vector2 mousePosition = GetMousePosition();
 
@@ -405,6 +416,29 @@ void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, Gam
     //Draw
     GetTexture(gameOverScene.background).Draw();
     DrawButton(playAgainButton, GetTexture(playAgainButton.background));
+
+
+    constexpr float rectLength{200};
+    const raylib::Rectangle winMessageRect
+    {
+        constants::screenWidth / 2.0 - rectLength / 2.0,
+        10,
+        rectLength,
+        100
+    };
+    // DrawRectangleRec(winMessageRect, WHITE);
+    if (player1.score > player2.score)
+    {
+        HelperFunctions::DrawTextCenteredInRec("Player 1 Wins!", 20, BLACK, winMessageRect);
+    }
+    else if (player2.score > player1.score)
+    {
+        HelperFunctions::DrawTextCenteredInRec("Player 2 Wins!", 20, BLACK, winMessageRect);
+    }
+    else
+    {
+        HelperFunctions::DrawTextCenteredInRec("It's a Draw!", 20, BLACK, winMessageRect);
+    }
 }
 
 void RunPrototypingScene(PrototypingScene &prototypingScene)

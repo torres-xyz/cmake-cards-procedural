@@ -1,7 +1,11 @@
 # To Do
 
-- [ ] Create new scene to display match winner.
 - [ ] Implement a complex card game.
+    - [ ] Add pass turn button.
+    - [ ] Add cards that can boost the stats of the played card.
+    - [x] Randomly generate cards with different stats.
+    - [x] Make the cards in the hand zone larger.
+    - [x] Make the battle winner the owner of the card with the higher overall stats.
 - [ ] Store a library of available cards and card lists better (currently they
   are just being declared in a vector<int> in constants.hpp).
 - [ ] Custom font (Aoboshi One, perhaps).
@@ -60,3 +64,4 @@
 - [x] Display other player's hand, face down.
 - [x] Load assets on demand.
 - [x] Unit testing framework.
+- [x] Create new scene to display match winner.

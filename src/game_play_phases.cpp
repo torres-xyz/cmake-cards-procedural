@@ -41,8 +41,8 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         case GameplayPhase::uninitialized:
         {
             //Reset everything gameplay wise
-            InitializePlayerWithDeck(player1, rd);
-            InitializePlayerWithDeck(player2, rd);
+            InitializePlayerWithAdvancedDeck(player1, rd);
+            InitializePlayerWithAdvancedDeck(player2, rd);
 
             ChangePhase(GameplayPhase::initialHandDraw);
 
@@ -262,33 +262,26 @@ void PutCardInPlay(Player &player)
 
 int BattleCards(const Card &card1, const Card &card2)
 {
-    const CardType typeCard1 = card1.type;
-    const CardType typeCard2 = card2.type;
+    int highestStatCard1{0};
+    if (card1.body > highestStatCard1) highestStatCard1 = card1.body;
+    if (card1.mind > highestStatCard1) highestStatCard1 = card1.mind;
+    if (card1.soul > highestStatCard1) highestStatCard1 = card1.soul;
 
-    if (typeCard1 == CardType::invalid || typeCard2 == CardType::invalid)
-    {
-        std::cerr << "Invalid card" << "\n";
-        return -1;
-    }
+    int highestStatCard2{0};
+    if (card2.body > highestStatCard1) highestStatCard2 = card2.body;
+    if (card2.mind > highestStatCard1) highestStatCard2 = card2.mind;
+    if (card2.soul > highestStatCard1) highestStatCard2 = card2.soul;
 
-    if (typeCard1 == typeCard2) return 0; //draw
-    if (typeCard1 == CardType::paper)
+    if (highestStatCard1 > highestStatCard2)
     {
-        if (typeCard2 == CardType::rock) return 1;
-        if (typeCard2 == CardType::scissors) return 2;
+        return 1;
     }
-    if (typeCard1 == CardType::rock)
+    if (highestStatCard2 > highestStatCard1)
     {
-        if (typeCard2 == CardType::scissors) return 1;
-        if (typeCard2 == CardType::paper) return 2;
+        return 2;
     }
-    if (typeCard1 == CardType::scissors)
-    {
-        if (typeCard2 == CardType::paper) return 1;
-        if (typeCard2 == CardType::rock) return 2;
-    }
-    std::cerr << "Something went wrong with the Rock-Paper-Scissors logic." << "\n";
-    return -1;
+    //Draw
+    return 0;
 }
 
 std::string GameplayPhaseToString(const GameplayPhase phase)

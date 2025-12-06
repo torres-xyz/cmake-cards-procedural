@@ -73,8 +73,8 @@ namespace constants
     inline constexpr int turnOwnerTextFontSize{20};
     inline constexpr Color turnOwnerTextColor{GREEN};
     //// PlayField
-    inline constexpr int playfieldWidth{cardWidth * 4 + 10};
-    inline constexpr int playfieldHeight{cardHeight * 2 + 10};
+    inline constexpr int playfieldWidth{cardWidth * 6 + 10};
+    inline constexpr int playfieldHeight{cardHeight * 4 + 10};
     inline constexpr int playfieldPosX{screenWidth / 2 - playfieldWidth / 2};
     inline constexpr int playfieldPosY{screenHeight / 2 - playfieldHeight / 2};
     inline constexpr Rectangle playfieldRec
@@ -97,7 +97,7 @@ namespace constants
     //// Playfield - P2
     inline constexpr Rectangle playerTwoPlayfieldCardZoneRect
     {
-        playfieldPosX - 10 + playfieldWidth - cardWidth,
+        playfieldPosX - 10 + playfieldWidth - cardWidth * 2,
         playfieldPosX + 10,
         cardWidth,
         cardHeight
