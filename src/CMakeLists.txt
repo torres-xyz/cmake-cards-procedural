@@ -18,6 +18,8 @@ add_library(${PROJECT_NAME}
         player.hpp
         card.cpp
         card.hpp
+        fonts.hpp
+        fonts.cpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

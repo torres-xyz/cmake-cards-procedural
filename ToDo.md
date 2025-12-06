@@ -1,14 +1,14 @@
 # To Do
 
+- [ ] Make text in cards more legible.
 - [ ] Implement a complex card game.
-    - [ ] Add pass turn button.
     - [ ] Add cards that can boost the stats of the played card.
+    - [x] Add pass turn button.
     - [x] Randomly generate cards with different stats.
     - [x] Make the cards in the hand zone larger.
     - [x] Make the battle winner the owner of the card with the higher overall stats.
 - [ ] Store a library of available cards and card lists better (currently they
   are just being declared in a vector<int> in constants.hpp).
-- [ ] Custom font (Aoboshi One, perhaps).
 - [ ] Animate opponent's cards being played.
 - [ ] Make Player 2 play a random card from its hand. (With the deck shuffled
   this is no longer very relevant until there's more complex gameplay).
@@ -65,3 +65,4 @@
 - [x] Load assets on demand.
 - [x] Unit testing framework.
 - [x] Create new scene to display match winner.
+- [x] Custom font (Aoboshi One, perhaps).

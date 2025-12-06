@@ -8,6 +8,7 @@
 #include "player.hpp"
 #include "textures.hpp"
 #include "helper_functions.hpp"
+#include "fonts.hpp"
 
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
 {
@@ -79,7 +80,7 @@ void DrawTextInsideCard(const char *text, const raylib::Rectangle &destRect, con
     }
     HelperFunctions::DrawTextBoxed
     (
-        GetFontDefault(),
+        GetFont(GameFont::aobashiOne),
         text,
         textBoxRect,
         destRect.height * fontMultiplier,
@@ -157,7 +158,7 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
     // if (destinationRect.width <= constants::cardWidth) return;
 
     //Hard coded numbers based on the texture pixel positions of these elements.
-    constexpr float margin{5};
+    constexpr float margin{4};
     DrawTextInsideCard(card.name.c_str(), destinationRect, 49, 45, 523, 56, margin, 0.04f, false);
     DrawTextInsideCard(card.bodyText.c_str(), destinationRect, 49, 532, 626, 337, margin, 0.03f, false);
     DrawTextInsideCard(std::to_string(card.body).c_str(), destinationRect, 65, 894, 161, 77, margin, 0.05f, false);
