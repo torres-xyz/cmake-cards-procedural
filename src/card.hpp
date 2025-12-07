@@ -8,13 +8,15 @@ enum class CardType
     rock,
     paper,
     scissors,
-    prototypeCard
+    unit,
+    action
 };
 
 enum class CardID
 {
     invalid,
-    firstCard
+    firstCard,
+    firstCardAction
 };
 
 enum class CardBanner
@@ -30,13 +32,11 @@ enum class CardBanner
 
 struct Card
 {
-    //TODO: convert size and pos into card Rectangle
     raylib::Rectangle rect
     {
         0, 0,
         constants::cardWidth,
         constants::cardHeight
-
     };
     CardType type{CardType::invalid};
     bool faceUp{true};

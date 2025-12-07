@@ -19,22 +19,17 @@ enum class GameTexture
     paperCard,
     rockCard,
     scissorsCard,
-    cardFrame_Form,
-    cardFrame_Flow,
-    cardFrame_Strategy,
-    cardFrame_Instinct,
-    cardFrame_Hope,
-    cardFrame_Despair
+    cardFrame_Unit_Form,
+    cardFrame_Unit_Flow,
+    cardFrame_Unit_Strategy,
+    cardFrame_Unit_Instinct,
+    cardFrame_Unit_Hope,
+    cardFrame_Unit_Despair,
+    cardFrame_Action_Form,
 };
 
 raylib::Texture2D const &GetTexture(GameTexture tex);
 
-raylib::Texture2D const &GetTexture(CardType type);
-
-raylib::Texture2D const &GetTexture(CardBanner banner);
+raylib::Texture2D const &GetTexture(CardBanner banner, CardType cardType);
 
 raylib::Texture2D const &GetCardArtTexture(CardID cardId);
-
-GameTexture GetGameTextureFromCardType(CardType type);
-
-GameTexture GetGameTextureFromBannerType(CardBanner banner);

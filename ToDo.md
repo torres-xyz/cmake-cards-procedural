@@ -2,9 +2,9 @@
 
 - [ ] Implement a complex card game.
     - [ ] Add cards that can boost the stats of the played card.
-        - [ ] Add Action-type of cards.
         - [ ] Disallow playing non-unit cards as the main card.
         - [ ] Resolve the Action cards effects when the turn ends.
+        - [x] Add Action-type of cards.
     - [ ] Add multiple stages to a turn, so that players can play more action cards after their opponent has played
       action cards.
     - [x] Add pass turn button.

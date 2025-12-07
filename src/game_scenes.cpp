@@ -34,30 +34,6 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
     DrawButton(startButton, GetTexture(startButton.background));
 }
 
-void DrawCard(const Card &card)
-{
-    const raylib::Texture2D &cardTex = GetTexture(
-        card.faceUp
-            ? GetGameTextureFromCardType(card.type)
-            : GameTexture::cardBack);
-
-    const raylib::Rectangle cardTexSourceRect
-    {
-        0, 0,
-        static_cast<float>(cardTex.GetWidth()),
-        static_cast<float>(cardTex.GetHeight())
-    };
-    const raylib::Rectangle cardTextDestRect
-    {
-        card.rect.x,
-        card.rect.y,
-        constants::cardWidth,
-        constants::cardHeight
-    };
-
-    cardTex.Draw(cardTexSourceRect, cardTextDestRect);
-}
-
 void DrawTextInsideCard(const char *text, const raylib::Rectangle &destRect, const float x, const float y,
                         const float width, const float height, const raylib::Vector2 margins,
                         const float fontMultiplier, const bool drawGrayBox)
@@ -138,7 +114,7 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
     cardArtTex.Draw(cardArtTexSourceRect, cardArtTexDestRect);
 
     //Card Frame
-    const raylib::Texture2D &cardFrameTex = GetTexture(card.banner);
+    const raylib::Texture2D &cardFrameTex = GetTexture(card.banner, card.type);
     const raylib::Rectangle cardFrameTexSourceRect
     {
         0, 0,
@@ -362,7 +338,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
 
         player2.hand.at(i).rect.SetPosition(cardPos);
         player2.hand.at(i).faceUp = false;
-        DrawCard(player2.hand.at(i));
+        DrawCardAdvanced(player2.hand.at(i), player2.hand.at(i).rect);
     }
 
     //Draw Cards in Hand, ...
@@ -463,7 +439,7 @@ void RunPrototypingScene(PrototypingScene &prototypingScene)
             100,
             100
         },
-        .type = CardType::prototypeCard,
+        .type = CardType::unit,
         .faceUp = true,
         .id = CardID::firstCard,
         .name = "Lorem Ipsum",

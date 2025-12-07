@@ -18,12 +18,13 @@ raylib::Texture2D const &GetTexture(const GameTexture tex)
         {GameTexture::paperCard, "resources/textures/cards/paper_card.png"},
         {GameTexture::rockCard, "resources/textures/cards/rock_card.png"},
         {GameTexture::scissorsCard, "resources/textures/cards/scissors_card.png"},
-        {GameTexture::cardFrame_Form, "resources/textures/card-frames/body_form_min.png"},
-        {GameTexture::cardFrame_Flow, "resources/textures/card-frames/body_flow_min.png"},
-        {GameTexture::cardFrame_Strategy, "resources/textures/card-frames/mind_strategy_min.png"},
-        {GameTexture::cardFrame_Instinct, "resources/textures/card-frames/mind_instinct_min.png"},
-        {GameTexture::cardFrame_Hope, "resources/textures/card-frames/soul_hope_min.png"},
-        {GameTexture::cardFrame_Despair, "resources/textures/card-frames/soul_despair_min.png"},
+        {GameTexture::cardFrame_Unit_Form, "resources/textures/card-frames/body_form_min.png"},
+        {GameTexture::cardFrame_Unit_Flow, "resources/textures/card-frames/body_flow_min.png"},
+        {GameTexture::cardFrame_Unit_Strategy, "resources/textures/card-frames/mind_strategy_min.png"},
+        {GameTexture::cardFrame_Unit_Instinct, "resources/textures/card-frames/mind_instinct_min.png"},
+        {GameTexture::cardFrame_Unit_Hope, "resources/textures/card-frames/soul_hope_min.png"},
+        {GameTexture::cardFrame_Unit_Despair, "resources/textures/card-frames/soul_despair_min.png"},
+        {GameTexture::cardFrame_Action_Form, "resources/textures/card-frames/body_form_action_min.png"},
     };
     static std::unordered_map<GameTexture, raylib::Texture2D> gameTextureToTexture2DMap{};
 
@@ -39,14 +40,39 @@ raylib::Texture2D const &GetTexture(const GameTexture tex)
     return gameTextureToTexture2DMap.at(tex);
 }
 
-raylib::Texture2D const &GetTexture(const CardType type)
+raylib::Texture2D const &GetTexture(const CardBanner banner, const CardType cardType)
 {
-    return GetTexture(GetGameTextureFromCardType(type));
-}
+    static const std::unordered_map<CardBanner, GameTexture> cardBannerToUnitCardFrameTextureMap
+    {
+        {CardBanner::invalid, GameTexture::invalid},
+        {CardBanner::despair, GameTexture::cardFrame_Unit_Despair},
+        {CardBanner::flow, GameTexture::cardFrame_Unit_Flow},
+        {CardBanner::form, GameTexture::cardFrame_Unit_Form},
+        {CardBanner::hope, GameTexture::cardFrame_Unit_Hope},
+        {CardBanner::instinct, GameTexture::cardFrame_Unit_Instinct},
+        {CardBanner::strategy, GameTexture::cardFrame_Unit_Strategy},
+    };
+    static const std::unordered_map<CardBanner, GameTexture> cardBannerToActionCardFrameTextureMap
+    {
+        {CardBanner::invalid, GameTexture::invalid},
+        {CardBanner::form, GameTexture::cardFrame_Action_Form},
+    };
 
-raylib::Texture2D const &GetTexture(const CardBanner banner)
-{
-    return GetTexture(GetGameTextureFromBannerType(banner));
+    if (cardType == CardType::unit)
+    {
+        if (cardBannerToUnitCardFrameTextureMap.contains(banner))
+        {
+            return GetTexture(cardBannerToUnitCardFrameTextureMap.at(banner));
+        }
+    }
+    if (cardType == CardType::action)
+    {
+        if (cardBannerToActionCardFrameTextureMap.contains(banner))
+        {
+            return GetTexture(cardBannerToActionCardFrameTextureMap.at(banner));
+        }
+    }
+    return GetTexture(GameTexture::invalid);
 }
 
 raylib::Texture2D const &GetCardArtTexture(const CardID cardId)
@@ -55,6 +81,7 @@ raylib::Texture2D const &GetCardArtTexture(const CardID cardId)
     {
         {CardID::invalid, "resources/textures/invalid_tex.png"},
         {CardID::firstCard, "resources/textures/card-art/first_card_art_min.png"},
+        {CardID::firstCardAction, "resources/textures/card-art/first_card_art_action_min.png"},
     };
     static std::unordered_map<CardID, raylib::Texture2D> cardIDToTexture2DMap{};
 
@@ -69,40 +96,3 @@ raylib::Texture2D const &GetCardArtTexture(const CardID cardId)
 
     return cardIDToTexture2DMap.at(cardId);
 }
-
-GameTexture GetGameTextureFromBannerType(const CardBanner banner)
-{
-    static const std::unordered_map<CardBanner, GameTexture> cardBannerToTextureMap
-    {
-        {CardBanner::invalid, GameTexture::invalid},
-        {CardBanner::despair, GameTexture::cardFrame_Despair},
-        {CardBanner::flow, GameTexture::cardFrame_Flow},
-        {CardBanner::form, GameTexture::cardFrame_Form},
-        {CardBanner::hope, GameTexture::cardFrame_Hope},
-        {CardBanner::instinct, GameTexture::cardFrame_Instinct},
-        {CardBanner::strategy, GameTexture::cardFrame_Strategy},
-    };
-
-    if (cardBannerToTextureMap.contains(banner))
-    {
-        return cardBannerToTextureMap.at(banner);
-    }
-    return GameTexture::invalid;
-}
-
-GameTexture GetGameTextureFromCardType(const CardType type)
-{
-    static const std::unordered_map<CardType, GameTexture> cardTypeToTextureMap
-    {
-        {CardType::invalid, GameTexture::invalid},
-        {CardType::paper, GameTexture::paperCard},
-        {CardType::rock, GameTexture::rockCard},
-        {CardType::scissors, GameTexture::scissorsCard},
-    };
-
-    if (cardTypeToTextureMap.contains(type))
-    {
-        return cardTypeToTextureMap.at(type);
-    }
-    return GameTexture::invalid;
-};
