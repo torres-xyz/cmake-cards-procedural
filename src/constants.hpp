@@ -60,6 +60,14 @@ namespace constants
         handZoneHeight
     };
     ////Player 2 Hand Zone
+    inline constexpr float player2HandZoneWidth{500};
+    inline constexpr Rectangle player2HandZone
+    {
+        constants::screenWidth - player2HandZoneWidth - 20,
+        -20,
+        player2HandZoneWidth,
+        constants::handZoneRec.height
+    };
 
     inline constexpr Color handZoneColor{BLUE};
     //// Players' Scores
@@ -73,10 +81,10 @@ namespace constants
     inline constexpr int turnOwnerTextFontSize{20};
     inline constexpr Color turnOwnerTextColor{GREEN};
     //// PlayField
-    inline constexpr int playfieldWidth{cardWidth * 6 + 10};
-    inline constexpr int playfieldHeight{cardHeight * 4 + 10};
-    inline constexpr int playfieldPosX{screenWidth / 2 - playfieldWidth / 2};
-    inline constexpr int playfieldPosY{screenHeight / 2 - playfieldHeight / 2};
+    inline constexpr int playfieldWidth{cardWidth * 10 + 10};
+    inline constexpr int playfieldHeight{cardHeight * 5 + 10};
+    inline constexpr int playfieldPosX{50};
+    inline constexpr int playfieldPosY{screenHeight / 2 - playfieldHeight / 2 - 30};
     inline constexpr Rectangle playfieldRec
     {
         playfieldPosX,
@@ -90,31 +98,16 @@ namespace constants
     inline constexpr Rectangle playerOnePlayfieldCardZoneRect
     {
         playfieldPosX + 10,
-        playfieldPosX + 10,
-        cardWidth,
-        cardHeight
+        playfieldPosY + 10,
+        cardWidth * 3,
+        cardHeight * 3
     };
     //// Playfield - P2
     inline constexpr Rectangle playerTwoPlayfieldCardZoneRect
     {
-        playfieldPosX - 10 + playfieldWidth - cardWidth * 2,
-        playfieldPosX + 10,
-        cardWidth,
-        cardHeight
-    };
-    //// Card Preview Zone
-    inline constexpr Rectangle cardPreviewZoneRec
-    {
-        50,
-        100,
+        playfieldPosX - 10 + playfieldWidth - cardWidth * 3,
+        playfieldPosY + 10,
         cardWidth * 3,
         cardHeight * 3
-    };
-    inline constexpr Rectangle cardPreviewZoneTexSrcRect
-    {
-        500,
-        10,
-        cardPreviewZoneRec.width,
-        cardPreviewZoneRec.height
     };
 }

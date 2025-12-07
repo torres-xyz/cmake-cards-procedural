@@ -1,17 +1,19 @@
 # To Do
 
-- [x] Make cards in hand bigger when hovered.
-- [x] Remove preview zone.
-- [ ] Expand playfield and make cards there bigger.
-- [ ] Make text in cards more legible.
 - [ ] Implement a complex card game.
     - [ ] Add cards that can boost the stats of the played card.
+        - [ ] Add Action-type of cards.
+        - [ ] Disallow playing non-unit cards as the main card.
+        - [ ] Resolve the Action cards effects when the turn ends.
+    - [ ] Add multiple stages to a turn, so that players can play more action cards after their opponent has played
+      action cards.
     - [x] Add pass turn button.
     - [x] Randomly generate cards with different stats.
     - [x] Make the cards in the hand zone larger.
     - [x] Make the battle winner the owner of the card with the higher overall stats.
 - [ ] Store a library of available cards and card lists better (currently they
   are just being declared in a vector<int> in constants.hpp).
+- [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Animate opponent's cards being played.
 - [ ] Make Player 2 play a random card from its hand. (With the deck shuffled
   this is no longer very relevant until there's more complex gameplay).
@@ -69,3 +71,7 @@
 - [x] Unit testing framework.
 - [x] Create new scene to display match winner.
 - [x] Custom font (Aoboshi One, perhaps).
+- [x] Make cards in hand bigger when hovered.
+- [x] Remove preview zone.
+- [x] Expand playfield and make cards there bigger.
+- [x] Make text in cards more legible.
