@@ -339,23 +339,6 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         },
         constants::playfieldRec);
 
-    //Draw Hovered Card or Held Card in the Preview Zone
-    if (hoveredCardIndex != -1 || player1.isHoldingACard)
-    {
-        //Prefer showing our held card.
-        int cardIndexToDisplay{};
-        if (player1.isHoldingACard) cardIndexToDisplay = player1.heldCardIndex;
-        else if (hoveredCardIndex != -1) cardIndexToDisplay = hoveredCardIndex;
-        else return;
-
-        const Card &cardInHand{player1.hand.at(static_cast<std::size_t>(cardIndexToDisplay))};
-        DrawCardAdvanced(cardInHand, constants::cardPreviewZoneRec);
-    }
-    else
-    {
-        //Draw the Preview Zone background
-        GetTexture(playingScene.cardPreviewZoneTex).Draw(constants::cardPreviewZoneRec, constants::cardPreviewZoneRec);
-    }
 
     //Draw Cards in the playfield
     if (player1.cardInPlay.type != CardType::invalid)
@@ -371,19 +354,6 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         // DrawCard(player2.cardInPlay);
     }
 
-    //Draw Cards in Hand, ...
-    for (size_t i = 0; i < player1.hand.size(); ++i)
-    {
-        if (player1.heldCardIndex == static_cast<int>(i)) continue;
-        // DrawCard(player1.hand.at(i));
-        DrawCardAdvanced(player1.hand.at(i), player1.hand.at(i).rect);
-    }
-    //... with the one being held drawn last, on top.
-    if (player1.isHoldingACard)
-    {
-        const Card &heldCard{player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex))};
-        DrawCardAdvanced(heldCard, heldCard.rect);
-    }
 
     //Draw Player 2 Hand
     constexpr float p2HandZoneWidth{500};
@@ -408,6 +378,42 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         player2.hand.at(i).rect.SetPosition(cardPos);
         player2.hand.at(i).faceUp = false;
         DrawCard(player2.hand.at(i));
+    }
+
+    //Draw Cards in Hand, ...
+    for (size_t i = 0; i < player1.hand.size(); ++i)
+    {
+        if (player1.heldCardIndex == static_cast<int>(i)) continue;
+        if (hoveredCardIndex == static_cast<int>(i)) continue;
+        // DrawCard(player1.hand.at(i));
+        DrawCardAdvanced(player1.hand.at(i), player1.hand.at(i).rect);
+    }
+    //Draw Hovered Card expanded
+    if (hoveredCardIndex != -1)
+    {
+        const Card &hoveredCard{player1.hand.at(static_cast<std::size_t>(hoveredCardIndex))};
+        if (player1.isHoldingACard)
+        {
+            DrawCardAdvanced(hoveredCard, hoveredCard.rect);
+        }
+        else
+        {
+            //Expand the card in place
+            raylib::Rectangle expandedCardRect
+            {
+                hoveredCard.rect.x,
+                hoveredCard.rect.y - hoveredCard.rect.height * 1.5f,
+                hoveredCard.rect.width * 2,
+                hoveredCard.rect.height * 2
+            };
+            DrawCardAdvanced(hoveredCard, expandedCardRect);
+        }
+    }
+    //... with the one being held drawn last, on top.
+    if (player1.isHoldingACard)
+    {
+        const Card &heldCard{player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex))};
+        DrawCardAdvanced(heldCard, heldCard.rect);
     }
 }
 

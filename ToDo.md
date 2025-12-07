@@ -1,7 +1,7 @@
 # To Do
 
-- [ ] Make cards in hand bigger when hovered.
-- [ ] Remove preview zone.
+- [x] Make cards in hand bigger when hovered.
+- [x] Remove preview zone.
 - [ ] Expand playfield and make cards there bigger.
 - [ ] Make text in cards more legible.
 - [ ] Implement a complex card game.
