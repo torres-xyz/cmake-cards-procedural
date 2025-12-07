@@ -195,7 +195,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
             endTurnButton.state = ButtonState::disabled;
 
             if (currentPhase == GameplayPhase::playerOnePlaying
-                && player1.cardInPlay.type != CardType::invalid)
+                && !player1.cardsInPlayStack.empty())
             {
                 endTurnButton.state = ButtonState::enabled;
                 UpdateButtonState(endTurnButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
@@ -203,7 +203,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
                 if (endTurnButton.wasPressed)
                 {
                     PlaySound(GameSound::buttonPress01);
-                    player1.hasPassedTheTurn = true;
+                    player1.hasEndedTheTurn = true;
                 }
             }
         }
@@ -247,7 +247,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         //and we are placing the card on the play zone we select that card to be played
         if (currentPhase == GameplayPhase::playerOnePlaying &&
             player1.isHoldingACard &&
-            player1.cardInPlay.type == CardType::invalid)
+            player1.cardsInPlayStack.empty())
         {
             const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardIndex));
 
@@ -317,13 +317,13 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
 
 
     //Draw Cards in the playfield
-    if (player1.cardInPlay.type != CardType::invalid)
+    if (!player1.cardsInPlayStack.empty())
     {
-        DrawCardAdvanced(player1.cardInPlay, constants::playerOnePlayfieldCardZoneRect);
+        DrawCardAdvanced(player1.cardsInPlayStack.at(0), constants::playerOnePlayfieldCardZoneRect);
     }
-    if (player2.cardInPlay.type != CardType::invalid)
+    if (!player2.cardsInPlayStack.empty())
     {
-        DrawCardAdvanced(player2.cardInPlay, constants::playerTwoPlayfieldCardZoneRect);
+        DrawCardAdvanced(player2.cardsInPlayStack.at(0), constants::playerTwoPlayfieldCardZoneRect);
     }
 
     //Draw Player 2 Hand

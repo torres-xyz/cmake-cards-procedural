@@ -82,21 +82,21 @@ int run()
             .text = "Deck",
             .fontSize = 20,
             .background = GameTexture::panel01,
-            .state = ButtonState::enabled
+            .state = ButtonState::disabled
         },
         .endTurnButton
         {
             .rectangle
             {
                 constants::screenWidth - 150 - 50,
-                300,
-                150,
+                380,
+                180,
                 60,
             },
             .text = "End Turn",
             .fontSize = 20,
             .background = GameTexture::panel05,
-            .state = ButtonState::enabled
+            .state = ButtonState::disabled
         }
     };
     //GameScene::playing end ---------------------------------------------------

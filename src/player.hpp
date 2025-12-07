@@ -9,11 +9,11 @@ struct Player
     int score{};
     std::vector<Card> deck{};
     std::vector<Card> hand{};
-    Card cardInPlay{};
+    std::vector<Card> cardsInPlayStack{};
     bool isHoldingACard{};
     int heldCardIndex{-1};
     bool hasDrawnThisTurn{false};
-    bool hasPassedTheTurn{false};
+    bool hasEndedTheTurn{false};
 };
 
 void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd);

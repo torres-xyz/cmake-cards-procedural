@@ -7,7 +7,7 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
 {
     player.score = 0;
     player.hand.clear();
-    player.cardInPlay.type = CardType::invalid;
+    player.cardsInPlayStack.clear();
     player.isHoldingACard = false;
     player.heldCardIndex = -1;
     //Use default deck for players for now.

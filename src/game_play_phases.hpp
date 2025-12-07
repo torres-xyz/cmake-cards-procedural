@@ -24,6 +24,6 @@ void DrawCardsFromDeckToHand(Player &player, int amount);
 
 void PutCardInPlay(Player &player);
 
-int BattleCards(const Card &card1, const Card &card2);
+int BattleCards(const std::vector<Card> &cardStack1, const std::vector<Card> &cardStack2);
 
 std::string GameplayPhaseToString(GameplayPhase phase);

@@ -23,14 +23,13 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
     auto HaveBothPlayersPlayed
     {
         [player1, player2]() {
-            return player1.cardInPlay.type != CardType::invalid &&
-                   player2.cardInPlay.type != CardType::invalid;
+            return !player1.cardsInPlayStack.empty() && !player2.cardsInPlayStack.empty();
         }
     };
     auto HasPlayerPlayed
     {
         [](const Player &player) {
-            return player.cardInPlay.type != CardType::invalid;
+            return !player.cardsInPlayStack.empty();
         }
     };
 
@@ -50,8 +49,8 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         }
         case GameplayPhase::initialHandDraw:
         {
-            player1.cardInPlay.type = CardType::invalid;
-            player2.cardInPlay.type = CardType::invalid;
+            player1.cardsInPlayStack.clear();
+            player2.cardsInPlayStack.clear();
 
             player1.hasDrawnThisTurn = false;
 
@@ -104,7 +103,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             {
                 break;
             }
-            if (!player1.hasPassedTheTurn)
+            if (!player1.hasEndedTheTurn)
             {
                 break;
             }
@@ -158,7 +157,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             if (timeSinceStartOfPhase < playerActionWaitTime)
                 break;
 
-            const int turnWinner = BattleCards(player1.cardInPlay, player2.cardInPlay);
+            const int turnWinner = BattleCards(player1.cardsInPlayStack, player2.cardsInPlayStack);
             if (turnWinner == 1)
             {
                 player1.score++;
@@ -169,10 +168,10 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             }
 
             //Remove the played cards
-            player1.cardInPlay.type = CardType::invalid;
-            player2.cardInPlay.type = CardType::invalid;
+            player1.cardsInPlayStack.clear();
+            player2.cardsInPlayStack.clear();
             player1.hasDrawnThisTurn = false;
-            player1.hasPassedTheTurn = false;
+            player1.hasEndedTheTurn = false;
 
             if (player1.hand.empty() && player1.deck.empty() &&
                 player2.hand.empty() && player2.deck.empty())
@@ -220,13 +219,16 @@ void PutCardInPlay(Player &player)
 {
     assert(player.heldCardIndex > -1 && "Trying to play a card of negative index.");
 
-    //Copy the card from the hand to the inPlay field.
-    player.cardInPlay = player.hand.at(static_cast<size_t>(player.heldCardIndex));
-    player.cardInPlay.faceUp = true;
+    //Can only play Non-Unit cards after a Unit card is already in play
+    // if (player.hand.at(static_cast<size_t>(player.heldCardIndex)).type == CardType::action) return;
+
+    //Copy the card from the hand to the Play field.
+    player.cardsInPlayStack.emplace_back(player.hand.at(static_cast<size_t>(player.heldCardIndex)));
+    player.cardsInPlayStack.at(0).faceUp = true;
 
     if (player.id == 1)
     {
-        player.cardInPlay.rect = raylib::Rectangle{
+        player.cardsInPlayStack.at(0).rect = raylib::Rectangle{
             constants::playerOnePlayfieldCardZoneRect.x,
             constants::playerOnePlayfieldCardZoneRect.y,
             constants::cardWidth,
@@ -235,7 +237,7 @@ void PutCardInPlay(Player &player)
     }
     else if (player.id == 2)
     {
-        player.cardInPlay.rect = raylib::Rectangle{
+        player.cardsInPlayStack.at(0).rect = raylib::Rectangle{
             constants::playerTwoPlayfieldCardZoneRect.x,
             constants::playerTwoPlayfieldCardZoneRect.y,
             constants::cardWidth,
@@ -252,13 +254,15 @@ void PutCardInPlay(Player &player)
     PlaySound(GameSound::cardPlace01);
 }
 
-int BattleCards(const Card &card1, const Card &card2)
+int BattleCards(const std::vector<Card> &cardStack1, const std::vector<Card> &cardStack2)
 {
+    const Card &card1 = cardStack1.at(0);
     int highestStatCard1{0};
     if (card1.body > highestStatCard1) highestStatCard1 = card1.body;
     if (card1.mind > highestStatCard1) highestStatCard1 = card1.mind;
     if (card1.soul > highestStatCard1) highestStatCard1 = card1.soul;
 
+    const Card &card2 = cardStack2.at(0);
     int highestStatCard2{0};
     if (card2.body > highestStatCard2) highestStatCard2 = card2.body;
     if (card2.mind > highestStatCard2) highestStatCard2 = card2.mind;
