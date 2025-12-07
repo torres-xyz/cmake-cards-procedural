@@ -27,8 +27,7 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
             .name = "Lorem Ipsum",
             .bodyText = "Id aspernatur consequuntur eos ut quia vero. Voluptas "
             "beatae ut temporibus consectetur eveniet placeat adipisci. "
-            "Dignissimos aut et recusandae voluptates harum. Enim non et "
-            "facilis. Nemo reiciendis dolores dolores illum omnis.",
+            "Dignissimos aut et recusandae voluptates harum.",
             .banner = CardBanner::form,
             .body = randomRange(rd) * 500,
             .mind = randomRange(rd) * 500,

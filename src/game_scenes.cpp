@@ -59,14 +59,14 @@ void DrawCard(const Card &card)
 }
 
 void DrawTextInsideCard(const char *text, const raylib::Rectangle &destRect, const float x, const float y,
-                        const float width, const float height, const float margin,
+                        const float width, const float height, const raylib::Vector2 margins,
                         const float fontMultiplier, const bool drawGrayBox)
 {
     //Coords
-    const float textPosX{(x + margin) / constants::cardTextureWidth};
-    const float textPosY{(y + margin) / constants::cardTextureHeight};
-    const float textWidth{(width - margin * 2) / constants::cardTextureWidth};
-    const float textHeight{(height - margin * 2) / constants::cardTextureHeight};
+    const float textPosX{(x + margins.x) / constants::cardTextureWidth};
+    const float textPosY{(y + margins.y) / constants::cardTextureHeight};
+    const float textWidth{(width - margins.x * 2) / constants::cardTextureWidth};
+    const float textHeight{(height - margins.y * 2) / constants::cardTextureHeight};
     const raylib::Rectangle textBoxRect
     {
         destRect.x + destRect.width * textPosX,
@@ -158,12 +158,12 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
     // if (destinationRect.width <= constants::cardWidth) return;
 
     //Hard coded numbers based on the texture pixel positions of these elements.
-    constexpr float margin{4};
-    DrawTextInsideCard(card.name.c_str(), destinationRect, 49, 45, 523, 56, margin, 0.04f, false);
-    DrawTextInsideCard(card.bodyText.c_str(), destinationRect, 49, 532, 626, 337, margin, 0.03f, false);
-    DrawTextInsideCard(std::to_string(card.body).c_str(), destinationRect, 65, 894, 161, 77, margin, 0.05f, false);
-    DrawTextInsideCard(std::to_string(card.mind).c_str(), destinationRect, 280, 894, 161, 77, margin, 0.05f, false);
-    DrawTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margin, 0.05f, false);
+    const raylib::Vector2 margins{4, 0};
+    DrawTextInsideCard(card.name.c_str(), destinationRect, 49, 45, 523, 56, margins, 0.05f, false);
+    DrawTextInsideCard(card.bodyText.c_str(), destinationRect, 49, 532, 626, 337, margins, 0.04f, false);
+    DrawTextInsideCard(std::to_string(card.body).c_str(), destinationRect, 65, 894, 161, 77, margins, 0.07f, false);
+    DrawTextInsideCard(std::to_string(card.mind).c_str(), destinationRect, 280, 894, 161, 77, margins, 0.07f, false);
+    DrawTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);
 }
 
 bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)

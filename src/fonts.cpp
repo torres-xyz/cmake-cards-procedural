@@ -1,7 +1,6 @@
 #include "fonts.hpp"
 #include <unordered_map>
 
-
 raylib::Font const &GetFont(GameFont gameFont)
 {
     static const std::unordered_map<GameFont, std::string> gameFontToPathMap
@@ -17,6 +16,7 @@ raylib::Font const &GetFont(GameFont gameFont)
                 gameFont,
                 raylib::Font(gameFontToPathMap.at(gameFont))
             });
+        SetTextureFilter(gameFontToFontMap.at(gameFont).texture, TEXTURE_FILTER_BILINEAR);
     }
 
     return gameFontToFontMap.at(gameFont);
