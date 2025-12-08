@@ -60,7 +60,8 @@ void DrawTextInsideCard(const char *text, const raylib::Rectangle &destRect, con
         text,
         textBoxRect,
         destRect.height * fontMultiplier,
-        1,
+        0.1f,
+        0.5f,
         true,
         WHITE
     );
@@ -136,7 +137,7 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
     //Hard coded numbers based on the texture pixel positions of these elements.
     const raylib::Vector2 margins{4, 0};
     DrawTextInsideCard(card.name.c_str(), destinationRect, 49, 45, 523, 56, margins, 0.05f, false);
-    DrawTextInsideCard(card.bodyText.c_str(), destinationRect, 49, 532, 626, 337, margins, 0.04f, false);
+    DrawTextInsideCard(card.bodyText.c_str(), destinationRect, 49, 532, 626, 337, margins, 0.06f, false);
     DrawTextInsideCard(std::to_string(card.body).c_str(), destinationRect, 65, 894, 161, 77, margins, 0.07f, false);
     DrawTextInsideCard(std::to_string(card.mind).c_str(), destinationRect, 280, 894, 161, 77, margins, 0.07f, false);
     DrawTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);

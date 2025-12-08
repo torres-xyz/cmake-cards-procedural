@@ -25,7 +25,7 @@ namespace HelperFunctions
 
 
     // Draw text using font inside rectangle limits with support for text selection
-    [[maybe_unused]] static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint)
+    [[maybe_unused]] static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, float verticalSpacingMult, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint)
     {
         const int length = static_cast<int>(TextLength(text)); // Total length in bytes of the text, scanned by codepoints in loop
 
@@ -106,7 +106,7 @@ namespace HelperFunctions
                 {
                     if (!wordWrap)
                     {
-                        textOffsetY += static_cast<float>((font.baseSize + font.baseSize / 2)) * scaleFactor;
+                        textOffsetY += static_cast<float>((font.baseSize + font.baseSize / 2)) * scaleFactor * verticalSpacingMult;
                         textOffsetX = 0;
                     }
                 }
@@ -114,12 +114,12 @@ namespace HelperFunctions
                 {
                     if (!wordWrap && ((textOffsetX + glyphWidth) > rec.width))
                     {
-                        textOffsetY += static_cast<float>((font.baseSize + font.baseSize / 2)) * scaleFactor;
+                        textOffsetY += static_cast<float>((font.baseSize + font.baseSize / 2)) * scaleFactor * verticalSpacingMult;
                         textOffsetX = 0;
                     }
 
                     // When text overflows rectangle height limit, just stop drawing
-                    if ((textOffsetY + static_cast<float>(font.baseSize) * scaleFactor) > rec.height) break;
+                    if ((textOffsetY + static_cast<float>(font.baseSize) * scaleFactor * verticalSpacingMult) > rec.height) break;
 
                     // Draw selection background
                     bool isGlyphSelected = false;
@@ -138,7 +138,7 @@ namespace HelperFunctions
 
                 if (wordWrap && (i == endLine))
                 {
-                    textOffsetY += static_cast<float>((font.baseSize + font.baseSize / 2)) * scaleFactor;
+                    textOffsetY += static_cast<float>((font.baseSize + font.baseSize / 2)) * scaleFactor * verticalSpacingMult;
                     textOffsetX = 0;
                     startLine = endLine;
                     endLine = -1;
@@ -155,8 +155,8 @@ namespace HelperFunctions
     }
 
     // Draw text using font inside rectangle limits
-    [[maybe_unused]] static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint)
+    [[maybe_unused]] static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float fontSize, float spacing, float verticalSpacingMult, bool wordWrap, Color tint)
     {
-        DrawTextBoxedSelectable(font, text, rec, fontSize, spacing, wordWrap, tint, 0, 0, WHITE, WHITE);
+        DrawTextBoxedSelectable(font, text, rec, fontSize, spacing, verticalSpacingMult, wordWrap, tint, 0, 0, WHITE, WHITE);
     }
 }
