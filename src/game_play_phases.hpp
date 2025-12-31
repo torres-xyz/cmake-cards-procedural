@@ -17,6 +17,23 @@ enum class GameplayPhase
     gameOver
 };
 
+/*
+ *     uninitialized,
+    initialHandDraw,
+    playerOneDrawing,
+    playerOneFirstTurn,
+    playerOnePlayingAndPlayerTwoPlayed,
+    playerOnePlayingAndPlayerTwoPassed,
+    playerTwoDrawing,
+    playerTwoFirstTurn,
+    playerTwoPlayingAndPlayerOnePlayed,
+    playerTwoPlayingAndPlayerOnePassed,
+    battle,
+    gameOver
+ *
+ *
+ */
+
 void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2,
                           int goingFirst, std::random_device &rd);
 

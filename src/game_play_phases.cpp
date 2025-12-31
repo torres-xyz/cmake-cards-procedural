@@ -12,6 +12,10 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
 {
     static float timeSinceStartOfPhase{};
     static constexpr float playerActionWaitTime{1};
+    static int playerOnePreviousCardsPlayed{};
+    static int playerTwoPreviousCardsPlayed{};
+    static bool playerOneHasPlayedOnThePreviousTurn{};
+    static bool playerTwoHasPlayedOnThePreviousTurn{};
 
     auto ChangePhase
     {
@@ -20,18 +24,22 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             timeSinceStartOfPhase = 0;
         }
     };
-    auto HaveBothPlayersPlayed
-    {
-        [player1, player2]() {
-            return !player1.cardsInPlayStack.empty() && !player2.cardsInPlayStack.empty();
-        }
-    };
+
     auto HasPlayerPlayed
     {
         [](const Player &player) {
-            return !player.cardsInPlayStack.empty();
+            if (player.id == 1 && playerOnePreviousCardsPlayed < player.cardsPlayed)
+            {
+                return true;
+            }
+            if (player.id == 2 && playerTwoPreviousCardsPlayed < player.cardsPlayed)
+            {
+                return true;
+            }
+            return false;
         }
     };
+
 
     timeSinceStartOfPhase += GetFrameTime();
 
@@ -98,21 +106,31 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         }
         case GameplayPhase::playerOnePlaying:
         {
+            //reset that this player has played a card on the previous turn.
+            playerOneHasPlayedOnThePreviousTurn = false;
+            //Check if the opponent has played a card on the previous turn
+            if (player2.cardsPlayed > playerTwoPreviousCardsPlayed)
+            {
+                playerTwoHasPlayedOnThePreviousTurn = true;
+                playerTwoPreviousCardsPlayed = player2.cardsPlayed;
+            }
+
             //Wait until player 1 has played
             if (!HasPlayerPlayed(player1))
             {
                 break;
             }
+            //Wait until player 1 has pressed the end turn button
             if (!player1.hasEndedTheTurn)
             {
                 break;
             }
 
             //If player 2 has also played we battle, otherwise it must be player 2's turn next.
-            if (HaveBothPlayersPlayed())
-            {
-                ChangePhase(GameplayPhase::battle);
-            }
+            // if (HaveBothPlayersPlayed())
+            // {
+            //     ChangePhase(GameplayPhase::battle);
+            // }
             else if (!HasPlayerPlayed(player2))
             {
                 ChangePhase(GameplayPhase::playerTwoDrawing);
@@ -137,15 +155,26 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         {
             if (timeSinceStartOfPhase < playerActionWaitTime) break;
 
+            //reset that this player has played a card on the previous turn.
+            playerTwoHasPlayedOnThePreviousTurn = false;
+            //Check if the opponent has played a card on the previous turn
+            if (player1.cardsPlayed > playerOnePreviousCardsPlayed)
+            {
+                playerOneHasPlayedOnThePreviousTurn = true;
+                playerOnePreviousCardsPlayed = player1.cardsPlayed;
+            }
+
+
             //Player 2 plays a card, always index 0 for now
             player2.heldCardIndex = 0;
             PutCardInPlay(player2);
 
-            if (HaveBothPlayersPlayed())
-            {
-                ChangePhase(GameplayPhase::battle);
-            }
-            else
+            playerOnePreviousCardsPlayed = player1.cardsPlayed;
+            // if (HaveBothPlayersPlayed())
+            // {
+            //     ChangePhase(GameplayPhase::battle);
+            // }
+            // else
             {
                 ChangePhase(GameplayPhase::playerOneDrawing);
             }
@@ -221,6 +250,8 @@ void PutCardInPlay(Player &player)
 
     //Can only play Non-Unit cards after a Unit card is already in play
     // if (player.hand.at(static_cast<size_t>(player.heldCardIndex)).type == CardType::action) return;
+
+    player.cardsPlayed++;
 
     //Copy the card from the hand to the Play field.
     player.cardsInPlayStack.emplace_back(player.hand.at(static_cast<size_t>(player.heldCardIndex)));

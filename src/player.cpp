@@ -12,9 +12,9 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
     player.heldCardIndex = -1;
     //Use default deck for players for now.
     player.deck.clear();
+    player.cardsPlayed = 0;
 
     std::uniform_int_distribution randomRange{1, 20};
-
 
     for (int i = 0; i < constants::initialDeckSize - 3; ++i)
     {
