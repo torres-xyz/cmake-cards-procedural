@@ -170,12 +170,26 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         hoveredCardIndex = -1;
     }
 
+    auto IsPlayerOnePlaying{
+        [currentPhase]() -> bool {
+            if (currentPhase == GameplayPhase::playerOneFirstTurn ||
+                currentPhase == GameplayPhase::playerOnePlayingAndPlayerTwoPassed ||
+                currentPhase == GameplayPhase::playerOnePlayingAndPlayerTwoPlayed)
+            {
+                return true;
+            }
+            return false;
+        }
+    };
+
     auto UpdateDeckButton{
         [&player1, currentPhase, &playingScene, mousePosition]()-> void {
             Button &playerDeckButton = playingScene.playerDeckButton;
             playerDeckButton.state = ButtonState::disabled;
 
-            if (!player1.deck.empty() && (currentPhase == GameplayPhase::initialHandDraw || currentPhase == GameplayPhase::playerOneDrawing))
+            if (!player1.deck.empty() &&
+                !player1.hasDrawnThisTurn &&
+                (currentPhase == GameplayPhase::initialHandDraw || currentPhase == GameplayPhase::playerOneFirstTurn || currentPhase == GameplayPhase::playerOnePlayingAndPlayerTwoPassed || currentPhase == GameplayPhase::playerOnePlayingAndPlayerTwoPlayed))
             {
                 playerDeckButton.state = ButtonState::enabled;
                 UpdateButtonState(playerDeckButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
@@ -191,12 +205,11 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     };
 
     auto UpdateEndTurnButton{
-        [&player1, currentPhase, &playingScene, mousePosition]()-> void {
+        [&player1, &playingScene, mousePosition, IsPlayerOnePlaying]()-> void {
             Button &endTurnButton = playingScene.endTurnButton;
             endTurnButton.state = ButtonState::disabled;
 
-            if (currentPhase == GameplayPhase::playerOnePlaying
-                && !player1.cardsInPlayStack.empty())
+            if (IsPlayerOnePlaying() && !player1.cardsInPlayStack.empty())
             {
                 endTurnButton.state = ButtonState::enabled;
                 UpdateButtonState(endTurnButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
@@ -209,6 +222,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
             }
         }
     };
+
 
     auto RemovePlayerHeldCard{
         [&player1]()-> void {
@@ -246,7 +260,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
     {
         //and we are placing the card on the play zone we select that card to be played
-        if (currentPhase == GameplayPhase::playerOnePlaying &&
+        if (IsPlayerOnePlaying() &&
             player1.isHoldingACard &&
             player1.cardsInPlayStack.empty())
         {

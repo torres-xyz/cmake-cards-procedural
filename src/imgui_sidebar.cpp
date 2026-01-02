@@ -1,4 +1,7 @@
 #include "imgui_sidebar.hpp"
+
+#include <iostream>
+
 #include "imgui.h"
 #include "rlImGui.h"
 #include "raylib-cpp.hpp"
@@ -28,7 +31,8 @@ namespace ImGuiSideBar
             ImGui::TextUnformatted(("Mouse X: " + std::to_string(GetMouseX())
                                     + " / Mouse Y: " + std::to_string(GetMouseY())).c_str());
             ImGui::SeparatorText("Game State");
-            ImGui::TextUnformatted(("Game Phase = " + GameplayPhaseToString(currentPhase)).c_str());
+            ImGui::TextWrapped(("Game Phase = " + GameplayPhaseToString(currentPhase)).c_str());
+            std::cout << "Game Phase = " << GameplayPhaseToString(currentPhase).c_str() << std::endl;
             ImGui::TextUnformatted(("Player 1 score = " + std::to_string(player1.score)).c_str());
             ImGui::TextUnformatted(("Player 2 score = " + std::to_string(player2.score)).c_str());
             ImGui::SeparatorText("Options");

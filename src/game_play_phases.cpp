@@ -1,6 +1,7 @@
 #include "game_play_phases.hpp"
 #include <cassert>
 #include <iostream>
+#include <bits/atomic_timed_wait.h>
 
 #include "audio.hpp"
 #include "constants.hpp"
@@ -8,20 +9,22 @@
 #include "player.hpp"
 
 void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2,
-                          const int goingFirst, std::random_device &rd)
+                          const int playerGoingFirst, std::random_device &rd)
 {
     static float timeSinceStartOfPhase{};
     static constexpr float playerActionWaitTime{1};
     static int playerOnePreviousCardsPlayed{};
     static int playerTwoPreviousCardsPlayed{};
-    static bool playerOneHasPlayedOnThePreviousTurn{};
-    static bool playerTwoHasPlayedOnThePreviousTurn{};
+    [[maybe_unused]] static GameplayPhase previousPhase{GameplayPhase::uninitialized};
 
     auto ChangePhase
     {
-        [&currentPhase](const GameplayPhase nextPhase) {
+        [&currentPhase, &player1, &player2](const GameplayPhase nextPhase) {
+            previousPhase = currentPhase;
             currentPhase = nextPhase;
             timeSinceStartOfPhase = 0;
+            player1.hasEndedTheTurn = false;
+            player2.hasEndedTheTurn = false;
         }
     };
 
@@ -61,6 +64,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             player2.cardsInPlayStack.clear();
 
             player1.hasDrawnThisTurn = false;
+            player2.hasDrawnThisTurn = false;
 
             //Auto draw initial hand for P2
             if (player2.hand.size() != constants::initialHandSize)
@@ -73,112 +77,183 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             {
                 break;
             }
-            if (goingFirst == 1)
+            if (playerGoingFirst == 1)
             {
-                ChangePhase(GameplayPhase::playerOnePlaying);
+                ChangePhase(GameplayPhase::playerOneFirstTurn);
                 break;
             }
-            if (goingFirst == 2)
+            if (playerGoingFirst == 2)
             {
-                ChangePhase(GameplayPhase::playerTwoPlaying);
+                ChangePhase(GameplayPhase::playerTwoFirstTurn);
                 break;
             }
 
             break;
         }
-        case GameplayPhase::playerOneDrawing:
+        case GameplayPhase::playerOneFirstTurn:
         {
-            //if player's deck is empty, skip drawing phase
-            if (player1.deck.empty())
+            if (!player1.deck.empty())
             {
-                ChangePhase(GameplayPhase::playerOnePlaying);
-                break;
+                if (player1.hasDrawnThisTurn == false)
+                {
+                    break;
+                }
             }
 
-            //Wait for Player 1 to draw a card (by clicking the deck button).
-            if (player1.hasDrawnThisTurn)
-            {
-                player1.hasDrawnThisTurn = false;
-                ChangePhase(GameplayPhase::playerOnePlaying);
-                break;
-            }
-            break;
-        }
-        case GameplayPhase::playerOnePlaying:
-        {
-            //reset that this player has played a card on the previous turn.
-            playerOneHasPlayedOnThePreviousTurn = false;
-            //Check if the opponent has played a card on the previous turn
-            if (player2.cardsPlayed > playerTwoPreviousCardsPlayed)
-            {
-                playerTwoHasPlayedOnThePreviousTurn = true;
-                playerTwoPreviousCardsPlayed = player2.cardsPlayed;
-            }
-
+            //TODO: Make sure the card played is a Unit card.
             //Wait until player 1 has played
             if (!HasPlayerPlayed(player1))
             {
                 break;
             }
+
             //Wait until player 1 has pressed the end turn button
             if (!player1.hasEndedTheTurn)
             {
                 break;
             }
 
-            //If player 2 has also played we battle, otherwise it must be player 2's turn next.
-            // if (HaveBothPlayersPlayed())
-            // {
-            //     ChangePhase(GameplayPhase::battle);
-            // }
-            else if (!HasPlayerPlayed(player2))
+            if (playerGoingFirst == 1)
             {
-                ChangePhase(GameplayPhase::playerTwoDrawing);
-            }
-            break;
-        }
-        case GameplayPhase::playerTwoDrawing:
-        {
-            //if player's deck is empty, skip drawing phase
-            if (player2.deck.empty())
-            {
-                ChangePhase(GameplayPhase::playerTwoPlaying);
+                ChangePhase(GameplayPhase::playerTwoFirstTurn);
                 break;
             }
-            //Player 2 draws automatically
-            DrawCardsFromDeckToHand(player2, 1);
-
-            ChangePhase(GameplayPhase::playerTwoPlaying);
+            if (playerGoingFirst == 2)
+            {
+                ChangePhase(GameplayPhase::playerTwoPlayingAndPlayerOnePlayed);
+                break;
+            }
             break;
         }
-        case GameplayPhase::playerTwoPlaying:
+        case GameplayPhase::playerTwoFirstTurn:
         {
-            if (timeSinceStartOfPhase < playerActionWaitTime) break;
-
-            //reset that this player has played a card on the previous turn.
-            playerTwoHasPlayedOnThePreviousTurn = false;
-            //Check if the opponent has played a card on the previous turn
-            if (player1.cardsPlayed > playerOnePreviousCardsPlayed)
+            //play only if there are cards in the deck
+            if (!player2.deck.empty() && player2.hasDrawnThisTurn == false)
             {
-                playerOneHasPlayedOnThePreviousTurn = true;
-                playerOnePreviousCardsPlayed = player1.cardsPlayed;
+                DrawCardsFromDeckToHand(player2, 1);
+                player2.hasDrawnThisTurn = true;
             }
 
+            //wait a little bit
+            if (timeSinceStartOfPhase < playerActionWaitTime) break;
 
+            //TODO: Make sure the card played is a Unit card.
             //Player 2 plays a card, always index 0 for now
             player2.heldCardIndex = 0;
             PutCardInPlay(player2);
 
-            playerOnePreviousCardsPlayed = player1.cardsPlayed;
-            // if (HaveBothPlayersPlayed())
-            // {
-            //     ChangePhase(GameplayPhase::battle);
-            // }
-            // else
+            if (playerGoingFirst == 1)
             {
-                ChangePhase(GameplayPhase::playerOneDrawing);
+                ChangePhase(GameplayPhase::playerOnePlayingAndPlayerTwoPlayed);
+                break;
+            }
+            if (playerGoingFirst == 2)
+            {
+                ChangePhase(GameplayPhase::playerOneFirstTurn);
+                break;
             }
             break;
+        }
+        case GameplayPhase::playerOnePlayingAndPlayerTwoPlayed:
+        {
+            //Draw a card first
+            if (!player1.deck.empty() && player1.hasDrawnThisTurn == false)
+            {
+                break;
+            }
+
+            //Wait until player 1 has pressed the end turn button
+            if (!player1.hasEndedTheTurn)
+            {
+                break;
+            }
+
+            if (HasPlayerPlayed(player1))
+            {
+                ChangePhase(GameplayPhase::playerTwoPlayingAndPlayerOnePlayed);
+                break;
+            }
+            else
+            {
+                ChangePhase(GameplayPhase::playerTwoPlayingAndPlayerOnePassed);
+                break;
+            }
+        }
+        case GameplayPhase::playerOnePlayingAndPlayerTwoPassed:
+        {
+            //Draw a card first
+            if (!player1.deck.empty() && player1.hasDrawnThisTurn == false)
+            {
+                break;
+            }
+
+            //Wait until player 1 has pressed the end turn button
+            if (!player1.hasEndedTheTurn)
+            {
+                break;
+            }
+
+            if (HasPlayerPlayed(player1))
+            {
+                ChangePhase(GameplayPhase::playerTwoPlayingAndPlayerOnePlayed);
+                break;
+            }
+            else
+            {
+                ChangePhase(GameplayPhase::battle); //When both pass in a row, they battle
+                break;
+            }
+        }
+
+        case GameplayPhase::playerTwoPlayingAndPlayerOnePlayed: //not yet implemented
+        {
+            if (!player2.deck.empty() && player2.hasDrawnThisTurn == false)
+            {
+                DrawCardsFromDeckToHand(player2, 1);
+                player2.hasDrawnThisTurn = true;
+            }
+
+            if (timeSinceStartOfPhase < playerActionWaitTime) break;
+
+            //Some logic here that makes the player 2 randomly player another card or pass.
+            std::uniform_int_distribution coinFlip{0, 1};
+            if (coinFlip(rd) == 0) //Pass
+            {
+                ChangePhase(GameplayPhase::playerOnePlayingAndPlayerTwoPassed);
+                break;
+            }
+            else //Play
+            {
+                player2.heldCardIndex = 0;
+                PutCardInPlay(player2);
+                ChangePhase(GameplayPhase::playerOnePlayingAndPlayerTwoPlayed);
+                break;
+            }
+        }
+        case GameplayPhase::playerTwoPlayingAndPlayerOnePassed:
+        {
+            if (!player2.deck.empty() && player2.hasDrawnThisTurn == false)
+            {
+                DrawCardsFromDeckToHand(player2, 1);
+                player2.hasDrawnThisTurn = true;
+            }
+
+            if (timeSinceStartOfPhase < playerActionWaitTime) break;
+
+            //Some logic here that makes the player 2 randomly player another card or pass.
+            std::uniform_int_distribution coinFlip{0, 1};
+            if (coinFlip(rd) == 0) //Pass
+            {
+                ChangePhase(GameplayPhase::battle);
+                break;
+            }
+            else //Play
+            {
+                player2.heldCardIndex = 0;
+                PutCardInPlay(player2);
+                ChangePhase(GameplayPhase::playerOnePlayingAndPlayerTwoPlayed);
+                break;
+            }
         }
         case GameplayPhase::battle:
         {
@@ -200,6 +275,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             player1.cardsInPlayStack.clear();
             player2.cardsInPlayStack.clear();
             player1.hasDrawnThisTurn = false;
+            player2.hasDrawnThisTurn = false;
             player1.hasEndedTheTurn = false;
 
             if (player1.hand.empty() && player1.deck.empty() &&
@@ -210,14 +286,14 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             }
 
             //After the battle, give the turn to the player who went first
-            if (goingFirst == 1)
+            if (playerGoingFirst == 1)
             {
-                ChangePhase(GameplayPhase::playerOneDrawing);
+                ChangePhase(GameplayPhase::playerOneFirstTurn);
                 break;
             }
-            if (goingFirst == 2)
+            if (playerGoingFirst == 2)
             {
-                ChangePhase(GameplayPhase::playerTwoDrawing);
+                ChangePhase(GameplayPhase::playerTwoFirstTurn);
                 break;
             }
             break;
@@ -319,14 +395,18 @@ std::string GameplayPhaseToString(const GameplayPhase phase)
             return "Uninitialized";
         case GameplayPhase::initialHandDraw:
             return "Initial Hand Draw";
-        case GameplayPhase::playerOneDrawing:
-            return "Player One Drawing";
-        case GameplayPhase::playerOnePlaying:
-            return "Player One Playing";
-        case GameplayPhase::playerTwoDrawing:
-            return "Player Two Drawing";
-        case GameplayPhase::playerTwoPlaying:
-            return "Player Two Playing";
+        case GameplayPhase::playerOneFirstTurn:
+            return "Player One First Turn";
+        case GameplayPhase::playerTwoFirstTurn:
+            return "Player Two First Turn";
+        case GameplayPhase::playerOnePlayingAndPlayerTwoPlayed:
+            return "Player One Playing And Player Two Played";
+        case GameplayPhase::playerTwoPlayingAndPlayerOnePlayed:
+            return "Player Two Playing And Player One Played";
+        case GameplayPhase::playerOnePlayingAndPlayerTwoPassed:
+            return "Player One Playing And Player Two Passed";
+        case GameplayPhase::playerTwoPlayingAndPlayerOnePassed:
+            return "Player Two Playing And Player One Passed";
         case GameplayPhase::battle:
             return "Battle";
         case GameplayPhase::gameOver:

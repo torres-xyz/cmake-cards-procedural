@@ -6,36 +6,31 @@ struct Card;
 struct Player;
 
 enum class GameplayPhase
+        // {
+        //     uninitialized,
+        //     initialHandDraw,
+        //     playerOneDrawing,
+        //     playerOnePlaying,
+        //     playerTwoDrawing,
+        //     playerTwoPlaying,
+        //     battle,
+        //     gameOver
+        // };
 {
     uninitialized,
     initialHandDraw,
-    playerOneDrawing,
-    playerOnePlaying,
-    playerTwoDrawing,
-    playerTwoPlaying,
+    playerOneFirstTurn,
+    playerTwoFirstTurn,
+    playerOnePlayingAndPlayerTwoPlayed,
+    playerTwoPlayingAndPlayerOnePlayed,
+    playerOnePlayingAndPlayerTwoPassed,
+    playerTwoPlayingAndPlayerOnePassed,
     battle,
     gameOver
 };
 
-/*
- *     uninitialized,
-    initialHandDraw,
-    playerOneDrawing,
-    playerOneFirstTurn,
-    playerOnePlayingAndPlayerTwoPlayed,
-    playerOnePlayingAndPlayerTwoPassed,
-    playerTwoDrawing,
-    playerTwoFirstTurn,
-    playerTwoPlayingAndPlayerOnePlayed,
-    playerTwoPlayingAndPlayerOnePassed,
-    battle,
-    gameOver
- *
- *
- */
-
 void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2,
-                          int goingFirst, std::random_device &rd);
+                          int playerGoingFirst, std::random_device &rd);
 
 void DrawCardsFromDeckToHand(Player &player, int amount);
 
