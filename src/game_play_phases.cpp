@@ -3,11 +3,218 @@
 #include <iostream>
 
 #include "audio.hpp"
+#include "button.hpp"
 #include "constants.hpp"
 #include "game_rules.hpp"
+#include "game_scenes.hpp"
+#include "helper_functions.hpp"
 #include "raylib-cpp.hpp"
 #include "player.hpp"
 
+
+void NEW_UpdateGameplayPhases(
+    PlayingScene &playingScene,
+    GameplayPhase &currentPhase,
+    Player &player1,
+    Player &player2,
+    [[maybe_unused]] const int playerGoingFirst,
+    [[maybe_unused]] std::random_device &rd)
+{
+    const raylib::Vector2 mousePosition = GetMousePosition();
+    [[maybe_unused]] static float timeSinceStartOfPhase{};
+    [[maybe_unused]] static GameplayPhase previousPhase{GameplayPhase::uninitialized};
+    static raylib::Vector2 heldCardOffset{};
+    [[maybe_unused]] int hoveredCardIndex{-1};
+
+
+    auto SetPlayerHeldCard{
+        [&player1](const int index)-> void {
+            assert(index >= 0 && "Trying to set a Held Card index that is negative.");
+            assert(index < static_cast<int>(player1.hand.size()) && "Trying to set a Held Card index that is outside of the players hand bounds.");
+            player1.heldCardIndex = index;
+            player1.isHoldingACard = true;
+        }
+
+    };
+
+    auto UpdateHandAndHeldCard{
+        [&player1, mousePosition, SetPlayerHeldCard, &hoveredCardIndex]()-> void {
+            constexpr int cardWidth{constants::cardWidth * 2};
+            constexpr int cardHeight{constants::cardHeight * 2};
+
+            //Place cards in the Hand Zone or Update Held Card
+            for (size_t i = 0; i < player1.hand.size(); ++i)
+            {
+                //Move the card we are holding with the mouse
+                if (static_cast<int>(i) == player1.heldCardIndex)
+                {
+                    player1.hand.at(i).rect.SetPosition(mousePosition - heldCardOffset);
+                    player1.hand.at(i).rect.SetSize(cardWidth, cardHeight);
+                    continue;
+                }
+
+                //If trying to click and hold a card
+                if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
+                    HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)) &&
+                    !player1.isHoldingACard)
+                {
+                    SetPlayerHeldCard(static_cast<int>(i));
+                    heldCardOffset = mousePosition - player1.hand.at(i).rect.GetPosition();
+
+                    //Don't position this card in the hand zone.
+                    continue;
+                }
+
+                //Set cards in the hand slightly apart from each other.
+                const int int_i = static_cast<int>(i);
+                const raylib::Rectangle newCardRect
+                {
+                    static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + cardWidth * int_i),
+                    static_cast<float>(constants::handZonePosY + 4),
+                    cardWidth,
+                    cardHeight
+                };
+
+                player1.hand.at(i).rect = newCardRect;
+                player1.hand.at(i).faceUp = true;
+
+                //Handle hovering
+                if (HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
+                {
+                    hoveredCardIndex = static_cast<int>(i);
+                }
+            }
+        }
+    };
+
+    auto ChangePhase{
+        [&currentPhase, &player1, &player2](const GameplayPhase nextPhase) {
+            previousPhase = currentPhase;
+            currentPhase = nextPhase;
+            timeSinceStartOfPhase = 0;
+            player1.hasEndedTheTurn = false;
+            player2.hasEndedTheTurn = false;
+        }
+    };
+
+    playingScene.playerDeckButton.state = ButtonState::disabled;
+
+    switch (currentPhase)
+    {
+        case GameplayPhase::uninitialized:
+        {
+            //Reset everything gameplay wise
+            heldCardOffset = raylib::Vector2{0, 0};
+            hoveredCardIndex = -1;
+            InitializePlayerWithAdvancedDeck(player1, rd);
+            InitializePlayerWithAdvancedDeck(player2, rd);
+
+            player1.cardsInPlayStack.clear();
+            player2.cardsInPlayStack.clear();
+
+            player1.hasDrawnThisTurn = false;
+            player2.hasDrawnThisTurn = false;
+
+            ChangePhase(GameplayPhase::initialHandDraw);
+            break;
+        }
+        case GameplayPhase::initialHandDraw:
+        {
+            UpdateHandAndHeldCard();
+
+            //Auto draw initial hand for P2
+            if (player2.hand.size() != constants::initialHandSize)
+            {
+                ChangePhase(GameplayPhase::playerTwoDrawing);
+                break;
+            }
+            //TODO: Fix this later. Make sure initial hand is always valid. Shuffle and redraw if needed.
+            assert(IsInitialHandValid(player2) && "Player 2 initial hand is not valid");
+
+            if (player1.hand.size() != constants::initialHandSize)
+            {
+                ChangePhase(GameplayPhase::playerOneDrawing);
+                break;
+            }
+            //TODO: Fix this later. Make sure initial hand is always valid. Shuffle and redraw if needed.
+            assert(IsInitialHandValid(player1) && "Player 1 initial hand is not valid");
+
+
+            if (playerGoingFirst == 1)
+            {
+                ChangePhase(GameplayPhase::playerOneFirstTurn);
+            }
+            else //if (playerGoingFirst == 2)
+            {
+                ChangePhase(GameplayPhase::playerTwoFirstTurn);
+            }
+
+            break;
+        }
+        case GameplayPhase::playerOneDrawing:
+        {
+            playingScene.playerDeckButton.state = ButtonState::enabled;
+            UpdateButtonState(playingScene.playerDeckButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+
+            if (playingScene.playerDeckButton.wasPressed)
+            {
+                PlaySound(GameSound::buttonPress01);
+                DrawCardsFromDeckToHand(player1, 1);
+                player1.hasDrawnThisTurn = true;
+                ChangePhase(previousPhase);
+            }
+
+            UpdateHandAndHeldCard();
+            break;
+        }
+        case GameplayPhase::playerTwoDrawing:
+        {
+            DrawCardsFromDeckToHand(player2, 1);
+            ChangePhase(previousPhase);
+            break;
+        }
+        case GameplayPhase::playerOneFirstTurn:
+            break;
+        case GameplayPhase::playerTwoFirstTurn:
+        {
+            //On the first turn, pick a Unit from the hand and play it
+            for (size_t i = 0; i < player2.hand.size(); ++i)
+            {
+                if (player2.hand.at(i).type == CardType::unit)
+                {
+                    player2.heldCardIndex = static_cast<int>(i);
+                    break;
+                }
+            }
+            PutCardInPlay(player2);
+
+            if (playerGoingFirst == 1)
+            {
+                ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
+            }
+            else
+            {
+                ChangePhase(GameplayPhase::playerOneFirstTurn);
+            }
+
+            break;
+        }
+        case GameplayPhase::playerOnePlayingAndOpponentPlayed:
+            break;
+        case GameplayPhase::playerTwoPlayingAndOpponentPlayed:
+            break;
+        case GameplayPhase::playerOnePlayingAndOpponentPassed:
+            break;
+        case GameplayPhase::playerTwoPlayingAndOpponentPassed:
+            break;
+        case GameplayPhase::battle:
+            break;
+        case GameplayPhase::gameOver:
+            break;
+    }
+}
+
+/*
 void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &player2,
                           const int playerGoingFirst, std::random_device &rd)
 {
@@ -128,7 +335,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             }
             if (playerGoingFirst == 2)
             {
-                ChangePhase(GameplayPhase::playerTwoPlayingAndPlayerOnePlayed);
+                ChangePhase(GameplayPhase::playerTwoPlayingAndOpponentPlayed);
                 break;
             }
             break;
@@ -152,7 +359,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
 
             if (playerGoingFirst == 1)
             {
-                ChangePhase(GameplayPhase::playerOnePlayingAndPlayerTwoPlayed);
+                ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
                 break;
             }
             if (playerGoingFirst == 2)
@@ -162,7 +369,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             }
             break;
         }
-        case GameplayPhase::playerOnePlayingAndPlayerTwoPlayed:
+        case GameplayPhase::playerOnePlayingAndOpponentPlayed:
         {
             //Draw a card first
             if (!player1.deck.empty() && player1.hasDrawnThisTurn == false)
@@ -178,16 +385,16 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
 
             if (HasPlayerPlayed(player1))
             {
-                ChangePhase(GameplayPhase::playerTwoPlayingAndPlayerOnePlayed);
+                ChangePhase(GameplayPhase::playerTwoPlayingAndOpponentPlayed);
                 break;
             }
             else
             {
-                ChangePhase(GameplayPhase::playerTwoPlayingAndPlayerOnePassed);
+                ChangePhase(GameplayPhase::playerTwoPlayingAndOpponentPassed);
                 break;
             }
         }
-        case GameplayPhase::playerOnePlayingAndPlayerTwoPassed:
+        case GameplayPhase::playerOnePlayingAndOpponentPassed:
         {
             //Draw a card first
             if (!player1.deck.empty() && player1.hasDrawnThisTurn == false)
@@ -203,7 +410,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
 
             if (HasPlayerPlayed(player1))
             {
-                ChangePhase(GameplayPhase::playerTwoPlayingAndPlayerOnePlayed);
+                ChangePhase(GameplayPhase::playerTwoPlayingAndOpponentPlayed);
                 break;
             }
             else
@@ -213,7 +420,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             }
         }
 
-        case GameplayPhase::playerTwoPlayingAndPlayerOnePlayed: //not yet implemented
+        case GameplayPhase::playerTwoPlayingAndOpponentPlayed: //not yet implemented
         {
             if (!player2.deck.empty() && player2.hasDrawnThisTurn == false)
             {
@@ -227,18 +434,18 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             std::uniform_int_distribution coinFlip{0, 1};
             if (coinFlip(rd) == 0) //Pass
             {
-                ChangePhase(GameplayPhase::playerOnePlayingAndPlayerTwoPassed);
+                ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPassed);
                 break;
             }
             else //Play
             {
                 player2.heldCardIndex = 0;
                 PutCardInPlay(player2);
-                ChangePhase(GameplayPhase::playerOnePlayingAndPlayerTwoPlayed);
+                ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
                 break;
             }
         }
-        case GameplayPhase::playerTwoPlayingAndPlayerOnePassed:
+        case GameplayPhase::playerTwoPlayingAndOpponentPassed:
         {
             if (!player2.deck.empty() && player2.hasDrawnThisTurn == false)
             {
@@ -259,7 +466,7 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             {
                 player2.heldCardIndex = 0;
                 PutCardInPlay(player2);
-                ChangePhase(GameplayPhase::playerOnePlayingAndPlayerTwoPlayed);
+                ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
                 break;
             }
         }
@@ -310,8 +517,13 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
         {
             break;
         }
+        case GameplayPhase::playerOneDrawing:
+            break;
+        case GameplayPhase::playerTwoDrawing:
+            break;
     }
 }
+*/
 
 void DrawCardsFromDeckToHand(Player &player, const int amount)
 {
@@ -403,18 +615,22 @@ std::string GameplayPhaseToString(const GameplayPhase phase)
             return "Uninitialized";
         case GameplayPhase::initialHandDraw:
             return "Initial Hand Draw";
+        case GameplayPhase::playerOneDrawing:
+            return "Player One Drawing";
+        case GameplayPhase::playerTwoDrawing:
+            return "Player Two Drawing";
         case GameplayPhase::playerOneFirstTurn:
             return "Player One First Turn";
         case GameplayPhase::playerTwoFirstTurn:
             return "Player Two First Turn";
-        case GameplayPhase::playerOnePlayingAndPlayerTwoPlayed:
-            return "Player One Playing And Player Two Played";
-        case GameplayPhase::playerTwoPlayingAndPlayerOnePlayed:
-            return "Player Two Playing And Player One Played";
-        case GameplayPhase::playerOnePlayingAndPlayerTwoPassed:
-            return "Player One Playing And Player Two Passed";
-        case GameplayPhase::playerTwoPlayingAndPlayerOnePassed:
-            return "Player Two Playing And Player One Passed";
+        case GameplayPhase::playerOnePlayingAndOpponentPlayed:
+            return "Player One Playing And Opponent Played";
+        case GameplayPhase::playerTwoPlayingAndOpponentPlayed:
+            return "Player Two Playing And Opponent Played";
+        case GameplayPhase::playerOnePlayingAndOpponentPassed:
+            return "Player One Playing And Opponent Passed";
+        case GameplayPhase::playerTwoPlayingAndOpponentPassed:
+            return "Player Two Playing And Opponent Passed";
         case GameplayPhase::battle:
             return "Battle";
         case GameplayPhase::gameOver:

@@ -13,11 +13,14 @@ bool CanCardBePlayedByPlayer(const Card &selectedCard, const Player &player, [[m
         return false;
     }
 
-    //if the playstack is NOT empty
 
-    //then we can assume the first/bottom card is a Unit.
-    //only Action cards can be played on top of a Unit card:
-    if (selectedCard.type == CardType::action) return true;
+    //if the playstack is NOT empty
+    //then we can assume (but still verify) the first/bottom card is a Unit.
+    if (player.cardsInPlayStack.at(0).type == CardType::unit)
+    {
+        //only Action cards can be played on top of a Unit card:
+        if (selectedCard.type == CardType::action) return true;
+    }
 
 
     return false;

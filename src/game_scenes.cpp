@@ -144,38 +144,81 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
     DrawTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);
 }
 
-bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
-{
-    return CheckCollisionPointRec
-    (
-        point,
-        raylib::Rectangle
-        {
-            card.rect.x,
-            card.rect.y,
-            card.rect.width,
-            card.rect.height
-        }
-    );
-}
-
 void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst, std::random_device &rd)
 {
     const raylib::Vector2 mousePosition = GetMousePosition();
     static raylib::Vector2 heldCardOffset{};
     int hoveredCardIndex{-1};
 
-    if (currentPhase == GameplayPhase::uninitialized)
+    // UPDATE ------------------------------------------------------------------
+
+    NEW_UpdateGameplayPhases(playingScene, currentPhase, player1, player2, goingFirst, rd);
+
+    //Update Music
+    PlayMusic(playingScene.music);
+
+    // DRAW ---------------------------------------------------------------------
+    GetTexture(playingScene.background).Draw();
+    DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
+    DrawButton(playingScene.endTurnButton, GetTexture(playingScene.endTurnButton.background));
+    GetTexture(playingScene.playfield).Draw(
+        Rectangle{
+            0,
+            0,
+            constants::playfieldRec.width,
+            constants::playfieldRec.height
+        },
+        constants::playfieldRec);
+
+
+    //Draw Player 2 Hand
+    for (std::size_t i = 0; i < player2.hand.size(); ++i)
     {
-        heldCardOffset = raylib::Vector2{0, 0};
-        hoveredCardIndex = -1;
+        const auto index = static_cast<float>(i);
+        //Set the cards in the hand slightly apart from each other.
+        const raylib::Vector2 cardPos{
+            constants::player2HandZone.x + 2 * (index + 1) + constants::cardWidth * index,
+            constants::player2HandZone.y + 4,
+        };
+
+        player2.hand.at(i).rect.SetPosition(cardPos);
+        player2.hand.at(i).faceUp = false;
+        DrawCardAdvanced(player2.hand.at(i), player2.hand.at(i).rect);
     }
+
+    //Draw Cards in the playfield
+    if (!player1.cardsInPlayStack.empty())
+    {
+        DrawCardAdvanced(player1.cardsInPlayStack.at(0), constants::playerOnePlayfieldCardZoneRect);
+    }
+    if (!player2.cardsInPlayStack.empty())
+    {
+        DrawCardAdvanced(player2.cardsInPlayStack.at(0), constants::playerTwoPlayfieldCardZoneRect);
+    }
+
+
+    //Draw Cards in Player 1 Hand, ...
+    for (size_t i = 0; i < player1.hand.size(); ++i)
+    {
+        if (player1.heldCardIndex == static_cast<int>(i)) continue;
+        if (hoveredCardIndex == static_cast<int>(i)) continue;
+        // DrawCard(player1.hand.at(i));
+        DrawCardAdvanced(player1.hand.at(i), player1.hand.at(i).rect);
+    }
+
+    return;
+
+    // if (currentPhase == GameplayPhase::uninitialized)
+    // {
+    //     heldCardOffset = raylib::Vector2{0, 0};
+    //     hoveredCardIndex = -1;
+    // }
 
     auto IsPlayerOnePlaying{
         [currentPhase]() -> bool {
             if (currentPhase == GameplayPhase::playerOneFirstTurn ||
-                currentPhase == GameplayPhase::playerOnePlayingAndPlayerTwoPassed ||
-                currentPhase == GameplayPhase::playerOnePlayingAndPlayerTwoPlayed)
+                currentPhase == GameplayPhase::playerOnePlayingAndOpponentPassed ||
+                currentPhase == GameplayPhase::playerOnePlayingAndOpponentPlayed)
             {
                 return true;
             }
@@ -183,27 +226,6 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         }
     };
 
-    auto UpdateDeckButton{
-        [&player1, currentPhase, &playingScene, mousePosition]()-> void {
-            Button &playerDeckButton = playingScene.playerDeckButton;
-            playerDeckButton.state = ButtonState::disabled;
-
-            if (!player1.deck.empty() &&
-                !player1.hasDrawnThisTurn &&
-                (currentPhase == GameplayPhase::initialHandDraw || currentPhase == GameplayPhase::playerOneFirstTurn || currentPhase == GameplayPhase::playerOnePlayingAndPlayerTwoPassed || currentPhase == GameplayPhase::playerOnePlayingAndPlayerTwoPlayed))
-            {
-                playerDeckButton.state = ButtonState::enabled;
-                UpdateButtonState(playerDeckButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
-
-                if (playerDeckButton.wasPressed)
-                {
-                    PlaySound(GameSound::buttonPress01);
-                    DrawCardsFromDeckToHand(player1, 1);
-                    player1.hasDrawnThisTurn = true;
-                }
-            }
-        }
-    };
 
     auto UpdateEndTurnButton{
         [&player1, &playingScene, mousePosition, IsPlayerOnePlaying]()-> void {
@@ -262,14 +284,12 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         }
     };
 
-    //Update Music
-    PlayMusic(playingScene.music);
 
     //Running the gameplay
     UpdateGameplayPhases(currentPhase, player1, player2, goingFirst, rd);
 
     //Scene Buttons
-    UpdateDeckButton();
+    // UpdateDeckButton();
     UpdateEndTurnButton();
 
     //Handle Card Positioning
@@ -294,7 +314,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
 
         //If trying to click and hold a card
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
-            CheckCollisionPointCard(mousePosition, player1.hand.at(i)) &&
+            HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)) &&
             !player1.isHoldingACard)
         {
             SetPlayerHeldCard(static_cast<int>(i));
@@ -318,7 +338,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         player1.hand.at(i).faceUp = true;
 
         //Handle hovering
-        if (CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
+        if (HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
         {
             hoveredCardIndex = static_cast<int>(i);
         }
@@ -326,51 +346,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
 
     //Draw ---------------------------------------------------------------------
     GetTexture(playingScene.background).Draw();
-    DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
-    DrawButton(playingScene.endTurnButton, GetTexture(playingScene.endTurnButton.background));
-    GetTexture(playingScene.playfield).Draw(
-        Rectangle{
-            0,
-            0,
-            constants::playfieldRec.width,
-            constants::playfieldRec.height
-        },
-        constants::playfieldRec);
 
-
-    //Draw Cards in the playfield
-    if (!player1.cardsInPlayStack.empty())
-    {
-        DrawCardAdvanced(player1.cardsInPlayStack.at(0), constants::playerOnePlayfieldCardZoneRect);
-    }
-    if (!player2.cardsInPlayStack.empty())
-    {
-        DrawCardAdvanced(player2.cardsInPlayStack.at(0), constants::playerTwoPlayfieldCardZoneRect);
-    }
-
-    //Draw Player 2 Hand
-    for (std::size_t i = 0; i < player2.hand.size(); ++i)
-    {
-        const auto index = static_cast<float>(i);
-        //Set the cards in the hand slightly apart from each other.
-        const raylib::Vector2 cardPos{
-            constants::player2HandZone.x + 2 * (index + 1) + constants::cardWidth * index,
-            constants::player2HandZone.y + 4,
-        };
-
-        player2.hand.at(i).rect.SetPosition(cardPos);
-        player2.hand.at(i).faceUp = false;
-        DrawCardAdvanced(player2.hand.at(i), player2.hand.at(i).rect);
-    }
-
-    //Draw Cards in Hand, ...
-    for (size_t i = 0; i < player1.hand.size(); ++i)
-    {
-        if (player1.heldCardIndex == static_cast<int>(i)) continue;
-        if (hoveredCardIndex == static_cast<int>(i)) continue;
-        // DrawCard(player1.hand.at(i));
-        DrawCardAdvanced(player1.hand.at(i), player1.hand.at(i).rect);
-    }
     //Draw Hovered Card expanded
     if (hoveredCardIndex != -1)
     {

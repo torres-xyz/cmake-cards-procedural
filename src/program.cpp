@@ -36,7 +36,7 @@ int run()
 
     constexpr int playerGoingFirst{2};
     GameScene currentScene{GameScene::starting};
-    GameplayPhase currentPhase{GameplayPhase::initialHandDraw};
+    GameplayPhase currentPhase{GameplayPhase::uninitialized};
 
     //GameScene::start ---------------------------------------------------------
     constexpr int startGameButtonWidth{200};

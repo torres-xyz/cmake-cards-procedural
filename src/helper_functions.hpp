@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib-cpp.hpp"
+#include "card.hpp"
 
 namespace HelperFunctions
 {
@@ -158,5 +159,20 @@ namespace HelperFunctions
     [[maybe_unused]] static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float fontSize, float spacing, float verticalSpacingMult, bool wordWrap, Color tint)
     {
         DrawTextBoxedSelectable(font, text, rec, fontSize, spacing, verticalSpacingMult, wordWrap, tint, 0, 0, WHITE, WHITE);
+    }
+
+    [[maybe_unused]] static bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
+    {
+        return CheckCollisionPointRec
+        (
+            point,
+            raylib::Rectangle
+            {
+                card.rect.x,
+                card.rect.y,
+                card.rect.width,
+                card.rect.height
+            }
+        );
     }
 }
