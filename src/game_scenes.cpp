@@ -148,7 +148,6 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
 {
     const raylib::Vector2 mousePosition = GetMousePosition();
     static raylib::Vector2 heldCardOffset{};
-    int hoveredCardIndex{-1};
 
     // UPDATE ------------------------------------------------------------------
 
@@ -187,32 +186,51 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     }
 
     //Draw Cards in the playfield
-    if (!player1.cardsInPlayStack.empty())
+    for (const Card &card: player1.cardsInPlayStack)
     {
-        DrawCardAdvanced(player1.cardsInPlayStack.at(0), constants::playerOnePlayfieldCardZoneRect);
+        DrawCardAdvanced(card, card.rect);
     }
-    if (!player2.cardsInPlayStack.empty())
+    for (const Card &card: player2.cardsInPlayStack)
     {
-        DrawCardAdvanced(player2.cardsInPlayStack.at(0), constants::playerTwoPlayfieldCardZoneRect);
+        DrawCardAdvanced(card, card.rect);
     }
-
 
     //Draw Cards in Player 1 Hand, ...
     for (size_t i = 0; i < player1.hand.size(); ++i)
     {
         if (player1.heldCardIndex == static_cast<int>(i)) continue;
-        if (hoveredCardIndex == static_cast<int>(i)) continue;
-        // DrawCard(player1.hand.at(i));
+        if (player1.hoveredCardIndex == static_cast<int>(i)) continue;
         DrawCardAdvanced(player1.hand.at(i), player1.hand.at(i).rect);
     }
 
+    //Draw Hovered Card expanded
+    if (player1.hoveredCardIndex != -1)
+    {
+        const Card &hoveredCard{player1.hand.at(static_cast<std::size_t>(player1.hoveredCardIndex))};
+        if (player1.isHoldingACard)
+        {
+            DrawCardAdvanced(hoveredCard, hoveredCard.rect);
+        }
+        else
+        {
+            //Expand the card in place
+            raylib::Rectangle expandedCardRect
+            {
+                hoveredCard.rect.x,
+                hoveredCard.rect.y - hoveredCard.rect.height * 1.5f,
+                hoveredCard.rect.width * 2,
+                hoveredCard.rect.height * 2
+            };
+            DrawCardAdvanced(hoveredCard, expandedCardRect);
+        }
+    }
+    //... with the one being held drawn last, on top.
+    if (player1.isHoldingACard)
+    {
+        const Card &heldCard{player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex))};
+        DrawCardAdvanced(heldCard, heldCard.rect);
+    }
     return;
-
-    // if (currentPhase == GameplayPhase::uninitialized)
-    // {
-    //     heldCardOffset = raylib::Vector2{0, 0};
-    //     hoveredCardIndex = -1;
-    // }
 
     auto IsPlayerOnePlaying{
         [currentPhase]() -> bool {
@@ -285,95 +303,10 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     };
 
 
-    //Running the gameplay
-    UpdateGameplayPhases(currentPhase, player1, player2, goingFirst, rd);
-
     //Scene Buttons
-    // UpdateDeckButton();
     UpdateEndTurnButton();
 
-    //Handle Card Positioning
-    constexpr int cardWidth{constants::cardWidth * 2};
-    constexpr int cardHeight{constants::cardHeight * 2};
-
-    //If we let go of the LMB
-    if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-    {
-        TryPlayingCard();
-    }
-    //Place cards in the Hand Zone or Update Held Card
-    for (size_t i = 0; i < player1.hand.size(); ++i)
-    {
-        //Move the card we are holding with the mouse
-        if (static_cast<int>(i) == player1.heldCardIndex)
-        {
-            player1.hand.at(i).rect.SetPosition(mousePosition - heldCardOffset);
-            player1.hand.at(i).rect.SetSize(cardWidth, cardHeight);
-            continue;
-        }
-
-        //If trying to click and hold a card
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
-            HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)) &&
-            !player1.isHoldingACard)
-        {
-            SetPlayerHeldCard(static_cast<int>(i));
-            heldCardOffset = mousePosition - player1.hand.at(i).rect.GetPosition();
-
-            //Don't position this card in the hand zone.
-            continue;
-        }
-
-        //Set cards in the hand slightly apart from each other.
-        const int int_i = static_cast<int>(i);
-        const raylib::Rectangle newCardRect
-        {
-            static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + cardWidth * int_i),
-            static_cast<float>(constants::handZonePosY + 4),
-            cardWidth,
-            cardHeight
-        };
-
-        player1.hand.at(i).rect = newCardRect;
-        player1.hand.at(i).faceUp = true;
-
-        //Handle hovering
-        if (HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
-        {
-            hoveredCardIndex = static_cast<int>(i);
-        }
-    }
-
     //Draw ---------------------------------------------------------------------
-    GetTexture(playingScene.background).Draw();
-
-    //Draw Hovered Card expanded
-    if (hoveredCardIndex != -1)
-    {
-        const Card &hoveredCard{player1.hand.at(static_cast<std::size_t>(hoveredCardIndex))};
-        if (player1.isHoldingACard)
-        {
-            DrawCardAdvanced(hoveredCard, hoveredCard.rect);
-        }
-        else
-        {
-            //Expand the card in place
-            raylib::Rectangle expandedCardRect
-            {
-                hoveredCard.rect.x,
-                hoveredCard.rect.y - hoveredCard.rect.height * 1.5f,
-                hoveredCard.rect.width * 2,
-                hoveredCard.rect.height * 2
-            };
-            DrawCardAdvanced(hoveredCard, expandedCardRect);
-        }
-    }
-    //... with the one being held drawn last, on top.
-    if (player1.isHoldingACard)
-    {
-        const Card &heldCard{player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex))};
-        DrawCardAdvanced(heldCard, heldCard.rect);
-    }
 }
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,

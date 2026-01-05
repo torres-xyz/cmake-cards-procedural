@@ -32,7 +32,6 @@ namespace ImGuiSideBar
                                     + " / Mouse Y: " + std::to_string(GetMouseY())).c_str());
             ImGui::SeparatorText("Game State");
             ImGui::TextWrapped(("Game Phase = " + GameplayPhaseToString(currentPhase)).c_str());
-            std::cout << "Game Phase = " << GameplayPhaseToString(currentPhase).c_str() << std::endl;
             ImGui::TextUnformatted(("Player 1 score = " + std::to_string(player1.score)).c_str());
             ImGui::TextUnformatted(("Player 2 score = " + std::to_string(player2.score)).c_str());
             ImGui::SeparatorText("Options");

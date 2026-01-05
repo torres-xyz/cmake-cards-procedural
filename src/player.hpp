@@ -12,6 +12,7 @@ struct Player
     std::vector<Card> cardsInPlayStack{};
     bool isHoldingACard{};
     int heldCardIndex{-1};
+    int hoveredCardIndex{-1};
     bool hasDrawnThisTurn{false};
     bool hasEndedTheTurn{false};
     int cardsPlayed{0};

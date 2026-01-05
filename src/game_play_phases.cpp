@@ -11,21 +11,49 @@
 #include "raylib-cpp.hpp"
 #include "player.hpp"
 
-
 void NEW_UpdateGameplayPhases(
     PlayingScene &playingScene,
     GameplayPhase &currentPhase,
     Player &player1,
     Player &player2,
-    [[maybe_unused]] const int playerGoingFirst,
-    [[maybe_unused]] std::random_device &rd)
+    const int playerGoingFirst,
+    std::random_device &rd)
 {
     const raylib::Vector2 mousePosition = GetMousePosition();
-    [[maybe_unused]] static float timeSinceStartOfPhase{};
-    [[maybe_unused]] static GameplayPhase previousPhase{GameplayPhase::uninitialized};
+    static GameplayPhase previousPhase{GameplayPhase::uninitialized};
     static raylib::Vector2 heldCardOffset{};
-    [[maybe_unused]] int hoveredCardIndex{-1};
 
+    static bool player1HasPlayedThisPhase{false};
+
+    [[maybe_unused]] static float timeSinceStartOfPhase{};
+
+    auto RemovePlayer1HeldCard{
+        [&player1]()-> void {
+            player1.heldCardIndex = -1;
+            player1.isHoldingACard = false;
+        }
+    };
+
+    auto TryToPlayCard{
+        [&player1, currentPhase, RemovePlayer1HeldCard]()-> void {
+            //If Player 1 tries to play a card,
+            //and we are placing the card on the play zone,
+            //we select that card to be played
+            if (player1.isHoldingACard)
+            {
+                const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardIndex));
+
+                if (CheckCollisionRecs(heldCard.rect, constants::playfieldRec) &&
+                    CanCardBePlayedByPlayer(heldCard, player1, currentPhase))
+                {
+                    PutCardInPlay(player1);
+                    player1HasPlayedThisPhase = true;
+                }
+            }
+            player1.hoveredCardIndex = -1;
+            RemovePlayer1HeldCard(); //whether we can play it or not, we always clear the card from the hand.
+        }
+    };
 
     auto SetPlayerHeldCard{
         [&player1](const int index)-> void {
@@ -34,11 +62,26 @@ void NEW_UpdateGameplayPhases(
             player1.heldCardIndex = index;
             player1.isHoldingACard = true;
         }
+    };
 
+    //TODO: design problem where this has to always come after UpdateHandAndHeldCard because it
+    //depends on it to reset the position of the card, i think. 
+    auto UpdateHoveringCardInHand{
+        [&player1, mousePosition]()-> void {
+            player1.hoveredCardIndex = -1;
+            for (std::size_t i = 0; i < player1.hand.size(); ++i)
+            {
+                //Handle hovering
+                if (HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
+                {
+                    player1.hoveredCardIndex = static_cast<int>(i);
+                }
+            }
+        }
     };
 
     auto UpdateHandAndHeldCard{
-        [&player1, mousePosition, SetPlayerHeldCard, &hoveredCardIndex]()-> void {
+        [&player1, mousePosition, SetPlayerHeldCard]()-> void {
             constexpr int cardWidth{constants::cardWidth * 2};
             constexpr int cardHeight{constants::cardHeight * 2};
 
@@ -77,12 +120,6 @@ void NEW_UpdateGameplayPhases(
 
                 player1.hand.at(i).rect = newCardRect;
                 player1.hand.at(i).faceUp = true;
-
-                //Handle hovering
-                if (HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
-                {
-                    hoveredCardIndex = static_cast<int>(i);
-                }
             }
         }
     };
@@ -94,10 +131,37 @@ void NEW_UpdateGameplayPhases(
             timeSinceStartOfPhase = 0;
             player1.hasEndedTheTurn = false;
             player2.hasEndedTheTurn = false;
+
+            player1HasPlayedThisPhase = false;
+
+            if (previousPhase != GameplayPhase::playerOneDrawing)
+            {
+                player1.hasDrawnThisTurn = false;
+            }
+
+            std::cout << "Game Phase = " << GameplayPhaseToString(currentPhase).c_str() << std::endl;
+        }
+    };
+
+    auto UpdateEndTurnButton{
+        [&player1, &playingScene, mousePosition]()-> void {
+            Button &endTurnButton = playingScene.endTurnButton;
+
+            if (player1.cardsInPlayStack.empty()) return;
+
+            endTurnButton.state = ButtonState::enabled;
+            UpdateButtonState(endTurnButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+
+            if (endTurnButton.wasPressed)
+            {
+                PlaySound(GameSound::buttonPress01);
+                player1.hasEndedTheTurn = true;
+            }
         }
     };
 
     playingScene.playerDeckButton.state = ButtonState::disabled;
+    playingScene.endTurnButton.state = ButtonState::disabled;
 
     switch (currentPhase)
     {
@@ -105,9 +169,12 @@ void NEW_UpdateGameplayPhases(
         {
             //Reset everything gameplay wise
             heldCardOffset = raylib::Vector2{0, 0};
-            hoveredCardIndex = -1;
+
             InitializePlayerWithAdvancedDeck(player1, rd);
             InitializePlayerWithAdvancedDeck(player2, rd);
+
+            player1.hoveredCardIndex = -1;
+            player2.hoveredCardIndex = -1; //redundant for now
 
             player1.cardsInPlayStack.clear();
             player2.cardsInPlayStack.clear();
@@ -143,12 +210,10 @@ void NEW_UpdateGameplayPhases(
             if (playerGoingFirst == 1)
             {
                 ChangePhase(GameplayPhase::playerOneFirstTurn);
+                break;
             }
-            else //if (playerGoingFirst == 2)
-            {
-                ChangePhase(GameplayPhase::playerTwoFirstTurn);
-            }
-
+            //else if (playerGoingFirst == 2)
+            ChangePhase(GameplayPhase::playerTwoFirstTurn);
             break;
         }
         case GameplayPhase::playerOneDrawing:
@@ -162,9 +227,11 @@ void NEW_UpdateGameplayPhases(
                 DrawCardsFromDeckToHand(player1, 1);
                 player1.hasDrawnThisTurn = true;
                 ChangePhase(previousPhase);
+                break;
             }
 
-            UpdateHandAndHeldCard();
+            //Only handle hovering
+            UpdateHoveringCardInHand();
             break;
         }
         case GameplayPhase::playerTwoDrawing:
@@ -174,7 +241,35 @@ void NEW_UpdateGameplayPhases(
             break;
         }
         case GameplayPhase::playerOneFirstTurn:
+        {
+            // First, draw a card
+            if (!player1.hasDrawnThisTurn)
+            {
+                ChangePhase(GameplayPhase::playerOneDrawing);
+                break;
+            }
+            if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+            {
+                TryToPlayCard();
+            }
+            UpdateHandAndHeldCard();
+            UpdateHoveringCardInHand();
+            UpdateEndTurnButton();
+
+            //Wait until player 1 has pressed the end turn button
+            if (!player1.hasEndedTheTurn)
+            {
+                break;
+            }
+
+            if (playerGoingFirst == 1)
+            {
+                ChangePhase(GameplayPhase::playerTwoFirstTurn);
+                break;
+            }
+            ChangePhase(GameplayPhase::playerTwoPlayingAndOpponentPlayed);
             break;
+        }
         case GameplayPhase::playerTwoFirstTurn:
         {
             //On the first turn, pick a Unit from the hand and play it
@@ -191,24 +286,154 @@ void NEW_UpdateGameplayPhases(
             if (playerGoingFirst == 1)
             {
                 ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
+                break;
             }
-            else
-            {
-                ChangePhase(GameplayPhase::playerOneFirstTurn);
-            }
-
+            ChangePhase(GameplayPhase::playerOneFirstTurn);
             break;
         }
         case GameplayPhase::playerOnePlayingAndOpponentPlayed:
+        {
+            // First, draw a card
+            if (!player1.hasDrawnThisTurn)
+            {
+                ChangePhase(GameplayPhase::playerOneDrawing);
+                break;
+            }
+            if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+            {
+                TryToPlayCard();
+            }
+            UpdateHandAndHeldCard();
+            UpdateHoveringCardInHand();
+            UpdateEndTurnButton();
+
+            //Wait until player 1 has pressed the end turn button
+            if (!player1.hasEndedTheTurn)
+            {
+                break;
+            }
+
+            if (player1HasPlayedThisPhase)
+            {
+                ChangePhase(GameplayPhase::playerTwoPlayingAndOpponentPlayed);
+                break;
+            }
+            //Player 1 passed without playing:
+            ChangePhase(GameplayPhase::playerTwoPlayingAndOpponentPassed);
             break;
+        }
         case GameplayPhase::playerTwoPlayingAndOpponentPlayed:
+        {
+            // First, draw a card
+            if (!player2.hasDrawnThisTurn)
+            {
+                player2.hasDrawnThisTurn = true;
+                ChangePhase(GameplayPhase::playerTwoDrawing);
+                break;
+            }
+
+            //If no cards in hand, pass the turn without playing
+            if (player2.hand.empty())
+            {
+                player2.hasDrawnThisTurn = false;
+                ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPassed);
+                break;
+            }
+
+            //To start with, Player 2 will always try to buff up it's Units if
+            //it has Action cards available to use.
+            for (size_t i = 0; i < player2.hand.size(); ++i)
+            {
+                if (player2.hand.at(i).type == CardType::action)
+                {
+                    player2.heldCardIndex = static_cast<int>(i);
+                    PutCardInPlay(player2);
+
+                    player2.hasDrawnThisTurn = false;
+                    ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
+                    break;
+                }
+            }
+
+            //If not, it will pass the turn.
+            player2.hasDrawnThisTurn = false;
+            ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPassed);
             break;
+        }
         case GameplayPhase::playerOnePlayingAndOpponentPassed:
+        {
+            // First, draw a card
+            if (!player1.hasDrawnThisTurn)
+            {
+                ChangePhase(GameplayPhase::playerOneDrawing);
+                break;
+            }
+            if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+            {
+                TryToPlayCard();
+            }
+            UpdateHoveringCardInHand();
+            UpdateHandAndHeldCard();
+            UpdateEndTurnButton();
+
+            //Wait until player 1 has pressed the end turn button
+            if (!player1.hasEndedTheTurn)
+            {
+                break;
+            }
+
+            if (player1HasPlayedThisPhase)
+            {
+                ChangePhase(GameplayPhase::playerTwoPlayingAndOpponentPlayed);
+                break;
+            }
+            //Player 1 passed without playing:
+            ChangePhase(GameplayPhase::battle);
             break;
+        }
         case GameplayPhase::playerTwoPlayingAndOpponentPassed:
+        {
+            // First, draw a card
+            if (!player2.hasDrawnThisTurn)
+            {
+                player2.hasDrawnThisTurn = true;
+                ChangePhase(GameplayPhase::playerTwoDrawing);
+                break;
+            }
+
+            //If no cards in hand, pass the turn without playing
+            if (player2.hand.empty())
+            {
+                player2.hasDrawnThisTurn = false;
+                ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPassed);
+                break;
+            }
+
+            //To start with, Player 2 will always try to buff up it's Units if it has Action cards
+            //available to use.
+            for (size_t i = 0; i < player2.hand.size(); ++i)
+            {
+                if (player2.hand.at(i).type == CardType::action)
+                {
+                    player2.heldCardIndex = static_cast<int>(i);
+                    PutCardInPlay(player2);
+
+                    player2.hasDrawnThisTurn = false;
+                    ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
+                    break;
+                }
+            }
+
+            //If not, it will pass the turn.
+
+            player2.hasDrawnThisTurn = false;
+            ChangePhase(GameplayPhase::battle);
             break;
+        }
         case GameplayPhase::battle:
+        {
             break;
+        }
         case GameplayPhase::gameOver:
             break;
     }
@@ -544,33 +769,29 @@ void PutCardInPlay(Player &player)
 {
     assert(player.heldCardIndex > -1 && "Trying to play a card of negative index.");
 
-    //Can only play Non-Unit cards after a Unit card is already in play
-    // if (player.hand.at(static_cast<size_t>(player.heldCardIndex)).type == CardType::action) return;
-
     player.cardsPlayed++;
 
     //Copy the card from the hand to the Play field.
     player.cardsInPlayStack.emplace_back(player.hand.at(static_cast<size_t>(player.heldCardIndex)));
-    player.cardsInPlayStack.at(0).faceUp = true;
 
-    if (player.id == 1)
+    //Place the cards in their respective player's play zone, and offset them vertically as they stack
+    for (size_t i = 0; i < player.cardsInPlayStack.size(); ++i)
     {
-        player.cardsInPlayStack.at(0).rect = raylib::Rectangle{
-            constants::playerOnePlayfieldCardZoneRect.x,
-            constants::playerOnePlayfieldCardZoneRect.y,
-            constants::cardWidth,
-            constants::cardHeight
-        };
+        player.cardsInPlayStack.at(i).faceUp = true;
+
+        constexpr float verticalOffset = 30;
+        if (player.id == 1)
+        {
+            player.cardsInPlayStack.at(i).rect = constants::playerOnePlayfieldCardZoneRect;
+        }
+        else if (player.id == 2)
+        {
+            player.cardsInPlayStack.at(i).rect = constants::playerTwoPlayfieldCardZoneRect;
+        }
+
+        player.cardsInPlayStack.at(i).rect.y += verticalOffset * static_cast<float>(i);
     }
-    else if (player.id == 2)
-    {
-        player.cardsInPlayStack.at(0).rect = raylib::Rectangle{
-            constants::playerTwoPlayfieldCardZoneRect.x,
-            constants::playerTwoPlayfieldCardZoneRect.y,
-            constants::cardWidth,
-            constants::cardHeight
-        };
-    }
+
 
     //Then remove that card from the hand.
     player.hand.erase(player.hand.begin() + player.heldCardIndex);
@@ -628,9 +849,9 @@ std::string GameplayPhaseToString(const GameplayPhase phase)
         case GameplayPhase::playerTwoPlayingAndOpponentPlayed:
             return "Player Two Playing And Opponent Played";
         case GameplayPhase::playerOnePlayingAndOpponentPassed:
-            return "Player One Playing And Opponent Passed";
+            return "Player One Playing And Opponent Passed (did NOT play)";
         case GameplayPhase::playerTwoPlayingAndOpponentPassed:
-            return "Player Two Playing And Opponent Passed";
+            return "Player Two Playing And Opponent Passed (did NOT play)";
         case GameplayPhase::battle:
             return "Battle";
         case GameplayPhase::gameOver:
