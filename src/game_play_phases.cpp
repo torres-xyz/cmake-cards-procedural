@@ -1,10 +1,10 @@
 #include "game_play_phases.hpp"
 #include <cassert>
 #include <iostream>
-#include <bits/atomic_timed_wait.h>
 
 #include "audio.hpp"
 #include "constants.hpp"
+#include "game_rules.hpp"
 #include "raylib-cpp.hpp"
 #include "player.hpp"
 
@@ -70,12 +70,20 @@ void UpdateGameplayPhases(GameplayPhase &currentPhase, Player &player1, Player &
             if (player2.hand.size() != constants::initialHandSize)
             {
                 DrawCardsFromDeckToHand(player2, constants::initialHandSize);
-                break;
+
+                //TODO: Fix this later. Make sure initial hand is always valid. Shuffle and redraw if needed.
+                assert(IsInitialHandValid(player2) && "Player 2 initial hand is not valid");
+                // break;
             }
             //Wait for P1 to click the draw button enough times
             if (player1.hand.size() != constants::initialHandSize)
             {
                 break;
+            }
+            else
+            {
+                //TODO: Fix this later. Make sure initial hand is always valid. Shuffle and redraw if needed.
+                assert(IsInitialHandValid(player1) && "Player 1 initial hand is not valid");
             }
             if (playerGoingFirst == 1)
             {

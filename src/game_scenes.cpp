@@ -9,6 +9,7 @@
 #include "textures.hpp"
 #include "helper_functions.hpp"
 #include "fonts.hpp"
+#include "game_rules.hpp"
 
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
 {
@@ -242,6 +243,25 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
 
     };
 
+    auto TryPlayingCard{
+        [IsPlayerOnePlaying, &player1, currentPhase, RemovePlayerHeldCard]()-> void {
+            //If Player 1 tries to play a card,
+            //and we are placing the card on the play zone,
+            //we select that card to be played
+            if (IsPlayerOnePlaying() && player1.isHoldingACard)
+            {
+                const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardIndex));
+
+                if (CheckCollisionRecs(heldCard.rect, constants::playfieldRec) &&
+                    CanCardBePlayedByPlayer(heldCard, player1, currentPhase))
+                {
+                    PutCardInPlay(player1);
+                }
+            }
+            RemovePlayerHeldCard(); //whether we can play it or not, we always let go of the card from the hand.
+        }
+    };
+
     //Update Music
     PlayMusic(playingScene.music);
 
@@ -259,20 +279,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     //If we let go of the LMB
     if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
     {
-        //and we are placing the card on the play zone we select that card to be played
-        if (IsPlayerOnePlaying() &&
-            player1.isHoldingACard &&
-            player1.cardsInPlayStack.empty())
-        {
-            const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardIndex));
-
-            if (CheckCollisionRecs(heldCard.rect, constants::playfieldRec))
-            {
-                PutCardInPlay(player1);
-            }
-        }
-        //we let go of the held card
-        RemovePlayerHeldCard();
+        TryPlayingCard();
     }
     //Place cards in the Hand Zone or Update Held Card
     for (size_t i = 0; i < player1.hand.size(); ++i)

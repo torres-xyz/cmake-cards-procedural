@@ -20,6 +20,8 @@ add_library(${PROJECT_NAME}
         card.hpp
         fonts.hpp
         fonts.cpp
+        game_rules.cpp
+        game_rules.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
