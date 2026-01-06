@@ -147,9 +147,6 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
 
 void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst, std::random_device &rd)
 {
-    const raylib::Vector2 mousePosition = GetMousePosition();
-    static raylib::Vector2 heldCardOffset{};
-
     // UPDATE ------------------------------------------------------------------
 
     UpdateGameplayPhases(playingScene, currentPhase, player1, player2, goingFirst, rd);
@@ -170,6 +167,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         },
         constants::playfieldRec);
     // Draw stack stats total
+    // Draw stack stats total - Rectangle
     const raylib::Rectangle statsTotalRec
     {
         constants::playfieldRec.x,
@@ -180,7 +178,8 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     const raylib::Color statsTotalRecColor{10, 10, 10, 200};
     DrawRectangleRec(statsTotalRec, statsTotalRecColor);
 
-    std::string player1TotalCardStats
+    // Draw stack stats total - Player 1 Stats
+    const std::string player1TotalCardStats
     {
         std::format("Total Stats \nB: {0} | M: {1} | S: {2}",
                     std::to_string(GetCardStackTotalBody(player1.cardsInPlayStack)),
@@ -206,8 +205,8 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         true,
         WHITE
     );
-
-    std::string player2TotalCardStats{
+    // Draw stack stats total - Player 2 Stats
+    const std::string player2TotalCardStats{
         std::format("Total Stats \nB: {0} | M: {1} | S: {2}",
                     std::to_string(GetCardStackTotalBody(player2.cardsInPlayStack)),
                     std::to_string(GetCardStackTotalMind(player2.cardsInPlayStack)),
@@ -231,7 +230,6 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         true,
         WHITE
     );
-
 
     //Draw Player 2 Hand
     for (std::size_t i = 0; i < player2.hand.size(); ++i)
@@ -293,83 +291,6 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         const Card &heldCard{player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex))};
         DrawCardAdvanced(heldCard, heldCard.rect);
     }
-    return;
-
-    auto IsPlayerOnePlaying{
-        [currentPhase]() -> bool {
-            if (currentPhase == GameplayPhase::playerOneFirstTurn ||
-                currentPhase == GameplayPhase::playerOnePlayingAndOpponentPassed ||
-                currentPhase == GameplayPhase::playerOnePlayingAndOpponentPlayed)
-            {
-                return true;
-            }
-            return false;
-        }
-    };
-
-
-    auto UpdateEndTurnButton{
-        [&player1, &playingScene, mousePosition, IsPlayerOnePlaying]()-> void {
-            Button &endTurnButton = playingScene.endTurnButton;
-            endTurnButton.state = ButtonState::disabled;
-
-            if (IsPlayerOnePlaying() && !player1.cardsInPlayStack.empty())
-            {
-                endTurnButton.state = ButtonState::enabled;
-                UpdateButtonState(endTurnButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
-
-                if (endTurnButton.wasPressed)
-                {
-                    PlaySound(GameSound::buttonPress01);
-                    player1.hasEndedTheTurn = true;
-                }
-            }
-        }
-    };
-
-
-    auto RemovePlayerHeldCard{
-        [&player1]()-> void {
-            player1.heldCardIndex = -1;
-            player1.isHoldingACard = false;
-        }
-    };
-    auto SetPlayerHeldCard{
-        [&player1](const int index)-> void {
-            assert(index >= 0 &&
-                "Trying to set a Held Card index that is negative.");
-            assert(index < static_cast<int>( player1.hand.size()) &&
-                "Trying to set a Held Card index that is outside of the players hand bounds.");
-            player1.heldCardIndex = index;
-            player1.isHoldingACard = true;
-        }
-
-    };
-
-    auto TryPlayingCard{
-        [IsPlayerOnePlaying, &player1, currentPhase, RemovePlayerHeldCard]()-> void {
-            //If Player 1 tries to play a card,
-            //and we are placing the card on the play zone,
-            //we select that card to be played
-            if (IsPlayerOnePlaying() && player1.isHoldingACard)
-            {
-                const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardIndex));
-
-                if (CheckCollisionRecs(heldCard.rect, constants::playfieldRec) &&
-                    CanCardBePlayedByPlayer(heldCard, player1, currentPhase))
-                {
-                    PutCardInPlay(player1);
-                }
-            }
-            RemovePlayerHeldCard(); //whether we can play it or not, we always let go of the card from the hand.
-        }
-    };
-
-
-    //Scene Buttons
-    UpdateEndTurnButton();
-
-    //Draw ---------------------------------------------------------------------
 }
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
@@ -423,7 +344,7 @@ void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, Gam
     }
 }
 
-void RunPrototypingScene(PrototypingScene &prototypingScene)
+void RunPrototypingScene(const PrototypingScene &scene)
 {
     static Card advancedCardProt
     {
@@ -466,7 +387,7 @@ void RunPrototypingScene(PrototypingScene &prototypingScene)
     // advancedCardProt_x4.pos.x = 700;
 
     //Draw
-    GetTexture(prototypingScene.background).Draw();
+    GetTexture(scene.background).Draw();
     // DrawCardAdvanced(advancedCardProt_x2);
     // DrawCardAdvanced(advancedCardProt_x3);
     // DrawCardAdvanced(advancedCardProt_x4);

@@ -57,4 +57,4 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase,
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
                       const Player &player1, const Player &player2);
 
-void RunPrototypingScene(PrototypingScene &scene);
+void RunPrototypingScene(const PrototypingScene &scene);
