@@ -1,6 +1,7 @@
 #include "game_scenes.hpp"
 #include <cassert>
 #include <iostream>
+#include <format>
 
 #include "audio.hpp"
 #include "constants.hpp"
@@ -151,7 +152,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
 
     // UPDATE ------------------------------------------------------------------
 
-    NEW_UpdateGameplayPhases(playingScene, currentPhase, player1, player2, goingFirst, rd);
+    UpdateGameplayPhases(playingScene, currentPhase, player1, player2, goingFirst, rd);
 
     //Update Music
     PlayMusic(playingScene.music);
@@ -168,6 +169,68 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
             constants::playfieldRec.height
         },
         constants::playfieldRec);
+    // Draw stack stats total
+    const raylib::Rectangle statsTotalRec
+    {
+        constants::playfieldRec.x,
+        constants::playfieldRec.y + constants::playfieldRec.height - 50,
+        constants::playfieldRec.width,
+        50
+    };
+    const raylib::Color statsTotalRecColor{10, 10, 10, 200};
+    DrawRectangleRec(statsTotalRec, statsTotalRecColor);
+
+    std::string player1TotalCardStats
+    {
+        std::format("Total Stats \nB: {0} | M: {1} | S: {2}",
+                    std::to_string(GetCardStackTotalBody(player1.cardsInPlayStack)),
+                    std::to_string(GetCardStackTotalMind(player1.cardsInPlayStack)),
+                    std::to_string(GetCardStackTotalSoul(player1.cardsInPlayStack)))
+    };
+
+    const raylib::Rectangle player1StatsRec
+    {
+        constants::playfieldRec.x,
+        constants::playfieldRec.y + constants::playfieldRec.height - 50,
+        constants::playfieldRec.width * 0.5,
+        50
+    };
+    HelperFunctions::DrawTextBoxed
+    (
+        GetFont(GameFont::aobashiOne),
+        player1TotalCardStats.c_str(),
+        player1StatsRec,
+        20,
+        0.1f,
+        0.5f,
+        true,
+        WHITE
+    );
+
+    std::string player2TotalCardStats{
+        std::format("Total Stats \nB: {0} | M: {1} | S: {2}",
+                    std::to_string(GetCardStackTotalBody(player2.cardsInPlayStack)),
+                    std::to_string(GetCardStackTotalMind(player2.cardsInPlayStack)),
+                    std::to_string(GetCardStackTotalSoul(player2.cardsInPlayStack)))
+    };
+    const raylib::Rectangle player2StatsRec
+    {
+        constants::playfieldRec.x + constants::playfieldRec.width * 0.5,
+        constants::playfieldRec.y + constants::playfieldRec.height - 50,
+        constants::playfieldRec.width * 0.5,
+        50
+    };
+    HelperFunctions::DrawTextBoxed
+    (
+        GetFont(GameFont::aobashiOne),
+        player2TotalCardStats.c_str(),
+        player2StatsRec,
+        20,
+        0.1f,
+        0.5f,
+        true,
+        WHITE
+    );
 
 
     //Draw Player 2 Hand
@@ -214,7 +277,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         else
         {
             //Expand the card in place
-            raylib::Rectangle expandedCardRect
+            const raylib::Rectangle expandedCardRect
             {
                 hoveredCard.rect.x,
                 hoveredCard.rect.y - hoveredCard.rect.height * 1.5f,

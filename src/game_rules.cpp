@@ -8,42 +8,64 @@
 
 struct Card;
 
-int CalculateRoundWinner(const Player &player1, const Player &player2)
+int GetCardStackTotalBody(const std::vector<Card> &stack)
 {
-    //Calculate Player 1 Top Stat
-    Card player1FinalCard = player1.cardsInPlayStack.at(0);
-    assert(player1FinalCard.type == CardType::unit && "Bottom card in player 1's stack was not a Unit.");
+    int bodyStatTotal{0};
 
-    for (std::size_t i = 1; i < player1.cardsInPlayStack.size(); ++i) //starting at 1, since 0 is the bottom Unit.
+    for (const auto &card: stack)
     {
-        player1FinalCard.body += player1.cardsInPlayStack.at(i).body;
-        player1FinalCard.mind += player1.cardsInPlayStack.at(i).mind;
-        player1FinalCard.soul += player1.cardsInPlayStack.at(i).soul;
+        bodyStatTotal += card.body;
     }
-    int player1TopStat{player1FinalCard.body};
-    if (player1FinalCard.mind > player1TopStat) player1TopStat = player1FinalCard.mind;
-    if (player1FinalCard.soul > player1TopStat) player1TopStat = player1FinalCard.soul;
 
-    //Calculate Player 2 Top Stat
-    Card player2FinalCard = player2.cardsInPlayStack.at(0);
-    assert(player2FinalCard.type == CardType::unit && "Bottom card in player 2's stack was not a Unit.");
+    return bodyStatTotal;
+}
 
-    for (std::size_t i = 1; i < player2.cardsInPlayStack.size(); ++i) //starting at 1, since 0 is the bottom Unit.
+int GetCardStackTotalMind(const std::vector<Card> &stack)
+{
+    int mindStatTotal{0};
+
+    for (const auto &card: stack)
     {
-        player2FinalCard.body += player2.cardsInPlayStack.at(i).body;
-        player2FinalCard.mind += player2.cardsInPlayStack.at(i).mind;
-        player2FinalCard.soul += player2.cardsInPlayStack.at(i).soul;
+        mindStatTotal += card.mind;
     }
-    int player2TopStat{player2FinalCard.body};
-    if (player2FinalCard.mind > player2TopStat) player2TopStat = player2FinalCard.mind;
-    if (player2FinalCard.soul > player2TopStat) player2TopStat = player2FinalCard.soul;
+
+    return mindStatTotal;
+}
+
+int GetCardStackTotalSoul(const std::vector<Card> &stack)
+{
+    int soulStatTotal{0};
+
+    for (const auto &card: stack)
+    {
+        soulStatTotal += card.soul;
+    }
+
+    return soulStatTotal;
+}
+
+int CalculateRoundWinner(const std::vector<Card> &stack1, const std::vector<Card> &stack2)
+{
+    const int totalBody1 = GetCardStackTotalBody(stack1);
+    const int totalMind1 = GetCardStackTotalMind(stack1);
+    const int totalSoul1 = GetCardStackTotalSoul(stack1);
+
+    int maxStat1 = totalBody1 > totalMind1 ? totalBody1 : totalMind1;
+    maxStat1 = totalSoul1 > maxStat1 ? totalSoul1 : maxStat1;
+
+    const int totalBody2 = GetCardStackTotalBody(stack2);
+    const int totalMind2 = GetCardStackTotalMind(stack2);
+    const int totalSoul2 = GetCardStackTotalSoul(stack2);
+
+    int maxStat2 = totalBody2 > totalMind2 ? totalBody2 : totalMind2;
+    maxStat2 = totalSoul2 > maxStat2 ? totalSoul2 : maxStat2;
 
     //Decide the winner
-    if (player1TopStat > player2TopStat)
+    if (maxStat1 > maxStat2)
     {
         return 1;
     }
-    if (player2TopStat > player1TopStat)
+    if (maxStat2 > maxStat1)
     {
         return 2;
     }
