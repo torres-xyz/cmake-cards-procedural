@@ -1,7 +1,5 @@
 #include "imgui_sidebar.hpp"
-
 #include <iostream>
-
 #include "imgui.h"
 #include "rlImGui.h"
 #include "raylib-cpp.hpp"

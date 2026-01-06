@@ -1,6 +1,5 @@
 #pragma once
 #include <random>
-
 #include "button.hpp"
 
 struct Player;

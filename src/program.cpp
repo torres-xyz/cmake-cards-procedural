@@ -24,14 +24,12 @@ int run()
     rlImGuiSetup(true);
 #endif
     InitAudioDevice();
-    bool muteGame{true};
+    bool muteGame{false};
 
     //Player 1
     Player player1{.id = 1};
     Player player2{.id = 2};
 
-    // InitializePlayerWithDeck(player1, rd);
-    // InitializePlayerWithDeck(player2, rd);
     InitializePlayerWithAdvancedDeck(player1, rd);
     InitializePlayerWithAdvancedDeck(player2, rd);
 

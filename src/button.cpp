@@ -1,8 +1,6 @@
 #include "button.hpp"
 #include <map>
-
 #include "helper_functions.hpp"
-
 
 void DrawButton(const Button &button, const raylib::Texture2D &texture)
 {
@@ -36,8 +34,8 @@ void DrawButton(const Button &button, const raylib::Texture2D &texture)
     constexpr NPatchInfo panelNPatchInfo
     {
         {0, 0, 48, 48},
-                12, 12, 12, 12,
-                0
+        12, 12, 12, 12,
+        0
     };
 
     DrawTextureNPatch(texture, panelNPatchInfo, button.rectangle, {0, 0}, 0, currentColor);

@@ -4,8 +4,7 @@
 
 namespace HelperFunctions
 {
-    [[maybe_unused]] static void DrawTextCenteredInRec(
-        const char *text, const float fontSize, const Color color, const Rectangle &rectangle)
+    inline void DrawTextCenteredInRec(const char *text, const float fontSize, const Color color, const Rectangle &rectangle)
     {
         // Raylib gets the spacing by dividing the font size by defaultFontSize (10).
         const float textSpacing = fontSize * 0.1f;
@@ -24,9 +23,8 @@ namespace HelperFunctions
         raylib::DrawTextEx(GetFontDefault(), text, centeredTextPos, fontSize, textSpacing, color);
     }
 
-
     // Draw text using font inside rectangle limits with support for text selection
-    [[maybe_unused]] static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, float verticalSpacingMult, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint)
+    inline void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, float verticalSpacingMult, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint)
     {
         const int length = static_cast<int>(TextLength(text)); // Total length in bytes of the text, scanned by codepoints in loop
 
@@ -156,12 +154,12 @@ namespace HelperFunctions
     }
 
     // Draw text using font inside rectangle limits
-    [[maybe_unused]] static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float fontSize, float spacing, float verticalSpacingMult, bool wordWrap, Color tint)
+    inline void DrawTextBoxed(Font font, const char *text, Rectangle rec, float fontSize, float spacing, float verticalSpacingMult, bool wordWrap, Color tint)
     {
         DrawTextBoxedSelectable(font, text, rec, fontSize, spacing, verticalSpacingMult, wordWrap, tint, 0, 0, WHITE, WHITE);
     }
 
-    [[maybe_unused]] static bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
+    inline bool CheckCollisionPointCard(const raylib::Vector2 &point, const Card &card)
     {
         return CheckCollisionPointRec
         (

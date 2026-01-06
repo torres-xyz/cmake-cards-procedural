@@ -11,13 +11,8 @@
 #include "raylib-cpp.hpp"
 #include "player.hpp"
 
-void UpdateGameplayPhases(
-    PlayingScene &playingScene,
-    GameplayPhase &currentPhase,
-    Player &player1,
-    Player &player2,
-    const int playerGoingFirst,
-    std::random_device &rd)
+void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1,
+                          Player &player2, const int playerGoingFirst, std::random_device &rd)
 {
     const raylib::Vector2 mousePosition = GetMousePosition();
     static GameplayPhase previousPhase{GameplayPhase::uninitialized};
@@ -36,9 +31,6 @@ void UpdateGameplayPhases(
 
     auto TryToPlayCard{
         [&player1, currentPhase, RemovePlayer1HeldCard]()-> void {
-            //If Player 1 tries to play a card,
-            //and we are placing the card on the play zone,
-            //we select that card to be played
             if (player1.isHoldingACard && !player1HasPlayedThisPhase)
             {
                 const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardIndex));
@@ -65,7 +57,7 @@ void UpdateGameplayPhases(
     };
 
     //TODO: design problem where this has to always come after UpdateHandAndHeldCard because it
-    //depends on it to reset the position of the card, i think.
+    // depends on it to reset the position of the card, it seems.
     auto UpdateHoveringCardInHand{
         [&player1, mousePosition]()-> void {
             player1.hoveredCardIndex = -1;
@@ -139,7 +131,7 @@ void UpdateGameplayPhases(
                 player1.hasDrawnThisTurn = false;
             }
 
-            std::cout << "Game Phase = " << GameplayPhaseToString(currentPhase).c_str() << std::endl;
+            // std::cout << "Game Phase = " << GameplayPhaseToString(currentPhase).c_str() << std::endl;
         }
     };
 
@@ -205,7 +197,6 @@ void UpdateGameplayPhases(
             }
             //TODO: Fix this later. Make sure initial hand is always valid. Shuffle and redraw if needed.
             assert(IsInitialHandValid(player1) && "Player 1 initial hand is not valid");
-
 
             if (playerGoingFirst == 1)
             {

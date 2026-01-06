@@ -77,15 +77,15 @@ bool CanCardBePlayedByPlayer(const Card &selectedCard, const Player &player, [[m
 {
     //Only 1 card can be played per turn.
 
-    // Playstack is empty ------------------------------------------------------
-    // The first card in the playstack has to be a Unit.
+    // Play Stack is empty ------------------------------------------------------
+    // The first card in the play stack has to be a Unit.
     if (player.cardsInPlayStack.empty())
     {
         if (selectedCard.type == CardType::unit) return true;
         return false;
     }
 
-    // Playstack is NOT empty --------------------------------------------------
+    // Play stack is NOT empty --------------------------------------------------
     //On the first turn, players can only play 1 unit.
 
     if (gameplayPhase == GameplayPhase::playerOneFirstTurn)
@@ -99,7 +99,6 @@ bool CanCardBePlayedByPlayer(const Card &selectedCard, const Player &player, [[m
         //only Action cards can be played on top of a Unit card:
         if (selectedCard.type == CardType::action) return true;
     }
-
 
     return false;
 }

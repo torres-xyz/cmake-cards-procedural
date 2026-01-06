@@ -369,27 +369,13 @@ void RunPrototypingScene(const PrototypingScene &scene)
         .soul = 1000
     };
 
-    // advancedCardProt.size = raylib::Vector2{
-    //     GetMousePosition().x - advancedCardProt.pos.x,
-    //     (GetMousePosition().x - advancedCardProt.pos.x) * (1 / constants::cardAspectRatio),
-    // };
-
-    // Card advancedCardProt_x2 = advancedCardProt;
-    // advancedCardProt_x2.size = raylib::Vector2{constants::cardWidth * 2, constants::cardHeight * 2};
-    // advancedCardProt_x2.pos.x = 200;
-    //
-    // Card advancedCardProt_x3 = advancedCardProt;
-    // advancedCardProt_x3.size = raylib::Vector2{constants::cardWidth * 3, constants::cardHeight * 3};
-    // advancedCardProt_x3.pos.x = 400;
-    //
-    // Card advancedCardProt_x4 = advancedCardProt;
-    // advancedCardProt_x4.size = raylib::Vector2{constants::cardWidth * 4, constants::cardHeight * 4};
-    // advancedCardProt_x4.pos.x = 700;
+    advancedCardProt.rect.SetSize(
+        GetMousePosition().x - advancedCardProt.rect.x,
+        (GetMousePosition().x - advancedCardProt.rect.x) * (1 / constants::cardAspectRatio)
+    );
 
     //Draw
     GetTexture(scene.background).Draw();
-    // DrawCardAdvanced(advancedCardProt_x2);
-    // DrawCardAdvanced(advancedCardProt_x3);
-    // DrawCardAdvanced(advancedCardProt_x4);
+    DrawCardAdvanced(advancedCardProt, advancedCardProt.rect);
 }
 

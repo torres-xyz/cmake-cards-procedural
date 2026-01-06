@@ -37,8 +37,6 @@ struct Card
     };
     CardType type{CardType::invalid};
     bool faceUp{true};
-
-    // Advanced stats
     CardID id{};
     std::string name{};
     std::string bodyText{};
