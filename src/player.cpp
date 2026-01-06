@@ -14,7 +14,8 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
     player.deck.clear();
     player.cardsPlayed = 0;
 
-    std::uniform_int_distribution randomRange{1, 20};
+    std::uniform_int_distribution unitsStatsRandomRange{1, 20};
+    std::uniform_int_distribution actionsStatsRandomRange{1, 10};
 
     for (int i = 0; i < constants::initialDeckSize - 3; ++i)
     {
@@ -29,9 +30,9 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
             "beatae ut temporibus consectetur eveniet placeat adipisci. "
             "Dignissimos aut et recusandae voluptates harum.",
             .banner = CardBanner::form,
-            .body = randomRange(rd) * 500,
-            .mind = randomRange(rd) * 500,
-            .soul = randomRange(rd) * 500
+            .body = unitsStatsRandomRange(rd) * 500,
+            .mind = unitsStatsRandomRange(rd) * 500,
+            .soul = unitsStatsRandomRange(rd) * 500
         };
 
         player.deck.emplace_back(advancedCard);
@@ -47,9 +48,9 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
             .name = "Action Card One",
             .bodyText = "+1000 Body to your Unit.",
             .banner = CardBanner::form,
-            .body = -1,
-            .mind = -1,
-            .soul = -1
+            .body = actionsStatsRandomRange(rd) * 500,
+            .mind = actionsStatsRandomRange(rd) * 500,
+            .soul = actionsStatsRandomRange(rd) * 500
         };
 
         player.deck.emplace_back(advancedActionCard);

@@ -39,7 +39,7 @@ void NEW_UpdateGameplayPhases(
             //If Player 1 tries to play a card,
             //and we are placing the card on the play zone,
             //we select that card to be played
-            if (player1.isHoldingACard)
+            if (player1.isHoldingACard && !player1HasPlayedThisPhase)
             {
                 const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardIndex));
 
@@ -65,7 +65,7 @@ void NEW_UpdateGameplayPhases(
     };
 
     //TODO: design problem where this has to always come after UpdateHandAndHeldCard because it
-    //depends on it to reset the position of the card, i think. 
+    //depends on it to reset the position of the card, i think.
     auto UpdateHoveringCardInHand{
         [&player1, mousePosition]()-> void {
             player1.hoveredCardIndex = -1;
@@ -432,6 +432,13 @@ void NEW_UpdateGameplayPhases(
         }
         case GameplayPhase::battle:
         {
+            const int winner = CalculateRoundWinner(player1, player2);
+
+            if (winner == 1) player1.score++;
+            if (winner == 2) player2.score++;
+
+            //For now, we play only one round.
+            ChangePhase(GameplayPhase::gameOver);
             break;
         }
         case GameplayPhase::gameOver:

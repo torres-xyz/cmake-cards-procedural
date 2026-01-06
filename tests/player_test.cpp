@@ -13,20 +13,27 @@ TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]"
         .id = playerID,
         .score = 100,
         .deck = {
-            Card{.type = CardType::paper},
-            Card{.type = CardType::rock},
+            Card{.type = CardType::unit},
+            Card{.type = CardType::unit},
         },
         .hand = {
-            Card{.type = CardType::paper},
-            Card{.type = CardType::rock},
-            Card{.type = CardType::scissors},
+            Card{.type = CardType::unit},
+            Card{.type = CardType::action},
+            Card{.type = CardType::unit},
         },
-        .cardInPlay{Card{.type = CardType::paper}},
+        .cardsInPlayStack = {
+            Card{.type = CardType::unit},
+            Card{.type = CardType::action},
+        },
         .isHoldingACard = true,
-        .heldCardIndex = 2
+        .heldCardIndex = 2,
+        .hoveredCardIndex = 2,
+        .hasDrawnThisTurn = true,
+        .hasEndedTheTurn = true,
+        .cardsPlayed = 10
     };
 
-    InitializePlayerWithDeck(playerUnderTest, rd);
+    InitializePlayerWithAdvancedDeck(playerUnderTest, rd);
 
     SECTION("Player ID shouldn't change")
     {
@@ -38,9 +45,9 @@ TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]"
     }
     SECTION("Everything else should be reset")
     {
+        //TODO: Finish this
         REQUIRE(playerUnderTest.score == 0);
         REQUIRE(playerUnderTest.hand.empty() == true);
-        REQUIRE(playerUnderTest.cardInPlay.type == CardType::invalid);
         REQUIRE(playerUnderTest.isHoldingACard == false);
         REQUIRE(playerUnderTest.heldCardIndex == -1);
     }

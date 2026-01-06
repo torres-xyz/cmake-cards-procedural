@@ -5,9 +5,6 @@
 enum class CardType
 {
     invalid,
-    rock,
-    paper,
-    scissors,
     unit,
     action
 };
