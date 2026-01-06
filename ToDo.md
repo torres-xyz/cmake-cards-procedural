@@ -1,6 +1,5 @@
 # To Do
 
-- [ ] Add a stats total to the UI.
 - [ ] Add hovering to the cards in the play zone so we can see all cards in the stacks.
 - [ ] Store a library of available cards and card lists better (currently they
   are just being declared in a vector<int> in constants.hpp).
@@ -72,3 +71,5 @@
     - [x] Make the cards in the hand zone larger.
     - [x] Make the battle winner the owner of the card with the higher overall stats.
 - [x] Remove RPS card types.
+- [x] Add a stats total to the UI.
+- [x] Make sure initial hand is always valid.

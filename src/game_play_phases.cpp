@@ -163,7 +163,11 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             heldCardOffset = raylib::Vector2{0, 0};
 
             InitializePlayerWithAdvancedDeck(player1, rd);
+            ShuffleDeckAndMakeSureTopCardIsAUnit(player1.deck, rd);
+
             InitializePlayerWithAdvancedDeck(player2, rd);
+            ShuffleDeckAndMakeSureTopCardIsAUnit(player2.deck, rd);
+
 
             player1.hoveredCardIndex = -1;
             player2.hoveredCardIndex = -1; //redundant for now
@@ -363,8 +367,8 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             {
                 TryToPlayCard();
             }
-            UpdateHoveringCardInHand();
             UpdateHandAndHeldCard();
+            UpdateHoveringCardInHand();
             UpdateEndTurnButton();
 
             //Wait until player 1 has pressed the end turn button

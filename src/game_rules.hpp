@@ -1,9 +1,12 @@
 #pragma once
+#include <random>
 #include <vector>
 
 enum class GameplayPhase;
 struct Card;
 struct Player;
+
+void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_device &rd);
 
 int GetCardStackTotalBody(const std::vector<Card> &stack);
 

@@ -1,12 +1,28 @@
 #include "game_rules.hpp"
-
+#include <algorithm>
 #include <cassert>
-
 #include "card.hpp"
 #include "game_play_phases.hpp"
 #include "player.hpp"
 
 struct Card;
+
+void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_device &rd)
+{
+    std::ranges::shuffle(deck, rd);
+
+    if (deck.at(0).type == CardType::unit) return;
+
+    for (std::size_t i = 0; i < deck.size(); ++i)
+    {
+        if (deck.at(i).type == CardType::unit)
+        {
+            std::swap(deck[i], deck[0]);
+            assert(deck.at(0).type == CardType::unit);
+            return;
+        }
+    }
+}
 
 int GetCardStackTotalBody(const std::vector<Card> &stack)
 {
