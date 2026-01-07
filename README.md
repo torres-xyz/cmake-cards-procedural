@@ -36,11 +36,11 @@ Brian Will's ["Object-Oriented Programming is Bad" video](https://www.youtube.co
 
 - [Raylib's Github](https://github.com/raysan5/raylib)
 - [Raylib's Examples](https://www.raylib.com/examples.html)
-- [Pkmn GB TCG Sprites](https://www.spriters-resource.com/game_boy_gbc/pokemontradingcardgame/)
+- [Pokemon GB TCG Sprites](https://www.spriters-resource.com/game_boy_gbc/pokemontradingcardgame/)
 
 # CLI Setup
 
-0 - Make sure you have cmake and ninja-build installed in your system.
+0 - Make sure you have CMake and ninja-build installed on your system.
 
 1 - Run
 
@@ -54,7 +54,8 @@ this will produce build files for your current platform. <sup>1</sup>
 
 Runs the build system created previously, and creates the executable.
 `build` is the folder where these will be placed.
-`--config Debug` tells cmake create a Debug build. This needs to be specified because we set the Ninja generator to be
+`--config Debug` tells CMake to create a Debug build. This needs to be specified because we set the Ninja generator to
+be
 Multi-Config, which gives us the option to create "Debug", "Release" and "RelWithDebInfo" builds.
 
 3 - Run
@@ -73,7 +74,7 @@ to run the executable we just created.
 
 3 - Run.
 
-# Notes (this is outdated)
+# Notes
 
 <sup>1</sup> I am using Ninja Multi-Config to easily switch between a Debug config (has imgui sidebar for extra info)
 and a Release config (just the game).
