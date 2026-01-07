@@ -27,6 +27,11 @@
 *.out
 *.app
 
+#CMake
+
+CMakeCache.txt
+CMakeFiles
+
 /build
 /_deps
 /graphviz

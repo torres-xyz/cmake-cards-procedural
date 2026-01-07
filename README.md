@@ -1,6 +1,6 @@
 # CMake-Cards-Procedural
 
-TCG game and testing tool. Wrote using Procedural Programing instead of OOP as an experiment after watching
+TCG game and gameplay testing tool. Written using Procedural Programing instead of OOP as an experiment after watching
 Brian Will's ["Object-Oriented Programming is Bad" video](https://www.youtube.com/watch?v=QM1iUe6IofM).
 
 ## Libraries used:
@@ -28,7 +28,7 @@ Brian Will's ["Object-Oriented Programming is Bad" video](https://www.youtube.co
 - Kenney's Casino Audio - [Link](https://kenney.nl/assets/casino-audio)
 - Rusted Music Studio's Free Music Lo-Fi Tracks - [Link](https://rustedstudio.itch.io/free-music-lofi-tracks)
 
-### To use in the future
+### Waiting implementation
 
 - Diablo Luna ど苛ッ's Butterfly - looped ambience sounds pack. - [Link](https://pudretediablo.itch.io/butterfly)
 
@@ -37,9 +37,10 @@ Brian Will's ["Object-Oriented Programming is Bad" video](https://www.youtube.co
 - [Raylib's Github](https://github.com/raysan5/raylib)
 - [Raylib's Examples](https://www.raylib.com/examples.html)
 - [Pkmn GB TCG Sprites](https://www.spriters-resource.com/game_boy_gbc/pokemontradingcardgame/)
--
 
 # CLI Setup
+
+0 - Make sure you have cmake and ninja-build installed in your system.
 
 1 - Run
 
@@ -58,7 +59,8 @@ Multi-Config, which gives us the option to create "Debug", "Release" and "RelWit
 
 3 - Run
 
-    ./build/Debug/raylib-template
+    cd build/src/Debug
+    ./main
 
 to run the executable we just created.
 
@@ -69,12 +71,10 @@ to run the executable we just created.
 2 - Edit the CMake profile created, probably "Debug", and set Generator to
 "Ninja Multi-Config". <sup>1</sup>
 
-3 - Run (Shift + F10).
+3 - Run.
 
 # Notes (this is outdated)
 
-<sup>1</sup> Ninja Multi-Config needs to be specified because the
-`add_custom_target(copy_resources ...)` command expects a multi config setup.
-It will try to copy the resources folder into this directory `${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/resources`
-and `$<CONFIG>` won't be set unless we have a multi-config setup.
+<sup>1</sup> I am using Ninja Multi-Config to easily switch between a Debug config (has imgui sidebar for extra info)
+and a Release config (just the game).
 
