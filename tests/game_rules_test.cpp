@@ -27,7 +27,7 @@ TEST_CASE("ShuffleDeckAndMakeSureTopCardIsAUnit leaves a Card of type Unit at in
     {
         .type = CardType::unit,
     };
-    testDeck.push_back(unitCard);
+    testDeck.emplace_back(unitCard);
 
     //Act
     ShuffleDeckAndMakeSureTopCardIsAUnit(testDeck, rd);

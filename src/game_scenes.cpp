@@ -1,4 +1,6 @@
 #include "game_scenes.hpp"
+
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <format>
@@ -94,7 +96,7 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
     }
 
     //Card Art
-    const raylib::Texture2D &cardArtTex = GetCardArtTexture(card.id);
+    const raylib::Texture2D &cardArtTex = GetCardArtTexture(card.cardID);
     const raylib::Rectangle cardArtTexSourceRect
     {
         0, 0,
@@ -231,65 +233,58 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
         WHITE
     );
 
-    //Draw Player 2 Hand
-    for (std::size_t i = 0; i < player2.hand.size(); ++i)
-    {
-        const auto index = static_cast<float>(i);
-        //Set the cards in the hand slightly apart from each other.
-        const raylib::Vector2 cardPos{
-            constants::player2HandZone.x + 2 * (index + 1) + constants::cardWidth * index,
-            constants::player2HandZone.y + 4,
-        };
+    //Join all cards in the order we want to draw them in
+    //and draw them in a single for loop, skipping over the hovered card, which is drawn last.
+    std::vector<Card> allCards{};
+    //// Player 2 Hand
+    allCards.insert(std::end(allCards), std::begin(player2.hand), std::end(player2.hand));
+    //// Cards in player 1 hand
+    allCards.insert(std::end(allCards), std::begin(player1.hand), std::end(player1.hand));
+    //// Cards in the playfield
+    const std::size_t playfieldCardsIndexOffset{allCards.size()};
+    allCards.insert(std::end(allCards), std::begin(player1.cardsInPlayStack), std::end(player1.cardsInPlayStack));
+    allCards.insert(std::end(allCards), std::begin(player2.cardsInPlayStack), std::end(player2.cardsInPlayStack));
 
-        player2.hand.at(i).rect.SetPosition(cardPos);
-        player2.hand.at(i).faceUp = false;
-        DrawCardAdvanced(player2.hand.at(i), player2.hand.at(i).rect);
-    }
 
-    //Draw Cards in the playfield
-    for (const Card &card: player1.cardsInPlayStack)
+    if (allCards.empty()) return;
+    std::size_t hoveredCardIndex{};
+    for (std::size_t i = 0; i < allCards.size(); ++i)
     {
-        DrawCardAdvanced(card, card.rect);
-    }
-    for (const Card &card: player2.cardsInPlayStack)
-    {
-        DrawCardAdvanced(card, card.rect);
-    }
-
-    //Draw Cards in Player 1 Hand, ...
-    for (size_t i = 0; i < player1.hand.size(); ++i)
-    {
-        if (player1.heldCardIndex == static_cast<int>(i)) continue;
-        if (player1.hoveredCardIndex == static_cast<int>(i)) continue;
-        DrawCardAdvanced(player1.hand.at(i), player1.hand.at(i).rect);
-    }
-
-    //Draw Hovered Card expanded
-    if (player1.hoveredCardIndex != -1)
-    {
-        const Card &hoveredCard{player1.hand.at(static_cast<std::size_t>(player1.hoveredCardIndex))};
-        if (player1.isHoldingACard)
+        if (player1.isHoveringOverACard && player1.hoveredCardUid == allCards.at(i).uid)
         {
-            DrawCardAdvanced(hoveredCard, hoveredCard.rect);
+            hoveredCardIndex = i;
+            continue;
+        }
+
+        DrawCardAdvanced(allCards.at(i), allCards.at(i).rect);
+    }
+    //Draw hovered card last
+    if (player1.isHoveringOverACard)
+    {
+        if (hoveredCardIndex < playfieldCardsIndexOffset)
+        {
+            //Expand the cards in the hand in place, but move it up a bit.
+            const raylib::Rectangle expandedCardRect
+            {
+                std::max(10.0f, allCards.at(hoveredCardIndex).rect.x - (constants::zoomedCardWidth - allCards.at(hoveredCardIndex).rect.width) * 0.5f),
+                allCards.at(hoveredCardIndex).rect.y - allCards.at(hoveredCardIndex).rect.height * 1.3f,
+                constants::zoomedCardWidth,
+                constants::zoomedCardHeight
+            };
+            DrawCardAdvanced(allCards.at(hoveredCardIndex), expandedCardRect);
         }
         else
         {
-            //Expand the card in place
-            const raylib::Rectangle expandedCardRect
+            //Expand the cards in the play field in place
+            const raylib::Rectangle expandedCardInFieldRect
             {
-                hoveredCard.rect.x,
-                hoveredCard.rect.y - hoveredCard.rect.height * 1.5f,
-                hoveredCard.rect.width * 2,
-                hoveredCard.rect.height * 2
+                allCards.at(hoveredCardIndex).rect.x - (constants::zoomedCardWidth - allCards.at(hoveredCardIndex).rect.width) * 0.5f,
+                allCards.at(hoveredCardIndex).rect.y,
+                constants::zoomedCardWidth,
+                constants::zoomedCardHeight
             };
-            DrawCardAdvanced(hoveredCard, expandedCardRect);
+            DrawCardAdvanced(allCards.at(hoveredCardIndex), expandedCardInFieldRect);
         }
-    }
-    //... with the one being held drawn last, on top.
-    if (player1.isHoldingACard)
-    {
-        const Card &heldCard{player1.hand.at(static_cast<std::size_t>(player1.heldCardIndex))};
-        DrawCardAdvanced(heldCard, heldCard.rect);
     }
 }
 
@@ -356,7 +351,7 @@ void RunPrototypingScene(const PrototypingScene &scene)
         },
         .type = CardType::unit,
         .faceUp = true,
-        .id = CardID::firstCard,
+        .cardID = CardID::firstCard,
         .name = "Lorem Ipsum",
         .bodyText = "Id aspernatur consequuntur eos ut quia vero. Voluptas "
         "beatae ut temporibus consectetur eveniet placeat adipisci. "

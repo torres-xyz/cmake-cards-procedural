@@ -18,10 +18,11 @@ void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_d
         if (deck.at(i).type == CardType::unit)
         {
             std::swap(deck[i], deck[0]);
-            assert(deck.at(0).type == CardType::unit);
-            return;
+            break;
         }
     }
+
+    assert(deck.at(0).type == CardType::unit);
 }
 
 int GetCardStackTotalBody(const std::vector<Card> &stack)

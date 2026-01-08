@@ -42,7 +42,8 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                     player1HasPlayedThisPhase = true;
                 }
             }
-            player1.hoveredCardIndex = -1;
+            player1.isHoveringOverACard = false;
+            player1.hoveredCardUid = 0;
             RemovePlayer1HeldCard(); //whether we can play it or not, we always clear the card from the hand.
         }
     };
@@ -59,14 +60,40 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
     //TODO: design problem where this has to always come after UpdateHandAndHeldCard because it
     // depends on it to reset the position of the card, it seems.
     auto UpdateHoveringCardInHand{
-        [&player1, mousePosition]()-> void {
-            player1.hoveredCardIndex = -1;
+        [&player1, mousePosition, player2]()-> void {
+            //If player 1 is holding a card, do not update the hovered card
+            if (player1.isHoldingACard)
+            {
+                return;
+            }
+
+            // player1.hoveredCardUid = 0;
+            // player1.isHoveringOverACard = false;
             for (std::size_t i = 0; i < player1.hand.size(); ++i)
             {
                 //Handle hovering
                 if (HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)))
                 {
-                    player1.hoveredCardIndex = static_cast<int>(i);
+                    player1.hoveredCardUid = player1.hand.at(i).uid;
+                    player1.isHoveringOverACard = true;
+                }
+            }
+            for (std::size_t i = 0; i < player1.cardsInPlayStack.size(); ++i)
+            {
+                //Handle hovering
+                if (HelperFunctions::CheckCollisionPointCard(mousePosition, player1.cardsInPlayStack.at(i)))
+                {
+                    player1.hoveredCardUid = player1.cardsInPlayStack.at(i).uid;
+                    player1.isHoveringOverACard = true;
+                }
+            }
+            for (std::size_t i = 0; i < player2.cardsInPlayStack.size(); ++i)
+            {
+                //Handle hovering
+                if (HelperFunctions::CheckCollisionPointCard(mousePosition, player2.cardsInPlayStack.at(i)))
+                {
+                    player1.hoveredCardUid = player2.cardsInPlayStack.at(i).uid;
+                    player1.isHoveringOverACard = true;
                 }
             }
         }
@@ -74,17 +101,16 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
 
     auto UpdateHandAndHeldCard{
         [&player1, mousePosition, SetPlayerHeldCard]()-> void {
-            constexpr int cardWidth{constants::cardWidth * 2};
-            constexpr int cardHeight{constants::cardHeight * 2};
-
             //Place cards in the Hand Zone or Update Held Card
             for (size_t i = 0; i < player1.hand.size(); ++i)
             {
+                const int int_i = static_cast<int>(i);
+
                 //Move the card we are holding with the mouse
-                if (static_cast<int>(i) == player1.heldCardIndex)
+                if (player1.heldCardIndex == int_i)
                 {
                     player1.hand.at(i).rect.SetPosition(mousePosition - heldCardOffset);
-                    player1.hand.at(i).rect.SetSize(cardWidth, cardHeight);
+                    player1.hand.at(i).rect.SetSize(constants::inHandCardWidth, constants::inHandCardHeight);
                     continue;
                 }
 
@@ -93,7 +119,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                     HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)) &&
                     !player1.isHoldingACard)
                 {
-                    SetPlayerHeldCard(static_cast<int>(i));
+                    SetPlayerHeldCard(int_i);
                     heldCardOffset = mousePosition - player1.hand.at(i).rect.GetPosition();
 
                     //Don't position this card in the hand zone.
@@ -101,17 +127,37 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 }
 
                 //Set cards in the hand slightly apart from each other.
-                const int int_i = static_cast<int>(i);
                 const raylib::Rectangle newCardRect
                 {
-                    static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + cardWidth * int_i),
+                    static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + constants::inHandCardWidth * int_i),
                     static_cast<float>(constants::handZonePosY + 4),
-                    cardWidth,
-                    cardHeight
+                    constants::inHandCardWidth,
+                    constants::inHandCardHeight
                 };
 
                 player1.hand.at(i).rect = newCardRect;
                 player1.hand.at(i).faceUp = true;
+            }
+        }
+    };
+
+    auto UpdatePlayer2HandCards{
+        [&player2]() -> void {
+            for (std::size_t i = 0; i < player2.hand.size(); ++i)
+            {
+                const float float_i = static_cast<float>(i);
+
+                //Set cards in the hand slightly apart from each other.
+                const raylib::Rectangle newCardRect
+                {
+                    constants::player2HandZone.x + 2 * float_i + 1 + constants::cardWidth * float_i,
+                    constants::player2HandZone.y + 4,
+                    constants::cardWidth,
+                    constants::cardHeight
+                };
+
+                player2.hand.at(i).rect = newCardRect;
+                player2.hand.at(i).faceUp = false;
             }
         }
     };
@@ -169,8 +215,10 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             ShuffleDeckAndMakeSureTopCardIsAUnit(player2.deck, rd);
 
 
-            player1.hoveredCardIndex = -1;
-            player2.hoveredCardIndex = -1; //redundant for now
+            player1.hoveredCardUid = 0;
+            player1.isHoveringOverACard = false;
+            player2.hoveredCardUid = 0; //redundant for now
+            player2.isHoveringOverACard = false; //redundant for now
 
             player1.cardsInPlayStack.clear();
             player2.cardsInPlayStack.clear();
@@ -191,7 +239,6 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 ChangePhase(GameplayPhase::playerTwoDrawing);
                 break;
             }
-            //TODO: Fix this later. Make sure initial hand is always valid. Shuffle and redraw if needed.
             assert(IsInitialHandValid(player2) && "Player 2 initial hand is not valid");
 
             if (player1.hand.size() != constants::initialHandSize)
@@ -199,7 +246,6 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 ChangePhase(GameplayPhase::playerOneDrawing);
                 break;
             }
-            //TODO: Fix this later. Make sure initial hand is always valid. Shuffle and redraw if needed.
             assert(IsInitialHandValid(player1) && "Player 1 initial hand is not valid");
 
             if (playerGoingFirst == 1)
@@ -232,6 +278,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         case GameplayPhase::playerTwoDrawing:
         {
             DrawCardsFromDeckToHand(player2, 1);
+            UpdatePlayer2HandCards();
             ChangePhase(previousPhase);
             break;
         }

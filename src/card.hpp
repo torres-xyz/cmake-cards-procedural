@@ -37,7 +37,8 @@ struct Card
     };
     CardType type{CardType::invalid};
     bool faceUp{true};
-    CardID id{};
+    CardID cardID{};
+    unsigned long int uid{};
     std::string name{};
     std::string bodyText{};
     CardBanner banner{CardBanner::invalid};
@@ -45,4 +46,5 @@ struct Card
     int mind{0};
     int soul{0};
 };
+
 

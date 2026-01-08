@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <random>
 #include "constants.hpp"
+#include "helper_functions.hpp"
 
 void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
 {
@@ -10,6 +11,8 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
     player.cardsInPlayStack.clear();
     player.isHoldingACard = false;
     player.heldCardIndex = -1;
+    player.hoveredCardUid = 0;
+    player.isHoveringOverACard = false;
     //Use default deck for players for now.
     player.deck.clear();
     player.cardsPlayed = 0;
@@ -24,7 +27,8 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
             .rect = {100, 100, constants::cardWidth, constants::cardHeight},
             .type = CardType::unit,
             .faceUp = true,
-            .id = CardID::firstCard,
+            .cardID = CardID::firstCard,
+            .uid = HelperFunctions::GetUID(),
             .name = "Lorem Ipsum",
             .bodyText = "Id aspernatur consequuntur eos ut quia vero. Voluptas "
             "beatae ut temporibus consectetur eveniet placeat adipisci. "
@@ -32,7 +36,7 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
             .banner = CardBanner::form,
             .body = unitsStatsRandomRange(rd) * 500,
             .mind = unitsStatsRandomRange(rd) * 500,
-            .soul = unitsStatsRandomRange(rd) * 500
+            .soul = unitsStatsRandomRange(rd) * 500,
         };
 
         player.deck.emplace_back(advancedCard);
@@ -44,7 +48,8 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
             .rect = {100, 100, constants::cardWidth, constants::cardHeight},
             .type = CardType::action,
             .faceUp = true,
-            .id = CardID::firstCardAction,
+            .cardID = CardID::firstCardAction,
+            .uid = HelperFunctions::GetUID(),
             .name = "Action Card One",
             .bodyText = "+1000 Body to your Unit.",
             .banner = CardBanner::form,

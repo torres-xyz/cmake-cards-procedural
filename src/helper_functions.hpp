@@ -173,4 +173,13 @@ namespace HelperFunctions
             }
         );
     }
+
+    inline unsigned long GetUID()
+    {
+        static unsigned long unique_ID{};
+
+        unique_ID++;
+
+        return unique_ID;
+    }
 }

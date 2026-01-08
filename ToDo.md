@@ -1,9 +1,9 @@
 # To Do
 
-- [ ] Add hovering to the cards in the play zone so we can see all cards in the stacks.
+- [ ] Make the game a best of 3.
+- [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Store a library of available cards and card lists better (currently they
   are just being declared in a vector<int> in constants.hpp).
-- [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Animate opponent's cards being played.
 
 ## Lower Priority
@@ -73,3 +73,6 @@
 - [x] Remove RPS card types.
 - [x] Add a stats total to the UI.
 - [x] Make sure initial hand is always valid.
+- [x] Add hovering to the cards in the play zone so we can see all cards in the stacks.
+    - [x] Use UIDs to identify which card is being hovered.
+    - [x] Center the zoomed in card around its original position.

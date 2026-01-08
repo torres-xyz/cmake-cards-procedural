@@ -27,7 +27,7 @@ TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]"
         },
         .isHoldingACard = true,
         .heldCardIndex = 2,
-        .hoveredCardIndex = 2,
+        .hoveredCardUid = 2,
         .hasDrawnThisTurn = true,
         .hasEndedTheTurn = true,
         .cardsPlayed = 10

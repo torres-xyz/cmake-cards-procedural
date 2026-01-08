@@ -30,6 +30,10 @@ namespace constants
     inline constexpr int cardTextureHeight{cardHeight * 10};
     inline constexpr int cardArtTextureWidth{630};
     inline constexpr int cardArtTextureHeight{388};
+    inline constexpr int inHandCardWidth{cardWidth * 2};
+    inline constexpr int inHandCardHeight{cardHeight * 2};
+    inline constexpr float zoomedCardWidth{cardWidth * 3.5};
+    inline constexpr float zoomedCardHeight{cardHeight * 3.5};
 
     // Decks
     // using a vector<int> instead of vector<Card> to avoid circular dependency
