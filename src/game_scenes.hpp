@@ -2,6 +2,7 @@
 #include <random>
 #include "button.hpp"
 
+struct GameRules;
 struct Player;
 enum class GameplayPhase;
 enum class GameMusic;
@@ -51,7 +52,7 @@ struct PrototypingScene
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene);
 
 void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase,
-                     Player &player1, Player &player2, int goingFirst, std::random_device &rd);
+                     Player &player1, Player &player2, GameRules gameRules, std::random_device &rd);
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
                       const Player &player1, const Player &player2);

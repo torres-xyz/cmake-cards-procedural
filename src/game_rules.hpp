@@ -6,6 +6,12 @@ enum class GameplayPhase;
 struct Card;
 struct Player;
 
+struct GameRules
+{
+    mutable int playerGoingFirst{2}; // CPU plays first
+    int pointsNeededToWin{2}; //Best of 3 rounds game as a default
+};
+
 void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_device &rd);
 
 int GetCardStackTotalBody(const std::vector<Card> &stack);

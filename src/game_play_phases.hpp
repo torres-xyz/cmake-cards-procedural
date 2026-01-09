@@ -1,6 +1,7 @@
 #pragma once
 #include <random>
 
+struct GameRules;
 struct PlayingScene;
 struct Card;
 struct Player;
@@ -22,7 +23,7 @@ enum class GameplayPhase
 };
 
 void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1, Player &player2,
-                          int playerGoingFirst, std::random_device &rd);
+                          GameRules gameRules, std::random_device &rd);
 
 void DrawCardsFromDeckToHand(Player &player, int amount);
 

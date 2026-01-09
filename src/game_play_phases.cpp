@@ -12,13 +12,17 @@
 #include "player.hpp"
 
 void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1,
-                          Player &player2, const int playerGoingFirst, std::random_device &rd)
+                          Player &player2, const GameRules gameRules, std::random_device &rd)
 {
     const raylib::Vector2 mousePosition = GetMousePosition();
     static GameplayPhase previousPhase{GameplayPhase::uninitialized};
     static raylib::Vector2 heldCardOffset{};
 
     static bool player1HasPlayedThisPhase{false};
+    [[maybe_unused]] static int player1TurnsPlayed{};
+    [[maybe_unused]] static int player2TurnsPlayed{};
+    static int roundsPlayed{};
+    static int previousRoundWinner{};
 
     [[maybe_unused]] static float timeSinceStartOfPhase{};
 
@@ -145,7 +149,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         [&player2]() -> void {
             for (std::size_t i = 0; i < player2.hand.size(); ++i)
             {
-                const float float_i = static_cast<float>(i);
+                const auto float_i = static_cast<float>(i);
 
                 //Set cards in the hand slightly apart from each other.
                 const raylib::Rectangle newCardRect
@@ -177,7 +181,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 player1.hasDrawnThisTurn = false;
             }
 
-            // std::cout << "Game Phase = " << GameplayPhaseToString(currentPhase).c_str() << std::endl;
+            std::cout << "Game Phase = " << GameplayPhaseToString(currentPhase).c_str() << std::endl;
         }
     };
 
@@ -206,8 +210,6 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         case GameplayPhase::uninitialized:
         {
             //Reset everything gameplay wise
-            heldCardOffset = raylib::Vector2{0, 0};
-
             InitializePlayerWithAdvancedDeck(player1, rd);
             ShuffleDeckAndMakeSureTopCardIsAUnit(player1.deck, rd);
 
@@ -248,7 +250,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             }
             assert(IsInitialHandValid(player1) && "Player 1 initial hand is not valid");
 
-            if (playerGoingFirst == 1)
+            if (gameRules.playerGoingFirst == 1)
             {
                 ChangePhase(GameplayPhase::playerOneFirstTurn);
                 break;
@@ -259,6 +261,13 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
         case GameplayPhase::playerOneDrawing:
         {
+            //Don't force a card draw phase if the deck is empty
+            if (player1.deck.empty())
+            {
+                ChangePhase(previousPhase);
+                break;
+            }
+
             playingScene.playerDeckButton.state = ButtonState::enabled;
             UpdateButtonState(playingScene.playerDeckButton, mousePosition, IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
 
@@ -272,11 +281,25 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             }
 
             //Only handle hovering
+            if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+            {
+                player1.isHoveringOverACard = false;
+                player1.hoveredCardUid = 0;
+                RemovePlayer1HeldCard(); //whether we can play it or not, we always clear the card from the hand.
+            }
+            UpdateHandAndHeldCard();
             UpdateHoveringCardInHand();
             break;
         }
         case GameplayPhase::playerTwoDrawing:
         {
+            //Don't force a card draw phase if the deck is empty
+            if (player2.deck.empty())
+            {
+                ChangePhase(previousPhase);
+                break;
+            }
+
             DrawCardsFromDeckToHand(player2, 1);
             UpdatePlayer2HandCards();
             ChangePhase(previousPhase);
@@ -285,7 +308,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         case GameplayPhase::playerOneFirstTurn:
         {
             // First, draw a card
-            if (!player1.hasDrawnThisTurn)
+            if (previousPhase != GameplayPhase::playerOneDrawing) //!player1.hasDrawnThisTurn)
             {
                 ChangePhase(GameplayPhase::playerOneDrawing);
                 break;
@@ -304,7 +327,20 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 break;
             }
 
-            if (playerGoingFirst == 1)
+            if (roundsPlayed == 0)
+            {
+                if (gameRules.playerGoingFirst == 1)
+                {
+                    ChangePhase(GameplayPhase::playerTwoFirstTurn);
+                    break;
+                }
+                if (gameRules.playerGoingFirst == 2)
+                {
+                    ChangePhase(GameplayPhase::playerTwoPlayingAndOpponentPlayed);
+                    break;
+                }
+            }
+            if (previousRoundWinner == 1)
             {
                 ChangePhase(GameplayPhase::playerTwoFirstTurn);
                 break;
@@ -314,6 +350,13 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
         case GameplayPhase::playerTwoFirstTurn:
         {
+            // First, draw a card
+            if (previousPhase != GameplayPhase::playerTwoDrawing) //!player1.hasDrawnThisTurn)
+            {
+                ChangePhase(GameplayPhase::playerTwoDrawing);
+                break;
+            }
+
             //On the first turn, pick a Unit from the hand and play it
             for (size_t i = 0; i < player2.hand.size(); ++i)
             {
@@ -323,9 +366,25 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                     break;
                 }
             }
+            assert(player2.hand.at(static_cast<size_t>(player2.heldCardIndex)).type == CardType::unit &&
+                "Player 2 was about to play a non-unit card as its first card.");
             PutCardInPlay(player2);
+            UpdatePlayer2HandCards();
 
-            if (playerGoingFirst == 1)
+            if (roundsPlayed == 0)
+            {
+                if (gameRules.playerGoingFirst == 1)
+                {
+                    ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
+                    break;
+                }
+                if (gameRules.playerGoingFirst == 2)
+                {
+                    ChangePhase(GameplayPhase::playerOneFirstTurn);
+                    break;
+                }
+            }
+            if (previousRoundWinner == 1)
             {
                 ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
                 break;
@@ -336,11 +395,12 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         case GameplayPhase::playerOnePlayingAndOpponentPlayed:
         {
             // First, draw a card
-            if (!player1.hasDrawnThisTurn)
+            if (previousPhase != GameplayPhase::playerOneDrawing) //!player1.hasDrawnThisTurn)
             {
                 ChangePhase(GameplayPhase::playerOneDrawing);
                 break;
             }
+
             if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
             {
                 TryToPlayCard();
@@ -367,9 +427,8 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         case GameplayPhase::playerTwoPlayingAndOpponentPlayed:
         {
             // First, draw a card
-            if (!player2.hasDrawnThisTurn)
+            if (previousPhase != GameplayPhase::playerTwoDrawing) //!player1.hasDrawnThisTurn)
             {
-                player2.hasDrawnThisTurn = true;
                 ChangePhase(GameplayPhase::playerTwoDrawing);
                 break;
             }
@@ -390,6 +449,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 {
                     player2.heldCardIndex = static_cast<int>(i);
                     PutCardInPlay(player2);
+                    UpdatePlayer2HandCards();
 
                     player2.hasDrawnThisTurn = false;
                     ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
@@ -405,11 +465,12 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         case GameplayPhase::playerOnePlayingAndOpponentPassed:
         {
             // First, draw a card
-            if (!player1.hasDrawnThisTurn)
+            if (previousPhase != GameplayPhase::playerOneDrawing) //!player1.hasDrawnThisTurn)
             {
                 ChangePhase(GameplayPhase::playerOneDrawing);
                 break;
             }
+
             if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
             {
                 TryToPlayCard();
@@ -436,6 +497,11 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         case GameplayPhase::playerTwoPlayingAndOpponentPassed:
         {
             // First, draw a card
+            if (previousPhase != GameplayPhase::playerTwoDrawing) //!player1.hasDrawnThisTurn)
+            {
+                ChangePhase(GameplayPhase::playerTwoDrawing);
+                break;
+            }
             if (!player2.hasDrawnThisTurn)
             {
                 player2.hasDrawnThisTurn = true;
@@ -459,6 +525,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 {
                     player2.heldCardIndex = static_cast<int>(i);
                     PutCardInPlay(player2);
+                    UpdatePlayer2HandCards();
 
                     player2.hasDrawnThisTurn = false;
                     ChangePhase(GameplayPhase::playerOnePlayingAndOpponentPlayed);
@@ -474,13 +541,55 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
         case GameplayPhase::battle:
         {
+            roundsPlayed++;
             const int winner = CalculateRoundWinner(player1.cardsInPlayStack, player2.cardsInPlayStack);
 
             if (winner == 1) player1.score++;
             if (winner == 2) player2.score++;
 
-            //For now, we play only one round.
-            ChangePhase(GameplayPhase::gameOver);
+            //Best of 3 Game
+            if (player1.score >= gameRules.pointsNeededToWin ||
+                player2.score >= gameRules.pointsNeededToWin)
+            {
+                ChangePhase(GameplayPhase::gameOver);
+                break;
+            }
+
+            // Reset stuff and start over
+            player1.hoveredCardUid = 0;
+            player1.isHoveringOverACard = false;
+            player2.hoveredCardUid = 0; //redundant for now
+            player2.isHoveringOverACard = false; //redundant for now
+
+            player1.cardsInPlayStack.clear();
+            player2.cardsInPlayStack.clear();
+
+            player1.hasDrawnThisTurn = false;
+            player2.hasDrawnThisTurn = false;
+
+            previousRoundWinner = winner;
+
+            // The player who just won starts playing first (disadvantage) TODO: turn into a game_rule
+            if (winner == 0) //Tie
+            {
+                if (gameRules.playerGoingFirst == 1)
+                {
+                    ChangePhase(GameplayPhase::playerOneFirstTurn);
+                    break;
+                }
+                ChangePhase(GameplayPhase::playerTwoFirstTurn);
+                break;
+            }
+            if (winner == 1)
+            {
+                ChangePhase(GameplayPhase::playerOneFirstTurn);
+                break;
+            }
+            if (winner == 2)
+            {
+                ChangePhase(GameplayPhase::playerTwoFirstTurn);
+                break;
+            }
             break;
         }
         case GameplayPhase::gameOver:

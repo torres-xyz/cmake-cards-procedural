@@ -147,11 +147,11 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
     DrawTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);
 }
 
-void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1, Player &player2, const int goingFirst, std::random_device &rd)
+void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1, Player &player2, const GameRules gameRules, std::random_device &rd)
 {
     // UPDATE ------------------------------------------------------------------
 
-    UpdateGameplayPhases(playingScene, currentPhase, player1, player2, goingFirst, rd);
+    UpdateGameplayPhases(playingScene, currentPhase, player1, player2, gameRules, rd);
 
     //Update Music
     PlayMusic(playingScene.music);

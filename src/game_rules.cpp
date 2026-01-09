@@ -7,6 +7,7 @@
 
 struct Card;
 
+
 void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_device &rd)
 {
     std::ranges::shuffle(deck, rd);
@@ -61,6 +62,12 @@ int GetCardStackTotalSoul(const std::vector<Card> &stack)
     return soulStatTotal;
 }
 
+/**
+ *
+ * @param stack1 Player 1's card stack on the field
+ * @param stack2 Player 2's card stack on the field
+ * @return 1 if Player 1 wins, 2 if player 2 wins or 0 if it's a tie.
+ */
 int CalculateRoundWinner(const std::vector<Card> &stack1, const std::vector<Card> &stack2)
 {
     const int totalBody1 = GetCardStackTotalBody(stack1);

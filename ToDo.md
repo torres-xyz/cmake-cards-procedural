@@ -1,6 +1,7 @@
 # To Do
 
-- [ ] Make the game a best of 3.
+- [ ] Add a delay to player 2's actions
+- [ ] Announce round winner every round.
 - [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Store a library of available cards and card lists better (currently they
   are just being declared in a vector<int> in constants.hpp).
@@ -76,3 +77,4 @@
 - [x] Add hovering to the cards in the play zone so we can see all cards in the stacks.
     - [x] Use UIDs to identify which card is being hovered.
     - [x] Center the zoomed in card around its original position.
+- [x] Make the game a best of 3.

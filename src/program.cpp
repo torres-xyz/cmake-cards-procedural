@@ -6,6 +6,7 @@
 #include "button.hpp"
 #include "audio.hpp"
 #include "game_play_phases.hpp"
+#include "game_rules.hpp"
 #include "textures.hpp"
 #include "game_scenes.hpp"
 #include "player.hpp"
@@ -33,7 +34,12 @@ int run()
     InitializePlayerWithAdvancedDeck(player1, rd);
     InitializePlayerWithAdvancedDeck(player2, rd);
 
-    constexpr int playerGoingFirst{2};
+    constexpr GameRules gameRules
+    {
+        .playerGoingFirst = 2,
+        .pointsNeededToWin = 2 //Best of 3 game
+    };
+
     GameScene currentScene{GameScene::starting};
     GameplayPhase currentPhase{GameplayPhase::uninitialized};
 
@@ -138,7 +144,6 @@ int run()
 
     while (!window.ShouldClose()) // Detect window close button or ESC key
     {
-        [[maybe_unused]] Vector2 mousePos = GetMousePosition();
         SetMasterVolume(!muteGame);
 
         switch (currentScene)
@@ -152,8 +157,7 @@ int run()
             }
             case GameScene::playing:
             {
-                RunPlayingScene(playingScene, currentPhase,
-                                player1, player2, playerGoingFirst, rd);
+                RunPlayingScene(playingScene, currentPhase, player1, player2, gameRules, rd);
 
                 if (currentPhase == GameplayPhase::gameOver)
                 {
@@ -163,8 +167,7 @@ int run()
             }
             case GameScene::gameOver:
             {
-                RunGameOverScene(gameOverScene, currentScene, currentPhase,
-                                 player1, player2);
+                RunGameOverScene(gameOverScene, currentScene, currentPhase, player1, player2);
                 break;
             }
             case GameScene::prototyping:
