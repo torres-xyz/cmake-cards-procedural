@@ -25,6 +25,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
     static int previousRoundWinner{};
 
     [[maybe_unused]] static float timeSinceStartOfPhase{};
+    static float player2ActionDelay{0.5};
 
     auto RemovePlayer1HeldCard{
         [&player1]()-> void {
@@ -205,6 +206,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
     playingScene.playerDeckButton.state = ButtonState::disabled;
     playingScene.endTurnButton.state = ButtonState::disabled;
 
+    timeSinceStartOfPhase += GetFrameTime();
     switch (currentPhase)
     {
         case GameplayPhase::uninitialized:
@@ -293,6 +295,8 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
         case GameplayPhase::playerTwoDrawing:
         {
+            if (timeSinceStartOfPhase < player2ActionDelay) break;
+
             //Don't force a card draw phase if the deck is empty
             if (player2.deck.empty())
             {
@@ -350,12 +354,16 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
         case GameplayPhase::playerTwoFirstTurn:
         {
+            if (timeSinceStartOfPhase < player2ActionDelay) break;
+
             // First, draw a card
             if (previousPhase != GameplayPhase::playerTwoDrawing) //!player1.hasDrawnThisTurn)
             {
                 ChangePhase(GameplayPhase::playerTwoDrawing);
                 break;
             }
+
+            if (timeSinceStartOfPhase < player2ActionDelay) break;
 
             //On the first turn, pick a Unit from the hand and play it
             for (size_t i = 0; i < player2.hand.size(); ++i)
@@ -426,12 +434,16 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
         case GameplayPhase::playerTwoPlayingAndOpponentPlayed:
         {
+            if (timeSinceStartOfPhase < player2ActionDelay) break;
+
             // First, draw a card
             if (previousPhase != GameplayPhase::playerTwoDrawing) //!player1.hasDrawnThisTurn)
             {
                 ChangePhase(GameplayPhase::playerTwoDrawing);
                 break;
             }
+
+            if (timeSinceStartOfPhase < player2ActionDelay) break;
 
             //If no cards in hand, pass the turn without playing
             if (player2.hand.empty())
@@ -496,6 +508,8 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
         case GameplayPhase::playerTwoPlayingAndOpponentPassed:
         {
+            if (timeSinceStartOfPhase < player2ActionDelay) break;
+
             // First, draw a card
             if (previousPhase != GameplayPhase::playerTwoDrawing) //!player1.hasDrawnThisTurn)
             {
@@ -508,6 +522,8 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 ChangePhase(GameplayPhase::playerTwoDrawing);
                 break;
             }
+
+            if (timeSinceStartOfPhase < player2ActionDelay) break;
 
             //If no cards in hand, pass the turn without playing
             if (player2.hand.empty())
@@ -541,6 +557,8 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
         case GameplayPhase::battle:
         {
+            if (timeSinceStartOfPhase < player2ActionDelay) break;
+
             roundsPlayed++;
             const int winner = CalculateRoundWinner(player1.cardsInPlayStack, player2.cardsInPlayStack);
 

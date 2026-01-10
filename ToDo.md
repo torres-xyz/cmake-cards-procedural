@@ -1,6 +1,5 @@
 # To Do
 
-- [ ] Add a delay to player 2's actions
 - [ ] Announce round winner every round.
 - [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Store a library of available cards and card lists better (currently they
@@ -78,3 +77,4 @@
     - [x] Use UIDs to identify which card is being hovered.
     - [x] Center the zoomed in card around its original position.
 - [x] Make the game a best of 3.
+- [x] Add a delay to player 2's actions
