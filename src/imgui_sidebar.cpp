@@ -5,11 +5,12 @@
 #include "raylib-cpp.hpp"
 #include "constants.hpp"
 #include "game_play_phases.hpp"
+#include "game_status.hpp"
 #include "player.hpp"
 
 namespace ImGuiSideBar
 {
-    void DrawSideBar(bool &muteGame, GameplayPhase &currentPhase,
+    void DrawSideBar(bool &muteGame, GameplayPhase &currentPhase, GameStatus &gameStatus,
                      const Player &player1, const Player &player2)
     {
         // start ImGui Content
@@ -39,6 +40,16 @@ namespace ImGuiSideBar
             ImGui::SeparatorText("Options");
             ImGui::Checkbox("Mute", &muteGame);
             ImGui::SeparatorText("Debug Actions");
+            if (ImGui::Button("Set Game Phase to End Phase"))
+            {
+                if (gameStatus.roundWinnerHistory.empty())
+                {
+                    gameStatus.roundWinnerHistory.push_back(1);
+                    std::cout << "Added '1' to gameStatus.roundWinnerHistory to test End Phase screen" << std::endl;
+                }
+
+                currentPhase = GameplayPhase::endPhase;
+            }
             if (ImGui::Button("Set Game Phase to Game Over"))
             {
                 currentPhase = GameplayPhase::gameOver;

@@ -15,7 +15,6 @@ enum class GameScene
     invalid,
     starting,
     playing,
-    roundWinnerAnnouncement,
     gameOver,
     prototyping
 };
@@ -37,16 +36,8 @@ struct PlayingScene
     GameMusic music{};
     Button playerDeckButton{};
     Button endTurnButton{};
-};
-
-struct RoundWinnerAnnouncementScene
-{
-    GameScene gameScene{GameScene::roundWinnerAnnouncement};
-    GameTexture background{};
-    GameMusic music{};
     Button nextRoundButton{};
 };
-
 
 struct GameOverScene
 {
@@ -65,8 +56,6 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene);
 
 void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, GameStatus &gameStatus,
                      Player &player1, Player &player2, const GameRules &gameRules, std::random_device &rd);
-
-void RunRoundWinnerAnnouncement(RoundWinnerAnnouncementScene &roundWinnerAnnouncementScene, const GameStatus &gameStatus);
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
                       const Player &player1, const Player &player2);

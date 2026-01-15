@@ -574,7 +574,13 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
         case GameplayPhase::endPhase:
         {
-            //This phase will be activated after the Round Winner Scene is shown.
+            Button &nextRoundButton{playingScene.nextRoundButton};
+
+            UpdateButtonState(nextRoundButton, mousePosition,
+                              IsMouseButtonDown(MOUSE_BUTTON_LEFT),
+                              IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+
+            if (!nextRoundButton.wasPressed) break;
 
             // Reset stuff and start over
             player1.hoveredCardUid = 0;

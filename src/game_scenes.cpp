@@ -289,52 +289,39 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Ga
             DrawCardAdvanced(allCards.at(hoveredCardIndex), expandedCardInFieldRect);
         }
     }
-}
-
-void RunRoundWinnerAnnouncement(RoundWinnerAnnouncementScene &roundWinnerAnnouncementScene, const GameStatus &gameStatus)
-{
-    const raylib::Vector2 mousePosition = GetMousePosition();
-
-    // Update Music
-    PlayMusic(roundWinnerAnnouncementScene.music);
-
-    Button &nextRoundButton = roundWinnerAnnouncementScene.nextRoundButton;
-    // Update
-    // Update Buttons
-    UpdateButtonState(nextRoundButton,
-                      mousePosition,
-                      IsMouseButtonDown(MOUSE_BUTTON_LEFT),
-                      IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
-
-    if (nextRoundButton.wasPressed)
+    if (currentPhase == GameplayPhase::endPhase)
     {
-        PlaySound(GameSound::buttonPress01);
+        //Render a semi-transparent black overlay on the scene
+        const raylib::Rectangle endPhaseOverlayRec{0, 0, constants::screenWidth, constants::screenHeight};
+        const raylib::Color transparentBlack{0, 0, 0, 180};
+        endPhaseOverlayRec.Draw(transparentBlack);
 
-        // gameplayPhase = GameplayPhase::uninitialized;
-        // currentScene = GameScene::playing;
-    }
+        const Button &nextRoundButton = playingScene.nextRoundButton;
+        DrawButton(nextRoundButton, GetTexture(nextRoundButton.background));
 
-    GetTexture(roundWinnerAnnouncementScene.background).Draw();
-    DrawButton(roundWinnerAnnouncementScene.nextRoundButton, GetTexture(roundWinnerAnnouncementScene.nextRoundButton.background));
+        constexpr float rectLength{200};
+        const raylib::Rectangle message
+        {
+            constants::screenWidth / 2.0 - rectLength / 2.0,
+            10,
+            rectLength,
+            200
+        };
 
-    constexpr float rectLength{200};
-    const raylib::Rectangle message
-    {
-        constants::screenWidth / 2.0 - rectLength / 2.0,
-        10,
-        rectLength,
-        100
-    };
+        assert(!gameStatus.roundWinnerHistory.empty() && "gameStatus.roundWinnerHistory is empty.");
 
-    assert(gameStatus.roundWinnerHistory.size() != 0 && "gameStatus.roundWinnerHistory.size() == 0");
-
-    if (gameStatus.roundWinnerHistory.back() == 1)
-    {
-        HelperFunctions::DrawTextCenteredInRec("Player 1 wins this round.", 20, BLACK, message);
-    }
-    else if (gameStatus.roundWinnerHistory.back() == 2)
-    {
-        HelperFunctions::DrawTextCenteredInRec("Player 2 wins this round.", 20, BLACK, message);
+        if (gameStatus.roundWinnerHistory.back() == 0)
+        {
+            HelperFunctions::DrawTextCenteredInRec("Round ended in a tie.", 20, RAYWHITE, message);
+        }
+        if (gameStatus.roundWinnerHistory.back() == 1)
+        {
+            HelperFunctions::DrawTextCenteredInRec("Player 1 wins this round.", 20, RAYWHITE, message);
+        }
+        else if (gameStatus.roundWinnerHistory.back() == 2)
+        {
+            HelperFunctions::DrawTextCenteredInRec("Player 2 wins this round.", 20, RAYWHITE, message);
+        }
     }
 }
 

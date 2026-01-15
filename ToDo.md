@@ -1,8 +1,6 @@
 # To Do
 
-- [ ] Announce round winner every round.
-    - [ ] Create a new struct RoundWinnerScene that shows the round winner, with a button to continue.
-    - [ ] Switch to the RoundWinnerScene at the end of the Battle phase.
+- [ ] Add current turn indicator.
 - [ ] Create a fixed card library (no more random cards).
 - [ ] Fix the way Action cards are displayed (remove the stats from the bottom).
 - [ ] Implement undoing playing a card before clicking end turn.
@@ -81,4 +79,5 @@
     - [x] Use UIDs to identify which card is being hovered.
     - [x] Center the zoomed in card around its original position.
 - [x] Make the game a best of 3.
-- [x] Add a delay to player 2's actions
+- [x] Add a delay to player 2's actions.
+- [x] Announce round winner every round.

@@ -70,6 +70,8 @@ int run()
     };
     //GameScene::start end -----------------------------------------------------
     //GameScene::playing -------------------------------------------------------
+    constexpr float nextRoundButtonWidth{200};
+    constexpr float nextRoundButtonHeight{100};
     PlayingScene playingScene
     {
         .gameScene = GameScene::playing,
@@ -104,17 +106,7 @@ int run()
             .fontSize = 20,
             .background = GameTexture::panel05,
             .state = ButtonState::disabled
-        }
-    };
-    //GameScene::playing end ---------------------------------------------------
-    //GameScene::roundWinnerAnnouncement -------------------------------------------------------
-    constexpr float nextRoundButtonWidth{200};
-    constexpr float nextRoundButtonHeight{100};
-    RoundWinnerAnnouncementScene roundWinnerAnnouncementScene
-    {
-        .gameScene = GameScene::roundWinnerAnnouncement,
-        .background = GameTexture::wall13,
-        .music = GameMusic::playing,
+        },
         .nextRoundButton
         {
             .rectangle = raylib::Rectangle
@@ -130,7 +122,7 @@ int run()
             .state = ButtonState::enabled
         }
     };
-    //GameScene::roundWinnerAnnouncement end ---------------------------------------------------
+    //GameScene::playing end ---------------------------------------------------
     //GameScene::gameOver start ------------------------------------------------
     constexpr float playAgainButtonWidth{200};
     constexpr float playAgainButtonHeight{100};
@@ -185,20 +177,10 @@ int run()
             {
                 RunPlayingScene(playingScene, currentPhase, gameStatus, player1, player2, gameRules, rd);
 
-                if (currentPhase == GameplayPhase::endPhase)
-                {
-                    currentScene = GameScene::roundWinnerAnnouncement;
-                }
                 if (currentPhase == GameplayPhase::gameOver)
                 {
                     currentScene = GameScene::gameOver;
                 }
-                break;
-            }
-            case GameScene::roundWinnerAnnouncement:
-            {
-                RunRoundWinnerAnnouncement(roundWinnerAnnouncementScene, gameStatus);
-
                 break;
             }
             case GameScene::gameOver:
@@ -215,7 +197,7 @@ int run()
 
 
 #if (DEBUG)
-        ImGuiSideBar::DrawSideBar(muteGame, currentPhase, player1, player2);
+        ImGuiSideBar::DrawSideBar(muteGame, currentPhase, gameStatus, player1, player2);
 #endif
         EndDrawing();
 
