@@ -1,6 +1,10 @@
 # To Do
 
 - [ ] Announce round winner every round.
+    - [ ] Create a new struct RoundWinnerScene that shows the round winner, with a button to continue.
+    - [ ] Switch to the RoundWinnerScene at the end of the Battle phase.
+- [ ] Create a fixed card library (no more random cards).
+- [ ] Fix the way Action cards are displayed (remove the stats from the bottom).
 - [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Store a library of available cards and card lists better (currently they
   are just being declared in a vector<int> in constants.hpp).

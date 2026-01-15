@@ -11,8 +11,8 @@
 #include "raylib-cpp.hpp"
 #include "player.hpp"
 
-void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1,
-                          Player &player2, const GameRules gameRules, std::random_device &rd)
+void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhase, GameStatus &gameStatus, Player &player1,
+                          Player &player2, const GameRules &gameRules, std::random_device &rd)
 {
     const raylib::Vector2 mousePosition = GetMousePosition();
     static GameplayPhase previousPhase{GameplayPhase::uninitialized};
@@ -24,7 +24,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
     static int roundsPlayed{};
     static int previousRoundWinner{};
 
-    [[maybe_unused]] static float timeSinceStartOfPhase{};
+    static float timeSinceStartOfPhase{};
     static float player2ActionDelay{0.5};
 
     auto RemovePlayer1HeldCard{
@@ -561,17 +561,20 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
 
             roundsPlayed++;
             const int winner = CalculateRoundWinner(player1.cardsInPlayStack, player2.cardsInPlayStack);
+            previousRoundWinner = winner;
 
             if (winner == 1) player1.score++;
             if (winner == 2) player2.score++;
 
-            //Best of 3 Game
-            if (player1.score >= gameRules.pointsNeededToWin ||
-                player2.score >= gameRules.pointsNeededToWin)
-            {
-                ChangePhase(GameplayPhase::gameOver);
-                break;
-            }
+            gameStatus.roundsPlayed++;
+            gameStatus.roundWinnerHistory.push_back(winner);
+
+            ChangePhase(GameplayPhase::endPhase);
+            break;
+        }
+        case GameplayPhase::endPhase:
+        {
+            //This phase will be activated after the Round Winner Scene is shown.
 
             // Reset stuff and start over
             player1.hoveredCardUid = 0;
@@ -585,10 +588,15 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             player1.hasDrawnThisTurn = false;
             player2.hasDrawnThisTurn = false;
 
-            previousRoundWinner = winner;
-
+            //Best of 3 Game
+            if (player1.score >= gameRules.pointsNeededToWin ||
+                player2.score >= gameRules.pointsNeededToWin)
+            {
+                ChangePhase(GameplayPhase::gameOver);
+                break;
+            }
             // The player who just won starts playing first (disadvantage) TODO: turn into a game_rule
-            if (winner == 0) //Tie
+            if (previousRoundWinner == 0) //Tie
             {
                 if (gameRules.playerGoingFirst == 1)
                 {
@@ -598,17 +606,16 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 ChangePhase(GameplayPhase::playerTwoFirstTurn);
                 break;
             }
-            if (winner == 1)
+            if (previousRoundWinner == 1)
             {
                 ChangePhase(GameplayPhase::playerOneFirstTurn);
                 break;
             }
-            if (winner == 2)
+            if (previousRoundWinner == 2)
             {
                 ChangePhase(GameplayPhase::playerTwoFirstTurn);
                 break;
             }
-            break;
         }
         case GameplayPhase::gameOver:
             break;
@@ -693,6 +700,8 @@ std::string GameplayPhaseToString(const GameplayPhase phase)
             return "Player Two Playing And Opponent Passed (did NOT play)";
         case GameplayPhase::battle:
             return "Battle";
+        case GameplayPhase::endPhase:
+            return "End Phase";
         case GameplayPhase::gameOver:
             return "Game Over";
     }

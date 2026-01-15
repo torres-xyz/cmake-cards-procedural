@@ -8,7 +8,7 @@ struct Player;
 
 struct GameRules
 {
-    mutable int playerGoingFirst{2}; // CPU plays first
+    int playerGoingFirst{2}; // CPU plays first
     int pointsNeededToWin{2}; //Best of 3 rounds game as a default
 };
 

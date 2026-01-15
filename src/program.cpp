@@ -9,6 +9,7 @@
 #include "game_rules.hpp"
 #include "textures.hpp"
 #include "game_scenes.hpp"
+#include "game_status.hpp"
 #include "player.hpp"
 
 int run()
@@ -34,7 +35,7 @@ int run()
     InitializePlayerWithAdvancedDeck(player1, rd);
     InitializePlayerWithAdvancedDeck(player2, rd);
 
-    constexpr GameRules gameRules
+    GameRules gameRules
     {
         .playerGoingFirst = 2,
         .pointsNeededToWin = 2 //Best of 3 game
@@ -42,6 +43,7 @@ int run()
 
     GameScene currentScene{GameScene::starting};
     GameplayPhase currentPhase{GameplayPhase::uninitialized};
+    GameStatus gameStatus{};
 
     //GameScene::start ---------------------------------------------------------
     constexpr int startGameButtonWidth{200};
@@ -105,9 +107,33 @@ int run()
         }
     };
     //GameScene::playing end ---------------------------------------------------
+    //GameScene::roundWinnerAnnouncement -------------------------------------------------------
+    constexpr float nextRoundButtonWidth{200};
+    constexpr float nextRoundButtonHeight{100};
+    RoundWinnerAnnouncementScene roundWinnerAnnouncementScene
+    {
+        .gameScene = GameScene::roundWinnerAnnouncement,
+        .background = GameTexture::wall13,
+        .music = GameMusic::playing,
+        .nextRoundButton
+        {
+            .rectangle = raylib::Rectangle
+            {
+                constants::screenWidth * 0.5f - nextRoundButtonWidth * 0.5f,
+                constants::screenHeight * 0.5f - nextRoundButtonHeight * 0.5f,
+                nextRoundButtonWidth,
+                nextRoundButtonHeight
+            },
+            .text = "Next Round",
+            .fontSize = 20,
+            .background = GameTexture::panel01,
+            .state = ButtonState::enabled
+        }
+    };
+    //GameScene::roundWinnerAnnouncement end ---------------------------------------------------
     //GameScene::gameOver start ------------------------------------------------
-    constexpr int playAgainButtonWidth{200};
-    constexpr int playAgainButtonHeight{100};
+    constexpr float playAgainButtonWidth{200};
+    constexpr float playAgainButtonHeight{100};
     GameOverScene gameOverScene
     {
         .gameScene = GameScene::gameOver,
@@ -117,10 +143,10 @@ int run()
         {
             .rectangle = raylib::Rectangle
             {
-                constants::screenWidth * 0.5f - static_cast<float>(playAgainButtonWidth) * 0.5f,
-                constants::screenHeight * 0.5f - static_cast<float>(playAgainButtonHeight) * 0.5f,
-                static_cast<float>(playAgainButtonWidth),
-                static_cast<float>(playAgainButtonHeight)
+                constants::screenWidth * 0.5f - playAgainButtonWidth * 0.5f,
+                constants::screenHeight * 0.5f - playAgainButtonHeight * 0.5f,
+                playAgainButtonWidth,
+                playAgainButtonHeight
             },
             .text = "Restart Game",
             .fontSize = 20,
@@ -157,12 +183,22 @@ int run()
             }
             case GameScene::playing:
             {
-                RunPlayingScene(playingScene, currentPhase, player1, player2, gameRules, rd);
+                RunPlayingScene(playingScene, currentPhase, gameStatus, player1, player2, gameRules, rd);
 
+                if (currentPhase == GameplayPhase::endPhase)
+                {
+                    currentScene = GameScene::roundWinnerAnnouncement;
+                }
                 if (currentPhase == GameplayPhase::gameOver)
                 {
                     currentScene = GameScene::gameOver;
                 }
+                break;
+            }
+            case GameScene::roundWinnerAnnouncement:
+            {
+                RunRoundWinnerAnnouncement(roundWinnerAnnouncementScene, gameStatus);
+
                 break;
             }
             case GameScene::gameOver:

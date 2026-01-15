@@ -13,6 +13,9 @@
 #include "helper_functions.hpp"
 #include "fonts.hpp"
 #include "game_rules.hpp"
+#include "game_status.hpp"
+
+struct GameStatus;
 
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
 {
@@ -147,11 +150,11 @@ void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
     DrawTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);
 }
 
-void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Player &player1, Player &player2, const GameRules gameRules, std::random_device &rd)
+void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, GameStatus &gameStatus, Player &player1, Player &player2, const GameRules &gameRules, std::random_device &rd)
 {
     // UPDATE ------------------------------------------------------------------
 
-    UpdateGameplayPhases(playingScene, currentPhase, player1, player2, gameRules, rd);
+    UpdateGameplayPhases(playingScene, currentPhase, gameStatus, player1, player2, gameRules, rd);
 
     //Update Music
     PlayMusic(playingScene.music);
@@ -288,6 +291,53 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Pl
     }
 }
 
+void RunRoundWinnerAnnouncement(RoundWinnerAnnouncementScene &roundWinnerAnnouncementScene, const GameStatus &gameStatus)
+{
+    const raylib::Vector2 mousePosition = GetMousePosition();
+
+    // Update Music
+    PlayMusic(roundWinnerAnnouncementScene.music);
+
+    Button &nextRoundButton = roundWinnerAnnouncementScene.nextRoundButton;
+    // Update
+    // Update Buttons
+    UpdateButtonState(nextRoundButton,
+                      mousePosition,
+                      IsMouseButtonDown(MOUSE_BUTTON_LEFT),
+                      IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+
+    if (nextRoundButton.wasPressed)
+    {
+        PlaySound(GameSound::buttonPress01);
+
+        // gameplayPhase = GameplayPhase::uninitialized;
+        // currentScene = GameScene::playing;
+    }
+
+    GetTexture(roundWinnerAnnouncementScene.background).Draw();
+    DrawButton(roundWinnerAnnouncementScene.nextRoundButton, GetTexture(roundWinnerAnnouncementScene.nextRoundButton.background));
+
+    constexpr float rectLength{200};
+    const raylib::Rectangle message
+    {
+        constants::screenWidth / 2.0 - rectLength / 2.0,
+        10,
+        rectLength,
+        100
+    };
+
+    assert(gameStatus.roundWinnerHistory.size() != 0 && "gameStatus.roundWinnerHistory.size() == 0");
+
+    if (gameStatus.roundWinnerHistory.back() == 1)
+    {
+        HelperFunctions::DrawTextCenteredInRec("Player 1 wins this round.", 20, BLACK, message);
+    }
+    else if (gameStatus.roundWinnerHistory.back() == 2)
+    {
+        HelperFunctions::DrawTextCenteredInRec("Player 2 wins this round.", 20, BLACK, message);
+    }
+}
+
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
                       const Player &player1, const Player &player2)
 {
@@ -324,7 +374,6 @@ void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, Gam
         rectLength,
         100
     };
-    // DrawRectangleRec(winMessageRect, WHITE);
     if (player1.score > player2.score)
     {
         HelperFunctions::DrawTextCenteredInRec("Player 1 Wins!", 20, BLACK, winMessageRect);

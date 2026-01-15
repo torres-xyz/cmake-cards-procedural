@@ -22,6 +22,8 @@ add_library(${PROJECT_NAME}
         fonts.cpp
         game_rules.cpp
         game_rules.hpp
+        game_status.cpp
+        game_status.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

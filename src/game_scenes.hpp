@@ -1,7 +1,9 @@
 #pragma once
 #include <random>
 #include "button.hpp"
+#include "game_status.hpp"
 
+struct GameStatus;
 struct GameRules;
 struct Player;
 enum class GameplayPhase;
@@ -13,6 +15,7 @@ enum class GameScene
     invalid,
     starting,
     playing,
+    roundWinnerAnnouncement,
     gameOver,
     prototyping
 };
@@ -36,6 +39,15 @@ struct PlayingScene
     Button endTurnButton{};
 };
 
+struct RoundWinnerAnnouncementScene
+{
+    GameScene gameScene{GameScene::roundWinnerAnnouncement};
+    GameTexture background{};
+    GameMusic music{};
+    Button nextRoundButton{};
+};
+
+
 struct GameOverScene
 {
     GameScene gameScene{GameScene::gameOver};
@@ -51,8 +63,10 @@ struct PrototypingScene
 
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene);
 
-void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase,
-                     Player &player1, Player &player2, GameRules gameRules, std::random_device &rd);
+void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, GameStatus &gameStatus,
+                     Player &player1, Player &player2, const GameRules &gameRules, std::random_device &rd);
+
+void RunRoundWinnerAnnouncement(RoundWinnerAnnouncementScene &roundWinnerAnnouncementScene, const GameStatus &gameStatus);
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
                       const Player &player1, const Player &player2);
