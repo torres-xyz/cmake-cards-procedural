@@ -1,8 +1,10 @@
 # To Do
 
-- [ ] Add current turn indicator.
 - [ ] Create a fixed card library (no more random cards).
 - [ ] Fix the way Action cards are displayed (remove the stats from the bottom).
+- [ ] Add cards of different banners.
+    - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
+- [ ] Add current turn indicator.
 - [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Store a library of available cards and card lists better (currently they
   are just being declared in a vector<int> in constants.hpp).

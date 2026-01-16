@@ -47,4 +47,8 @@ struct Card
     int soul{0};
 };
 
+void LoadCardLibrary();
 
+void PrintCard(const Card &card);
+
+CardBanner StringToBanner(const std::string_view sv);

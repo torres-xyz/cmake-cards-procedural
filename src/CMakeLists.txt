@@ -53,7 +53,8 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC # Set to public so our Tests can have access to the headers in our dependencies
         raylib_cpp
         imgui
-        rlimgui)
+        rlimgui
+        fast-cpp-csv-parser)
 
 add_executable(main
         main.cpp # will call run.main()

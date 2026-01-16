@@ -11,6 +11,7 @@
 #include "game_scenes.hpp"
 #include "game_status.hpp"
 #include "player.hpp"
+#include "csv.h"
 
 int run()
 {
@@ -27,6 +28,8 @@ int run()
 #endif
     InitAudioDevice();
     bool muteGame{false};
+
+    LoadCardLibrary();
 
     //Player 1
     Player player1{.id = 1};
