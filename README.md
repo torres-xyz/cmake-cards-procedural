@@ -21,7 +21,8 @@ Brian Will's ["Object-Oriented Programming is Bad" video](https://www.youtube.co
 
 - Kenney's Fantasy UI Borders - [Link](https://kenney.nl/assets/fantasy-ui-borders)
 - Bakku No Oni - SABI 4 - [Archive.org Link](https://archive.org/details/bakku-no-oni-sabi4/)
-- Pokemon TCG Game Boy Sprites - [Link](https://www.spriters-resource.com/game_boy_gbc/pokemontradingcardgame/)
+- Willibab's Mythic Monsters F pack [Itch.io](https://willibab.itch.io/free-mythic-monsters)
+- Willibab's Simple Icons pack [Itch.io](https://willibab.itch.io/willibabs-icons)
 
 ### Audio
 
