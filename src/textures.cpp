@@ -1,6 +1,8 @@
 #include "textures.hpp"
 #include <unordered_map>
 #include "card.hpp"
+#include <iostream>
+#include "csv.h"
 
 raylib::Texture2D const &GetTexture(const GameTexture tex)
 {
@@ -74,12 +76,27 @@ raylib::Texture2D const &GetTexture(const CardBanner banner, const CardType card
 
 raylib::Texture2D const &GetCardArtTexture(const CardID cardId)
 {
-    static const std::unordered_map<CardID, std::string> cardIDToArtTexturePathMap
+    static std::unordered_map<CardID, std::string> cardIDToArtTexturePathMap{};
+
+    //Add the invalid texture separately.
+    cardIDToArtTexturePathMap.insert({CardID::invalid, "resources/textures/invalid_tex.png"});
+
+    //TODO: Consider preloading this as well.
+    if (!cardIDToArtTexturePathMap.contains(cardId))
     {
-        {CardID::invalid, "resources/textures/invalid_tex.png"},
-        {CardID::firstCard, "resources/textures/card-art/first_card_art_min.png"},
-        {CardID::firstCardAction, "resources/textures/card-art/first_card_art_action_min.png"},
-    };
+        io::CSVReader<2> in("resources/csv/cards_db.csv");
+        in.read_header(io::ignore_extra_column, "cardID", "Asset Name");
+        int cardID{};
+        std::string assetName{};
+
+        const std::string cardArtDirPath = "resources/textures/card-art/";
+
+        while (in.read_row(cardID, assetName))
+        {
+            cardIDToArtTexturePathMap.insert({static_cast<CardID>(cardID), std::format("{0}/{1}.png", cardArtDirPath, assetName)});
+        }
+    }
+
     static std::unordered_map<CardID, raylib::Texture2D> cardIDToTexture2DMap{};
 
     if (!cardIDToTexture2DMap.contains(cardId))

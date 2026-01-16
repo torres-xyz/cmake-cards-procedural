@@ -9,6 +9,7 @@ Brian Will's ["Object-Oriented Programming is Bad" video](https://www.youtube.co
 - raylib-cpp - [GitHub](https://github.com/RobLoach/raylib-cpp), [Docs](https://robloach.github.io/raylib-cpp/)
 - dear imgui - [GitHub](https://github.com/ocornut/imgui)
 - rlimgui - [GitHub](https://github.com/raylib-extras/rlImGui)
+- fast-cpp-csv-parser - [GitHub](https://github.com/ben-strasser/fast-cpp-csv-parser)
 
 ### For testing:
 

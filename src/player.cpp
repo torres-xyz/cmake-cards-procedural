@@ -17,48 +17,17 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
     player.deck.clear();
     player.cardsPlayed = 0;
 
-    std::uniform_int_distribution unitsStatsRandomRange{1, 20};
-    std::uniform_int_distribution actionsStatsRandomRange{1, 10};
-
     for (int i = 0; i < constants::initialDeckSize - 3; ++i)
     {
-        Card advancedCard
-        {
-            .rect = {100, 100, constants::cardWidth, constants::cardHeight},
-            .type = CardType::unit,
-            .faceUp = true,
-            .cardID = CardID::firstCard,
-            .uid = HelperFunctions::GetUID(),
-            .name = "Lorem Ipsum",
-            .bodyText = "Id aspernatur consequuntur eos ut quia vero. Voluptas "
-            "beatae ut temporibus consectetur eveniet placeat adipisci. "
-            "Dignissimos aut et recusandae voluptates harum.",
-            .banner = CardBanner::form,
-            .body = unitsStatsRandomRange(rd) * 500,
-            .mind = unitsStatsRandomRange(rd) * 500,
-            .soul = unitsStatsRandomRange(rd) * 500,
-        };
+        Card cardFromDB = GetCardFromDB(CardID::cancerPagurus);
 
-        player.deck.emplace_back(advancedCard);
+        player.deck.emplace_back(cardFromDB);
     }
     for (int i = 0; i < 3; ++i)
     {
-        Card advancedActionCard
-        {
-            .rect = {100, 100, constants::cardWidth, constants::cardHeight},
-            .type = CardType::action,
-            .faceUp = true,
-            .cardID = CardID::firstCardAction,
-            .uid = HelperFunctions::GetUID(),
-            .name = "Action Card One",
-            .bodyText = "+1000 Body to your Unit.",
-            .banner = CardBanner::form,
-            .body = actionsStatsRandomRange(rd) * 500,
-            .mind = actionsStatsRandomRange(rd) * 500,
-            .soul = actionsStatsRandomRange(rd) * 500
-        };
+        Card cardFromDB = GetCardFromDB(CardID::bodyPlus);
 
-        player.deck.emplace_back(advancedActionCard);
+        player.deck.emplace_back(cardFromDB);
     }
 
     std::ranges::shuffle(player.deck, rd);

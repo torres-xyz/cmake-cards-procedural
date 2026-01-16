@@ -387,7 +387,7 @@ void RunPrototypingScene(const PrototypingScene &scene)
         },
         .type = CardType::unit,
         .faceUp = true,
-        .cardID = CardID::firstCard,
+        .cardID = CardID::cancerPagurus,
         .name = "Lorem Ipsum",
         .bodyText = "Id aspernatur consequuntur eos ut quia vero. Voluptas "
         "beatae ut temporibus consectetur eveniet placeat adipisci. "

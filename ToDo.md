@@ -1,6 +1,10 @@
 # To Do
 
 - [ ] Create a fixed card library (no more random cards).
+    - [x] At least 30 different cards.
+    - [x] Add card art for each card.
+    - [ ] Create CardIDs for each card.
+    - [ ] Make 2 different decks with these cards, one for each player.
 - [ ] Fix the way Action cards are displayed (remove the stats from the bottom).
 - [ ] Add cards of different banners.
     - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
@@ -83,3 +87,4 @@
 - [x] Make the game a best of 3.
 - [x] Add a delay to player 2's actions.
 - [x] Announce round winner every round.
+- [x] Make GetCardArtTexture retrieve the path from the csv file.

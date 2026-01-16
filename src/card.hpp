@@ -11,9 +11,10 @@ enum class CardType
 
 enum class CardID
 {
-    invalid,
-    firstCard,
-    firstCardAction
+    invalid = 0,
+    cancerPagurus = 1,
+    pierrotten = 2,
+    bodyPlus = 15,
 };
 
 enum class CardBanner
@@ -49,6 +50,14 @@ struct Card
 
 void LoadCardLibrary();
 
+Card GetCardFromDB(const CardID id);
+
 void PrintCard(const Card &card);
 
 CardBanner StringToBanner(const std::string_view sv);
+
+std::string BannerToString(const CardBanner banner);
+
+CardType StringToCardType(const std::string_view sv);
+
+std::string CardTypeToString(const CardType cardType);

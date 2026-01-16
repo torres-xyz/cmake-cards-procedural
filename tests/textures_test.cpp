@@ -6,14 +6,14 @@ TEST_CASE("GetCardArtTexture returns a valid Texture")
 {
     const raylib::Window window(0, 0, "Tests");
 
-    REQUIRE(GetCardArtTexture(CardID::firstCard).IsValid());
+    REQUIRE(GetCardArtTexture(CardID::cancerPagurus).IsValid());
 }
 
 TEST_CASE("GetCardArtTexture(CardID cardId) returns a Texture")
 {
     const raylib::Window window(0, 0, "Tests");
 
-    REQUIRE(GetCardArtTexture(CardID::firstCard).IsValid());
+    REQUIRE(GetCardArtTexture(CardID::cancerPagurus).IsValid());
 }
 
 
