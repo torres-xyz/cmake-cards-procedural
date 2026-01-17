@@ -9,14 +9,6 @@ enum class CardType
     action
 };
 
-enum class CardID
-{
-    invalid = 0,
-    cancerPagurus = 1,
-    pierrotten = 2,
-    bodyPlus = 15,
-};
-
 enum class CardBanner
 {
     invalid,
@@ -38,7 +30,7 @@ struct Card
     };
     CardType type{CardType::invalid};
     bool faceUp{true};
-    CardID cardID{};
+    int cardID{};
     unsigned long int uid{};
     std::string name{};
     std::string bodyText{};
@@ -48,16 +40,18 @@ struct Card
     int soul{0};
 };
 
-void LoadCardLibrary();
+std::vector<Card> GetCardDB();
 
-Card GetCardFromDB(const CardID id);
+Card GetCardFromDB(int id);
 
 void PrintCard(const Card &card);
 
-CardBanner StringToBanner(const std::string_view sv);
+CardBanner StringToBanner(std::string_view sv);
 
-std::string BannerToString(const CardBanner banner);
+std::string BannerToString(CardBanner banner);
 
-CardType StringToCardType(const std::string_view sv);
+CardType StringToCardType(std::string_view sv);
 
-std::string CardTypeToString(const CardType cardType);
+std::string CardTypeToString(CardType cardType);
+
+int StringToCardId(std::string_view cardName);

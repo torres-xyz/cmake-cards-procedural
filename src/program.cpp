@@ -29,7 +29,7 @@ int run()
     InitAudioDevice();
     bool muteGame{false};
 
-    LoadCardLibrary();
+    GetCardDB();
 
     //Player 1
     Player player1{.id = 1};

@@ -74,12 +74,12 @@ raylib::Texture2D const &GetTexture(const CardBanner banner, const CardType card
     return GetTexture(GameTexture::invalid);
 }
 
-raylib::Texture2D const &GetCardArtTexture(const CardID cardId)
+raylib::Texture2D const &GetCardArtTexture(const int cardId)
 {
-    static std::unordered_map<CardID, std::string> cardIDToArtTexturePathMap{};
+    static std::unordered_map<int, std::string> cardIDToArtTexturePathMap{};
 
     //Add the invalid texture separately.
-    cardIDToArtTexturePathMap.insert({CardID::invalid, "resources/textures/invalid_tex.png"});
+    cardIDToArtTexturePathMap.insert({0, "resources/textures/invalid_tex.png"});
 
     //TODO: Consider preloading this as well.
     if (!cardIDToArtTexturePathMap.contains(cardId))
@@ -93,11 +93,11 @@ raylib::Texture2D const &GetCardArtTexture(const CardID cardId)
 
         while (in.read_row(cardID, assetName))
         {
-            cardIDToArtTexturePathMap.insert({static_cast<CardID>(cardID), std::format("{0}/{1}.png", cardArtDirPath, assetName)});
+            cardIDToArtTexturePathMap.insert({cardID, std::format("{0}/{1}.png", cardArtDirPath, assetName)});
         }
     }
 
-    static std::unordered_map<CardID, raylib::Texture2D> cardIDToTexture2DMap{};
+    static std::unordered_map<int, raylib::Texture2D> cardIDToTexture2DMap{};
 
     if (!cardIDToTexture2DMap.contains(cardId))
     {

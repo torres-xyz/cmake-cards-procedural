@@ -5,6 +5,7 @@
     - [x] Add card art for each card.
     - [ ] Create CardIDs for each card.
     - [ ] Make 2 different decks with these cards, one for each player.
+    - [ ] Create a NameToID() function.
 - [ ] Fix the way Action cards are displayed (remove the stats from the bottom).
 - [ ] Add cards of different banners.
     - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.

@@ -19,15 +19,15 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
 
     for (int i = 0; i < constants::initialDeckSize - 3; ++i)
     {
-        Card cardFromDB = GetCardFromDB(CardID::cancerPagurus);
+        Card cancerPagurusCard = GetCardFromDB(StringToCardId("Cancer Pagurus"));
 
-        player.deck.emplace_back(cardFromDB);
+        player.deck.emplace_back(cancerPagurusCard);
     }
     for (int i = 0; i < 3; ++i)
     {
-        Card cardFromDB = GetCardFromDB(CardID::bodyPlus);
+        Card bodyPlusCard = GetCardFromDB(StringToCardId("Body Plus"));
 
-        player.deck.emplace_back(cardFromDB);
+        player.deck.emplace_back(bodyPlusCard);
     }
 
     std::ranges::shuffle(player.deck, rd);

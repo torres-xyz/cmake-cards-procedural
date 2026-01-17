@@ -1,40 +1,46 @@
 #include "card.hpp"
 #include <iostream>
+#include <algorithm>
 #include <unordered_map>
 #include "csv.h"
 #include "helper_functions.hpp"
 
-void LoadCardLibrary()
+std::vector<Card> GetCardDB()
 {
-    io::CSVReader<8> in("resources/csv/cards_db.csv");
-    in.read_header(io::ignore_extra_column, "cardID", "Name", "Type", "Banner", "Body Text", "Body", "Mind", "Soul");
-    int cardID{};
-    std::string name{};
-    std::string cardType{};
-    std::string cardBanner{};
-    std::string bodyText{};
-    int body{};
-    int mind{};
-    int soul{};
-
-    while (in.read_row(cardID, name, cardType, cardBanner, bodyText, body, mind, soul))
+    static std::vector<Card> cardDB{};
+    if (cardDB.empty())
     {
-        Card newCard
+        io::CSVReader<8> in("resources/csv/cards_db.csv");
+        in.read_header(io::ignore_extra_column, "cardID", "Name", "Type", "Banner", "Body Text", "Body", "Mind", "Soul");
+        int cardID{};
+        std::string name{};
+        std::string cardType{};
+        std::string cardBanner{};
+        std::string bodyText{};
+        int body{};
+        int mind{};
+        int soul{};
+
+        while (in.read_row(cardID, name, cardType, cardBanner, bodyText, body, mind, soul))
         {
-            .type = StringToCardType(cardType),
-            .cardID = static_cast<CardID>(cardID),
-            .name = name,
-            .bodyText = bodyText,
-            .banner = StringToBanner(cardBanner),
-            .body = body,
-            .mind = mind,
-            .soul = soul
-        };
-        PrintCard(newCard);
+            //TODO: verify that using emplace_back() like this makes sense and does avoid making a copy
+            cardDB.emplace_back() = {
+                .type = StringToCardType(cardType),
+                .cardID = cardID,
+                .name = name,
+                .bodyText = bodyText,
+                .banner = StringToBanner(cardBanner),
+                .body = body,
+                .mind = mind,
+                .soul = soul
+            };
+        }
     }
+
+    return cardDB;
 }
 
-Card GetCardFromDB(const CardID id)
+Card GetCardFromDB(const int id)
 {
     io::CSVReader<8> in("resources/csv/cards_db.csv");
     in.read_header(io::ignore_extra_column, "cardID", "Name", "Type", "Banner", "Body Text", "Body", "Mind", "Soul");
@@ -50,10 +56,10 @@ Card GetCardFromDB(const CardID id)
     Card newCard{};
     while (in.read_row(cardID, name, cardType, cardBanner, bodyText, body, mind, soul))
     {
-        if (static_cast<CardID>(cardID) != id) continue;
+        if (cardID != id) continue;
 
         newCard.type = StringToCardType(cardType);
-        newCard.cardID = static_cast<CardID>(cardID);
+        newCard.cardID = cardID;
         newCard.name = name;
         newCard.bodyText = bodyText;
         newCard.banner = StringToBanner(cardBanner);
@@ -145,4 +151,19 @@ std::string CardTypeToString(const CardType cardType)
     assert(cardTypeToStringMap.contains(cardType) && "No such card type.");
 
     return cardTypeToStringMap.at(cardType);
+}
+
+int StringToCardId(const std::string_view cardName)
+{
+    const std::vector<Card> cardDB = GetCardDB();
+
+    for (const Card &card: cardDB)
+    {
+        if (card.name == cardName)
+        {
+            return card.cardID;
+        }
+    }
+
+    return 0;
 }

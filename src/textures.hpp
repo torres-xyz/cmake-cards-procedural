@@ -29,4 +29,4 @@ raylib::Texture2D const &GetTexture(GameTexture tex);
 
 raylib::Texture2D const &GetTexture(CardBanner banner, CardType cardType);
 
-raylib::Texture2D const &GetCardArtTexture(CardID cardId);
+raylib::Texture2D const &GetCardArtTexture(int cardId);
