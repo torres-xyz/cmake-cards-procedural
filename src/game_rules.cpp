@@ -7,7 +7,6 @@
 
 struct Card;
 
-
 void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_device &rd)
 {
     std::ranges::shuffle(deck, rd);

@@ -3,9 +3,8 @@
 - [ ] Create a fixed card library (no more random cards).
     - [x] At least 30 different cards.
     - [x] Add card art for each card.
-    - [ ] Create CardIDs for each card.
+    - [x] Create a NameToID() function.
     - [ ] Make 2 different decks with these cards, one for each player.
-    - [ ] Create a NameToID() function.
 - [ ] Fix the way Action cards are displayed (remove the stats from the bottom).
 - [ ] Add cards of different banners.
     - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.

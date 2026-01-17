@@ -89,7 +89,7 @@ raylib::Texture2D const &GetCardArtTexture(const int cardId)
         int cardID{};
         std::string assetName{};
 
-        const std::string cardArtDirPath = "resources/textures/card-art/";
+        const std::string cardArtDirPath = "resources/textures/card-art";
 
         while (in.read_row(cardID, assetName))
         {

@@ -44,6 +44,8 @@ std::vector<Card> GetCardDB();
 
 Card GetCardFromDB(int id);
 
+Card GetCardFromDB(std::string_view cardName);
+
 void PrintCard(const Card &card);
 
 CardBanner StringToBanner(std::string_view sv);

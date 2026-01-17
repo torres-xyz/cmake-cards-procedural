@@ -377,36 +377,15 @@ void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, Gam
 
 void RunPrototypingScene(const PrototypingScene &scene)
 {
-    static Card advancedCardProt
-    {
-        .rect = {
-            constants::cardWidth,
-            constants::cardHeight,
-            100,
-            100
-        },
-        .type = CardType::unit,
-        .faceUp = true,
-        .cardID = 1, // Cancer Pagurus
-        .name = "Lorem Ipsum",
-        .bodyText = "Id aspernatur consequuntur eos ut quia vero. Voluptas "
-        "beatae ut temporibus consectetur eveniet placeat adipisci. "
-        "Dignissimos aut et recusandae voluptates harum. Enim non et "
-        "facilis. Nemo reiciendis dolores dolores illum omnis "
-        "voluptatem.",
-        .banner = CardBanner::form,
-        .body = 3000,
-        .mind = 2000,
-        .soul = 1000
-    };
+    static Card cardProt = GetCardFromDB("Cancer Pagurus");
 
-    advancedCardProt.rect.SetSize(
-        GetMousePosition().x - advancedCardProt.rect.x,
-        (GetMousePosition().x - advancedCardProt.rect.x) * (1 / constants::cardAspectRatio)
+    cardProt.rect.SetSize(
+        GetMousePosition().x - cardProt.rect.x,
+        (GetMousePosition().x - cardProt.rect.x) * (1 / constants::cardAspectRatio)
     );
 
     //Draw
     GetTexture(scene.background).Draw();
-    DrawCardAdvanced(advancedCardProt, advancedCardProt.rect);
+    DrawCardAdvanced(cardProt, cardProt.rect);
 }
 

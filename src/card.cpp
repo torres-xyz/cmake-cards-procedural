@@ -74,6 +74,11 @@ Card GetCardFromDB(const int id)
     return newCard;
 }
 
+Card GetCardFromDB(const std::string_view cardName)
+{
+    return GetCardFromDB(StringToCardId(cardName));
+}
+
 void PrintCard(const Card &card)
 {
     const std::string cardPrint{

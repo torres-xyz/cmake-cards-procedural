@@ -36,16 +36,9 @@ namespace constants
     inline constexpr float zoomedCardHeight{cardHeight * 3.5};
 
     // Decks
-    // using a vector<int> instead of vector<Card> to avoid circular dependency
-    // with Card.hpp
-    inline const std::vector<int> defaultDeck
-    {
-        1, 1, 1,
-        2, 2, 2,
-        3, 3, 3
-    };
     inline constexpr int initialDeckSize{10};
     inline constexpr int initialHandSize{3};
+
     // UI
     //// Player 1 HandZone
     inline constexpr int handZonePaddingRight{200};

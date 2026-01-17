@@ -635,11 +635,11 @@ void DrawCardsFromDeckToHand(Player &player, const int amount)
 
     for (int i = 0; i < amount; ++i)
     {
-        Card drawnCard = player.deck.back();
+        Card drawnCard = player.deck.at(0);
         drawnCard.rect.SetPosition(raylib::Vector2{-1000, -1000});
         drawnCard.faceUp = false;
         player.hand.push_back(drawnCard);
-        player.deck.pop_back();
+        player.deck.erase(player.deck.begin());
     }
 }
 

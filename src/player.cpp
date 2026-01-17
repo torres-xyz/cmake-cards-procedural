@@ -17,17 +17,19 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
     player.deck.clear();
     player.cardsPlayed = 0;
 
-    for (int i = 0; i < constants::initialDeckSize - 3; ++i)
+    if (player.id == 1)
     {
-        Card cancerPagurusCard = GetCardFromDB(StringToCardId("Cancer Pagurus"));
-
-        player.deck.emplace_back(cancerPagurusCard);
+        for (const int deck1Card: deckP1)
+        {
+            player.deck.push_back(GetCardFromDB(deck1Card));
+        }
     }
-    for (int i = 0; i < 3; ++i)
+    if (player.id == 2)
     {
-        Card bodyPlusCard = GetCardFromDB(StringToCardId("Body Plus"));
-
-        player.deck.emplace_back(bodyPlusCard);
+        for (const int deck2Card: deckP2)
+        {
+            player.deck.push_back(GetCardFromDB(deck2Card));
+        }
     }
 
     std::ranges::shuffle(player.deck, rd);
