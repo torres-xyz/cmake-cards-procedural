@@ -27,12 +27,13 @@ std::vector<Card> GetCardDB()
             cardDB.emplace_back() = {
                 .type = StringToCardType(cardType),
                 .cardID = cardID,
+                .uid = HelperFunctions::GetUID(), //always generate a new UID when creating a new card
                 .name = name,
                 .bodyText = bodyText,
                 .banner = StringToBanner(cardBanner),
                 .body = body,
                 .mind = mind,
-                .soul = soul
+                .soul = soul,
             };
         }
     }
@@ -66,7 +67,7 @@ Card GetCardFromDB(const int id)
         newCard.body = body;
         newCard.mind = mind;
         newCard.soul = soul;
-        newCard.uid = HelperFunctions::GetUID();
+        newCard.uid = HelperFunctions::GetUID(); //always generate a new UID when creating a new card
 
         break;
     }

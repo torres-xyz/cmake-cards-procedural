@@ -2,20 +2,24 @@
 #include "../src/textures.hpp"
 #include "../src/card.hpp"
 
-TEST_CASE("GetCardArtTexture returns a valid Texture")
+TEST_CASE("All Textures from the Card DB can be loaded")
 {
     const raylib::Window window(0, 0, "Tests");
 
-    REQUIRE(GetCardArtTexture(CardID::cancerPagurus).IsValid());
+    std::vector<Card> cardDbSUT = GetCardDB();
+
+    for (const auto &card: cardDbSUT)
+    {
+        GetCardArtTexture(card.cardID);
+    }
 }
 
 TEST_CASE("GetCardArtTexture(CardID cardId) returns a Texture")
 {
     const raylib::Window window(0, 0, "Tests");
 
-    REQUIRE(GetCardArtTexture(CardID::cancerPagurus).IsValid());
+    REQUIRE(GetCardArtTexture(GetCardFromDB("Cancer Pagurus").cardID).IsValid());
 }
-
 
 TEST_CASE("Card Textures have the correct dimensions")
 {

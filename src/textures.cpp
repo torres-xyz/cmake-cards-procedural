@@ -78,9 +78,6 @@ raylib::Texture2D const &GetCardArtTexture(const int cardId)
 {
     static std::unordered_map<int, std::string> cardIDToArtTexturePathMap{};
 
-    //Add the invalid texture separately.
-    cardIDToArtTexturePathMap.insert({0, "resources/textures/invalid_tex.png"});
-
     //TODO: Consider preloading this as well.
     if (!cardIDToArtTexturePathMap.contains(cardId))
     {

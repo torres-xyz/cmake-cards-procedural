@@ -6,7 +6,7 @@ TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]"
     std::random_device rd{};
     SetRandomSeed(rd());
 
-    constexpr int playerID = 10;
+    constexpr int playerID = 1;
 
     Player playerUnderTest
     {

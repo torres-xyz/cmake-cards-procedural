@@ -20,8 +20,8 @@ cardID,Name,Type,Banner,Body Text,Body,Mind,Soul,Asset Name
 19,Mind Plus Plus,Action,Form,Add 2000 to Mind.,0,2000,0,mind_plus_2
 20,Mind Plus Plus Plus,Action,Form,Add 3000 to Mind.,0,3000,0,mind_plus_3
 21,Soul Plus,Action,Form,Add 1000 to Soul.,0,0,1000,soul_plus_1
-22,Soul Plus Plus,Action,Form,Add 2000 to Soul.,,,2000,soul_plus_2
-23,Soul Plus Plus Plus,Action,Form,Add 3000 to Soul.,,,3000,soul_plus_3
+22,Soul Plus Plus,Action,Form,Add 2000 to Soul.,0,0,2000,soul_plus_2
+23,Soul Plus Plus Plus,Action,Form,Add 3000 to Soul.,0,0,3000,soul_plus_3
 24,Body Mind Plus,Action,Form,Add 500 to Body and Mind.,500,500,0,body_mind_plus
 25,Body Soul Plus,Action,Form,Add 500 to Body and Soul.,500,0,500,body_soul_plus
 26,Mind Soul Plus,Action,Form,Add 500 to Mind and Soul.,0,500,500,mind_soul_plus
