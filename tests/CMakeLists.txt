@@ -36,7 +36,7 @@ add_dependencies(${TESTS_NAME} copy_resources_tests)
 target_link_libraries(${TESTS_NAME} PRIVATE ${PROJECT_NAME} Catch2::Catch2WithMain)
 
 # we use a catch_discover_tests() command defined in the module provided by Catch2
-#to automatically detect all test cases from unit_tests and register them with CTest
+# to automatically detect all test cases from unit_tests and register them with CTest
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
-catch_discover_tests(unit_tests)
+catch_discover_tests(${TESTS_NAME})

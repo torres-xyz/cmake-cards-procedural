@@ -1,16 +1,6 @@
 # To Do
 
 - [ ] BUG: It is possible to start a Phase with no Units in the hand, bricking the game. (Make player lose the game?)
-- [ ] Create a fixed card library (no more random cards).
-    - [x] At least 30 different cards.
-    - [x] Add card art for each card.
-    - [x] Create a NameToID() function.
-    - [x] Make 2 different decks with these cards, one for each player.
-    - [ ] Create tests for the new functions.
-        - [x] Test if all the cards in the DB have different ids.
-        - [x] Test if all the textures in the DB exist and can be loaded successfully.
-        - [x] Test all cards created have a unique uid;
-    - [ ] Run tests automatically after each build?
 - [ ] Redo player_test.cpp.
 - [ ] Fix the way Action cards are displayed (remove the stats from the bottom).
 - [ ] Add cards of different banners.
@@ -95,3 +85,12 @@
 - [x] Add a delay to player 2's actions.
 - [x] Announce round winner every round.
 - [x] Make GetCardArtTexture retrieve the path from the csv file.
+- [x] Create a fixed card library (no more random cards).
+    - [x] At least 30 different cards.
+    - [x] Add card art for each card.
+    - [x] Create a NameToID() function.
+    - [x] Make 2 different decks with these cards, one for each player.
+    - [x] Create tests for the new functions.
+        - [x] Test if all the cards in the DB have different ids.
+        - [x] Test if all the textures in the DB exist and can be loaded successfully.
+        - [x] Test all cards created have a unique uid;
