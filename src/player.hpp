@@ -2,6 +2,9 @@
 #include <random>
 #include <vector>
 #include "card.hpp"
+#include "game_turn.hpp"
+
+enum class PlayerAction;
 
 struct Player
 {
@@ -10,6 +13,8 @@ struct Player
     std::vector<Card> deck{};
     std::vector<Card> hand{};
     std::vector<Card> cardsInPlayStack{};
+    std::vector<PlayerActionAndHandCardPair> availableActions{};
+    PlayerActionAndHandCardPair chosenAction{};
     bool isHoldingACard{};
     int heldCardIndex{-1};
     unsigned long int hoveredCardUid{};

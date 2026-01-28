@@ -40,6 +40,8 @@ struct Card
     int soul{0};
 };
 
+void RenderCard(const Card &card, raylib::Rectangle destinationRect);
+
 std::vector<Card> GetCardDB();
 
 Card GetCardFromDB(int id);

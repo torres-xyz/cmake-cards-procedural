@@ -14,6 +14,7 @@
 #include "fonts.hpp"
 #include "game_rules.hpp"
 #include "game_status.hpp"
+#include "game_turn.hpp"
 
 struct GameStatus;
 
@@ -41,138 +42,79 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
     DrawButton(startButton, GetTexture(startButton.background));
 }
 
-void DrawTextInsideCard(const char *text, const raylib::Rectangle &destRect, const float x, const float y,
-                        const float width, const float height, const raylib::Vector2 margins,
-                        const float fontMultiplier, const bool drawGrayBox)
+void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, const GameplayPhase &currentPhase, GameStatus &gameStatus, Player &player1, Player &player2, const GameRules &gameRules, [[maybe_unused]] std::random_device &rd)
 {
-    //Coords
-    const float textPosX{(x + margins.x) / constants::cardTextureWidth};
-    const float textPosY{(y + margins.y) / constants::cardTextureHeight};
-    const float textWidth{(width - margins.x * 2) / constants::cardTextureWidth};
-    const float textHeight{(height - margins.y * 2) / constants::cardTextureHeight};
-    const raylib::Rectangle textBoxRect
-    {
-        destRect.x + destRect.width * textPosX,
-        destRect.y + destRect.height * textPosY,
-        destRect.width * textWidth,
-        destRect.height * textHeight
-    };
-    if (drawGrayBox)
-    {
-        DrawRectangleRec(textBoxRect, GRAY);
-    }
-    HelperFunctions::DrawTextBoxed
-    (
-        GetFont(GameFont::aobashiOne),
-        text,
-        textBoxRect,
-        destRect.height * fontMultiplier,
-        0.1f,
-        0.5f,
-        true,
-        WHITE
-    );
-}
+    auto UpdateSceneButton = [](Button &bt, Player &p1, const PlayerAction pAction) {
+        bt.state = ButtonState::disabled;
 
-void DrawCardAdvanced(const Card &card, const raylib::Rectangle destinationRect)
-{
-    if (card.faceUp == false)
-    {
-        const raylib::Texture2D &cardBackTex = GetTexture(GameTexture::cardBack);
-
-        const raylib::Rectangle cardBackTexSourceRect
+        bool playerHasAvailableAction{false};
+        for (const auto availableActions: p1.availableActions)
         {
-            0, 0,
-            static_cast<float>(cardBackTex.GetWidth()),
-            static_cast<float>(cardBackTex.GetHeight())
-        };
-        const raylib::Rectangle cardBackTextDestRect
+            if (availableActions.action == pAction) playerHasAvailableAction = true;
+        }
+
+        if (playerHasAvailableAction)
         {
-            destinationRect.x,
-            destinationRect.y,
-            destinationRect.width,
-            destinationRect.height
-        };
+            bt.state = ButtonState::enabled;
+            UpdateButtonState(bt, GetMousePosition(), IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
 
-        cardBackTex.Draw(cardBackTexSourceRect, cardBackTextDestRect);
-        return;
-    }
-
-    //Card Art
-    const raylib::Texture2D &cardArtTex = GetCardArtTexture(card.cardID);
-    const raylib::Rectangle cardArtTexSourceRect
-    {
-        0, 0,
-        static_cast<float>(cardArtTex.GetWidth()),
-        static_cast<float>(cardArtTex.GetHeight())
+            if (bt.wasPressed)
+            {
+                PlaySound(GameSound::buttonPress01);
+                p1.chosenAction.action = pAction;
+            }
+        }
     };
 
-    // constexpr float artMargin = 2.0;
-    constexpr float artPosX{46.0f / constants::cardTextureWidth};
-    constexpr float artPosY{123.0f / constants::cardTextureHeight};
-    constexpr float artWidth{static_cast<float>(constants::cardArtTextureWidth) / constants::cardTextureWidth};
-    constexpr float artHeight{static_cast<float>(constants::cardArtTextureHeight) / constants::cardTextureHeight};
-    const raylib::Rectangle cardArtTexDestRect
-    {
-        destinationRect.x + destinationRect.width * artPosX,
-        destinationRect.y + destinationRect.height * artPosY,
-        destinationRect.width * artWidth,
-        destinationRect.height * artHeight
-    };
-    cardArtTex.Draw(cardArtTexSourceRect, cardArtTexDestRect);
-
-    //Card Frame
-    const raylib::Texture2D &cardFrameTex = GetTexture(card.banner, card.type);
-    const raylib::Rectangle cardFrameTexSourceRect
-    {
-        0, 0,
-        static_cast<float>(cardFrameTex.GetWidth()),
-        static_cast<float>(cardFrameTex.GetHeight())
-    };
-    const raylib::Rectangle cardFrameTexDestRect
-    {
-        destinationRect.x,
-        destinationRect.y,
-        destinationRect.width,
-        destinationRect.height
-    };
-    cardFrameTex.Draw(cardFrameTexSourceRect, cardFrameTexDestRect);
-
-    //if a card is being drawn at 1x size, don't render the text
-    // if (destinationRect.width <= constants::cardWidth) return;
-
-    //Hard coded numbers based on the texture pixel positions of these elements.
-    const raylib::Vector2 margins{4, 0};
-    DrawTextInsideCard(card.name.c_str(), destinationRect, 49, 45, 523, 56, margins, 0.05f, false);
-    DrawTextInsideCard(card.bodyText.c_str(), destinationRect, 49, 532, 626, 337, margins, 0.06f, false);
-    DrawTextInsideCard(std::to_string(card.body).c_str(), destinationRect, 65, 894, 161, 77, margins, 0.07f, false);
-    DrawTextInsideCard(std::to_string(card.mind).c_str(), destinationRect, 280, 894, 161, 77, margins, 0.07f, false);
-    DrawTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);
-}
-
-void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, GameStatus &gameStatus, Player &player1, Player &player2, const GameRules &gameRules, std::random_device &rd)
-{
+    // UpdateGameplayPhases(playingScene, currentPhase, gameStatus, player1, player2, gameRules, rd);
     // UPDATE ------------------------------------------------------------------
 
-    UpdateGameplayPhases(playingScene, currentPhase, gameStatus, player1, player2, gameRules, rd);
+    if (gameStatus.roundsPlayed == 0)
+    {
+        gameStatus.currentTurnOwner = gameRules.playerGoingFirst;
+        gameStatus.currentTurnOwner = 1; // TODO: DELETE LATER
+    }
+
+    if (gameStatus.currentTurnOwner == 1)
+    {
+        player1.availableActions = CalculateAvailableActions(player1, currentTurnPhase, gameRules);
+        ExecuteTurn(player1, currentTurnPhase, gameRules, gameStatus);
+    }
+    if (gameStatus.currentTurnOwner == 2)
+    {
+        player2.availableActions = CalculateAvailableActions(player2, currentTurnPhase, gameRules);
+        ExecuteTurn(player2, currentTurnPhase, gameRules, gameStatus);
+    }
+
+    // Update the button states
+    UpdateSceneButton(playingScene.endTurnButton, player1, PlayerAction::passTheTurn);
+    UpdateSceneButton(playingScene.playerDeckButton, player1, PlayerAction::drawCard);
 
     //Update Music
     PlayMusic(playingScene.music);
+    // Put Player 1's hand cards in place, slightly apart from each other.
+    for (size_t i = 0; i < player1.hand.size(); ++i)
+    {
+        const int int_i = static_cast<int>(i);
+        const raylib::Rectangle newCardRect
+        {
+            static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + constants::inHandCardWidth * int_i),
+            static_cast<float>(constants::handZonePosY + 4),
+            constants::inHandCardWidth,
+            constants::inHandCardHeight
+        };
+
+        player1.hand.at(i).rect = newCardRect;
+        player1.hand.at(i).faceUp = true;
+    }
 
     // DRAW ---------------------------------------------------------------------
     GetTexture(playingScene.background).Draw();
     DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
     DrawButton(playingScene.endTurnButton, GetTexture(playingScene.endTurnButton.background));
-    GetTexture(playingScene.playfield).Draw(
-        Rectangle{
-            0,
-            0,
-            constants::playfieldRec.width,
-            constants::playfieldRec.height
-        },
-        constants::playfieldRec);
+    GetTexture(playingScene.playfield).Draw(Rectangle{0, 0, constants::playfieldRec.width, constants::playfieldRec.height}, constants::playfieldRec);
     // Draw stack stats total
-    // Draw stack stats total - Rectangle
+    //// Rectangle
     const raylib::Rectangle statsTotalRec
     {
         constants::playfieldRec.x,
@@ -183,7 +125,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Ga
     const raylib::Color statsTotalRecColor{10, 10, 10, 200};
     DrawRectangleRec(statsTotalRec, statsTotalRecColor);
 
-    // Draw stack stats total - Player 1 Stats
+    //// Player 1 Stats
     const std::string player1TotalCardStats
     {
         std::format("Total Stats \nB: {0} | M: {1} | S: {2}",
@@ -210,7 +152,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Ga
         true,
         WHITE
     );
-    // Draw stack stats total - Player 2 Stats
+    //// Player 2 Stats
     const std::string player2TotalCardStats{
         std::format("Total Stats \nB: {0} | M: {1} | S: {2}",
                     std::to_string(GetCardStackTotalBody(player2.cardsInPlayStack)),
@@ -259,7 +201,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Ga
             continue;
         }
 
-        DrawCardAdvanced(allCards.at(i), allCards.at(i).rect);
+        RenderCard(allCards.at(i), allCards.at(i).rect);
     }
     //Draw hovered card last
     if (player1.isHoveringOverACard)
@@ -274,7 +216,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Ga
                 constants::zoomedCardWidth,
                 constants::zoomedCardHeight
             };
-            DrawCardAdvanced(allCards.at(hoveredCardIndex), expandedCardRect);
+            RenderCard(allCards.at(hoveredCardIndex), expandedCardRect);
         }
         else
         {
@@ -286,7 +228,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, Ga
                 constants::zoomedCardWidth,
                 constants::zoomedCardHeight
             };
-            DrawCardAdvanced(allCards.at(hoveredCardIndex), expandedCardInFieldRect);
+            RenderCard(allCards.at(hoveredCardIndex), expandedCardInFieldRect);
         }
     }
     if (currentPhase == GameplayPhase::endPhase)
@@ -386,6 +328,5 @@ void RunPrototypingScene(const PrototypingScene &scene)
 
     //Draw
     GetTexture(scene.background).Draw();
-    DrawCardAdvanced(cardProt, cardProt.rect);
+    RenderCard(cardProt, cardProt.rect);
 }
-

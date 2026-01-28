@@ -1,14 +1,19 @@
 # To Do
 
+Check if a player has already drawn this turn by looking at the actions log and looking for a drawCard action in their
+current turn.
+
+Do a CardsInPlayToStringByUID function.
+
+- [ ] Move game logic to use a set of actions that each player can take.
 - [ ] BUG: It is possible to start a Phase with no Units in the hand, bricking the game. (Make player lose the game?)
+    - [ ] Add a log of each action.
 - [ ] Redo player_test.cpp.
 - [ ] Fix the way Action cards are displayed (remove the stats from the bottom).
 - [ ] Add cards of different banners.
     - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
 - [ ] Add current turn indicator.
 - [ ] Implement undoing playing a card before clicking end turn.
-- [ ] Store a library of available cards and card lists better (currently they
-  are just being declared in a vector<int> in constants.hpp).
 - [ ] Animate opponent's cards being played.
 
 ## Lower Priority

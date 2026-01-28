@@ -12,6 +12,7 @@
 #include "game_status.hpp"
 #include "player.hpp"
 #include "csv.h"
+#include "game_turn.hpp"
 
 int run()
 {
@@ -27,7 +28,7 @@ int run()
     rlImGuiSetup(true);
 #endif
     InitAudioDevice();
-    bool muteGame{false};
+    bool muteGame{true};
 
     GetCardDB();
 
@@ -45,7 +46,10 @@ int run()
     };
 
     GameScene currentScene{GameScene::starting};
-    GameplayPhase currentPhase{GameplayPhase::uninitialized};
+    GameplayPhase currentPhase{GameplayPhase::uninitialized}; //TODO: Soon to be deprecated
+
+    TurnPhase currentTurnPhase{TurnPhase::initialSetup};
+
     GameStatus gameStatus{};
 
     //GameScene::start ---------------------------------------------------------
@@ -178,7 +182,7 @@ int run()
             }
             case GameScene::playing:
             {
-                RunPlayingScene(playingScene, currentPhase, gameStatus, player1, player2, gameRules, rd);
+                RunPlayingScene(playingScene, currentTurnPhase, currentPhase, gameStatus, player1, player2, gameRules, rd);
 
                 if (currentPhase == GameplayPhase::gameOver)
                 {
@@ -200,7 +204,7 @@ int run()
 
 
 #if (DEBUG)
-        ImGuiSideBar::DrawSideBar(muteGame, currentPhase, gameStatus, player1, player2);
+        ImGuiSideBar::DrawSideBar(muteGame, currentTurnPhase, currentPhase, gameStatus, player1, player2);
 #endif
         EndDrawing();
 

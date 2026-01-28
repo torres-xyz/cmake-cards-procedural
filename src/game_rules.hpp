@@ -10,6 +10,7 @@ struct GameRules
 {
     int playerGoingFirst{2}; // CPU plays first
     int pointsNeededToWin{2}; //Best of 3 rounds game as a default
+    int initialHandSize{5};
 };
 
 void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_device &rd);
@@ -24,4 +25,4 @@ int CalculateRoundWinner(const std::vector<Card> &stack1, const std::vector<Card
 
 bool CanCardBePlayedByPlayer(const Card &selectedCard, const Player &player, const GameplayPhase &gameplayPhase);
 
-bool IsInitialHandValid(const Player &player);
+bool IsInitialHandValid(const std::vector<Card> &playerHand, GameRules gameRules);

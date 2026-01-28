@@ -3,7 +3,117 @@
 #include <algorithm>
 #include <unordered_map>
 #include "csv.h"
+#include "fonts.hpp"
 #include "helper_functions.hpp"
+#include "textures.hpp"
+
+void RenderCard(const Card &card, const raylib::Rectangle destinationRect)
+{
+    auto RenderTextInsideCard = [](const char *text, const raylib::Rectangle &destRect, const float x, const float y,
+                                   const float width, const float height, const raylib::Vector2 margins,
+                                   const float fontMultiplier, const bool drawGrayBox)-> void {
+        //Coords
+        const float textPosX{(x + margins.x) / constants::cardTextureWidth};
+        const float textPosY{(y + margins.y) / constants::cardTextureHeight};
+        const float textWidth{(width - margins.x * 2) / constants::cardTextureWidth};
+        const float textHeight{(height - margins.y * 2) / constants::cardTextureHeight};
+        const raylib::Rectangle textBoxRect
+        {
+            destRect.x + destRect.width * textPosX,
+            destRect.y + destRect.height * textPosY,
+            destRect.width * textWidth,
+            destRect.height * textHeight
+        };
+        if (drawGrayBox)
+        {
+            DrawRectangleRec(textBoxRect, GRAY);
+        }
+        HelperFunctions::DrawTextBoxed
+        (
+            GetFont(GameFont::aobashiOne),
+            text,
+            textBoxRect,
+            destRect.height * fontMultiplier,
+            0.1f,
+            0.5f,
+            true,
+            WHITE
+        );
+    };
+
+    if (card.faceUp == false)
+    {
+        const raylib::Texture2D &cardBackTex = GetTexture(GameTexture::cardBack);
+
+        const raylib::Rectangle cardBackTexSourceRect
+        {
+            0, 0,
+            static_cast<float>(cardBackTex.GetWidth()),
+            static_cast<float>(cardBackTex.GetHeight())
+        };
+        const raylib::Rectangle cardBackTextDestRect
+        {
+            destinationRect.x,
+            destinationRect.y,
+            destinationRect.width,
+            destinationRect.height
+        };
+
+        cardBackTex.Draw(cardBackTexSourceRect, cardBackTextDestRect);
+        return;
+    }
+
+    //Card Art
+    const raylib::Texture2D &cardArtTex = GetCardArtTexture(card.cardID);
+    const raylib::Rectangle cardArtTexSourceRect
+    {
+        0, 0,
+        static_cast<float>(cardArtTex.GetWidth()),
+        static_cast<float>(cardArtTex.GetHeight())
+    };
+
+    // constexpr float artMargin = 2.0;
+    constexpr float artPosX{46.0f / constants::cardTextureWidth};
+    constexpr float artPosY{123.0f / constants::cardTextureHeight};
+    constexpr float artWidth{static_cast<float>(constants::cardArtTextureWidth) / constants::cardTextureWidth};
+    constexpr float artHeight{static_cast<float>(constants::cardArtTextureHeight) / constants::cardTextureHeight};
+    const raylib::Rectangle cardArtTexDestRect
+    {
+        destinationRect.x + destinationRect.width * artPosX,
+        destinationRect.y + destinationRect.height * artPosY,
+        destinationRect.width * artWidth,
+        destinationRect.height * artHeight
+    };
+    cardArtTex.Draw(cardArtTexSourceRect, cardArtTexDestRect);
+
+    //Card Frame
+    const raylib::Texture2D &cardFrameTex = GetTexture(card.banner, card.type);
+    const raylib::Rectangle cardFrameTexSourceRect
+    {
+        0, 0,
+        static_cast<float>(cardFrameTex.GetWidth()),
+        static_cast<float>(cardFrameTex.GetHeight())
+    };
+    const raylib::Rectangle cardFrameTexDestRect
+    {
+        destinationRect.x,
+        destinationRect.y,
+        destinationRect.width,
+        destinationRect.height
+    };
+    cardFrameTex.Draw(cardFrameTexSourceRect, cardFrameTexDestRect);
+
+    //if a card is being drawn at 1x size, don't render the text
+    // if (destinationRect.width <= constants::cardWidth) return;
+
+    //Hard coded numbers based on the texture pixel positions of these elements.
+    const raylib::Vector2 margins{4, 0};
+    RenderTextInsideCard(card.name.c_str(), destinationRect, 49, 45, 523, 56, margins, 0.05f, false);
+    RenderTextInsideCard(card.bodyText.c_str(), destinationRect, 49, 532, 626, 337, margins, 0.06f, false);
+    RenderTextInsideCard(std::to_string(card.body).c_str(), destinationRect, 65, 894, 161, 77, margins, 0.07f, false);
+    RenderTextInsideCard(std::to_string(card.mind).c_str(), destinationRect, 280, 894, 161, 77, margins, 0.07f, false);
+    RenderTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);
+}
 
 std::vector<Card> GetCardDB()
 {

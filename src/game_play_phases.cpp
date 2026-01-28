@@ -243,14 +243,14 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
                 ChangePhase(GameplayPhase::playerTwoDrawing);
                 break;
             }
-            assert(IsInitialHandValid(player2) && "Player 2 initial hand is not valid");
+            assert(IsInitialHandValid(player2.hand, gameRules) && "Player 2 initial hand is not valid");
 
             if (player1.hand.size() != constants::initialHandSize)
             {
                 ChangePhase(GameplayPhase::playerOneDrawing);
                 break;
             }
-            assert(IsInitialHandValid(player1) && "Player 1 initial hand is not valid");
+            assert(IsInitialHandValid(player1.hand, gameRules) && "Player 1 initial hand is not valid");
 
             if (gameRules.playerGoingFirst == 1)
             {

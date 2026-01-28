@@ -126,10 +126,15 @@ bool CanCardBePlayedByPlayer(const Card &selectedCard, const Player &player, [[m
     return false;
 }
 
-bool IsInitialHandValid(const Player &player)
+bool IsInitialHandValid(const std::vector<Card> &playerHand, const GameRules gameRules)
 {
+    if (static_cast<int>(playerHand.size()) < gameRules.initialHandSize)
+    {
+        return false;
+    }
+
     //An initial hand needs to have only one Unit.
-    for (const Card &card: player.hand)
+    for (const Card &card: playerHand)
     {
         if (card.type == CardType::unit) return true;
     }

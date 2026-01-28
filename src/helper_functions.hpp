@@ -1,6 +1,9 @@
 #pragma once
 #include "raylib-cpp.hpp"
 #include "card.hpp"
+#include "game_turn.hpp"
+#include "player.hpp"
+#include "game_status.hpp"
 
 namespace HelperFunctions
 {
@@ -176,10 +179,37 @@ namespace HelperFunctions
 
     inline unsigned long GetUID()
     {
-        static unsigned long unique_ID{};
+        static unsigned long unique_ID{0};
 
         unique_ID++;
 
         return unique_ID;
+    }
+
+    inline std::string PlayerAvailableActionsToString(const Player &player)
+    {
+        std::string s{};
+
+        for (const PlayerActionAndHandCardPair &action: player.availableActions)
+        {
+            s.append(PlayerActionToString(action));
+            s.append("\n");
+        }
+
+        return s;
+    }
+
+    inline std::string ActionLogsToString(const GameStatus &gameStatus)
+    {
+        std::string s{};
+
+        for (size_t i = 0; i < gameStatus.actionLogs.size(); ++i)
+        {
+            s.append(std::to_string(i) + " - ");
+            s.append(ActionLogEntryToString(gameStatus.actionLogs.at(i)));
+            s.append("\n");
+        }
+
+        return s;
     }
 }

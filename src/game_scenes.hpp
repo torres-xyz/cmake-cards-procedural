@@ -9,6 +9,7 @@ struct Player;
 enum class GameplayPhase;
 enum class GameMusic;
 enum class GameTexture;
+enum class TurnPhase;
 
 enum class GameScene
 {
@@ -54,7 +55,7 @@ struct PrototypingScene
 
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene);
 
-void RunPlayingScene(PlayingScene &playingScene, GameplayPhase &currentPhase, GameStatus &gameStatus,
+void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, const GameplayPhase &currentPhase, GameStatus &gameStatus,
                      Player &player1, Player &player2, const GameRules &gameRules, std::random_device &rd);
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,

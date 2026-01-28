@@ -6,11 +6,12 @@
 #include "constants.hpp"
 #include "game_play_phases.hpp"
 #include "game_status.hpp"
+#include "helper_functions.hpp"
 #include "player.hpp"
 
 namespace ImGuiSideBar
 {
-    void DrawSideBar(bool &muteGame, GameplayPhase &currentPhase, GameStatus &gameStatus,
+    void DrawSideBar(bool &muteGame, const TurnPhase &currentTurnPhase, GameplayPhase &currentPhase, GameStatus &gameStatus,
                      const Player &player1, const Player &player2)
     {
         // start ImGui Content
@@ -37,6 +38,12 @@ namespace ImGuiSideBar
             ImGui::TextUnformatted(("Player 2 score = " + std::to_string(player2.score)).c_str());
             ImGui::TextUnformatted(("Player 2 hand = " + std::to_string(player2.hand.size())).c_str());
             ImGui::TextUnformatted(("Player 2 deck = " + std::to_string(player2.deck.size())).c_str());
+            ImGui::SeparatorText("Turn Phase");
+            ImGui::TextUnformatted(("Turn Phase = " + std::to_string(static_cast<int>(currentTurnPhase))).c_str());
+            ImGui::SeparatorText("Player 1 available actions");
+            ImGui::TextUnformatted(HelperFunctions::PlayerAvailableActionsToString(player1).c_str());
+            ImGui::SeparatorText("Actions Log");
+            ImGui::TextUnformatted(HelperFunctions::ActionLogsToString(gameStatus).c_str());
             ImGui::SeparatorText("Options");
             ImGui::Checkbox("Mute", &muteGame);
             ImGui::SeparatorText("Debug Actions");
