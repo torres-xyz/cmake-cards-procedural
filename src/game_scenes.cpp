@@ -71,22 +71,17 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     // UpdateGameplayPhases(playingScene, currentPhase, gameStatus, player1, player2, gameRules, rd);
     // UPDATE ------------------------------------------------------------------
 
-    if (gameStatus.roundsPlayed == 0)
-    {
-        gameStatus.currentTurnOwner = gameRules.playerGoingFirst;
-        gameStatus.currentTurnOwner = 1; // TODO: DELETE LATER
-    }
 
     if (gameStatus.currentTurnOwner == 1)
     {
-        player1.availableActions = CalculateAvailableActions(player1, currentTurnPhase, gameRules);
+        player1.availableActions = CalculateAvailableActions(player1, currentTurnPhase, gameRules, gameStatus);
 
 
         ExecuteTurn(player1, currentTurnPhase, gameRules, gameStatus);
     }
     if (gameStatus.currentTurnOwner == 2)
     {
-        player2.availableActions = CalculateAvailableActions(player2, currentTurnPhase, gameRules);
+        player2.availableActions = CalculateAvailableActions(player2, currentTurnPhase, gameRules, gameStatus);
 
         //Insert CPU brain here
 

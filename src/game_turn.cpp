@@ -8,11 +8,11 @@
 #include "game_status.hpp"
 #include "player.hpp"
 
-std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player &player, const TurnPhase &turnPhase, const GameRules &gameRules)
+std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player &player, const TurnPhase &turnPhase, const GameRules &gameRules, const GameStatus &gameStatus)
 {
     std::vector<PlayerActionAndHandCardPair> possibleActions{};
 
-    possibleActions.push_back({PlayerAction::forfeit, 0});
+    possibleActions.push_back({PlayerAction::forfeit});
 
     switch (turnPhase)
     {
@@ -26,7 +26,7 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
             {
                 if (IsInitialHandValid(player.hand, gameRules))
                 {
-                    //pass the turn? doesn't make sense since this is the initial setup, both players are playing at once.
+                    //pass the turn?
                 }
                 else
                 {
@@ -37,15 +37,29 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
         }
         case TurnPhase::drawStep:
         {
-            //If player can draw, draw
+            //If player can draw a card, do it
             if (!player.deck.empty())
             {
-                possibleActions.push_back({PlayerAction::drawCard, 0});
+                possibleActions.push_back({PlayerAction::drawCard});
             }
             break;
         }
         case TurnPhase::mainPhase:
         {
+            auto HasPlayedACardThisTurn = [](const GameStatus &gS) -> bool {
+                const int currentTurn = gS.turnsPlayed;
+                for (int i = static_cast<int>(gS.actionLogs.size()) - 1; i >= 0; --i)
+                {
+                    if (gS.actionLogs.at(static_cast<size_t>(i)).turnNumber == currentTurn &&
+                        gS.actionLogs.at(static_cast<size_t>(i)).actionCardPairTaken.action == PlayerAction::playCard)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+
             //If the player has NO cards in play, they MUST play a Unit
             if (player.cardsInPlayStack.empty())
             {
@@ -62,6 +76,20 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
                 if (foundAUnitToPlay == false)
                 {
                     //If the player can't play another Unit, they lose the game.
+                }
+            }
+
+            // You can play Action Cards on your Unit card in play.
+            if (!player.cardsInPlayStack.empty() &&
+                !HasPlayedACardThisTurn(gameStatus) &&
+                player.cardsInPlayStack.at(0).type == CardType::unit)
+            {
+                for (const Card &card: player.hand)
+                {
+                    if (card.type == CardType::action)
+                    {
+                        possibleActions.push_back({PlayerAction::playCard, card});
+                    }
                 }
             }
 
@@ -175,11 +203,10 @@ void ExecuteChosenPlayerAction(Player &player, const TurnPhase &turnPhase, GameS
     {
         case PlayerAction::null:
         {
-            break;
+            return;
         }
         case PlayerAction::drawCard:
         {
-            LogAction(player, turnPhase, gameStatus);
             DrawCardsFromDeckToHand(player, 1);
             break;
         }
@@ -191,8 +218,6 @@ void ExecuteChosenPlayerAction(Player &player, const TurnPhase &turnPhase, GameS
             break;
         case PlayerAction::playCard:
         {
-            LogAction(player, turnPhase, gameStatus);
-
             //Copy the card from the hand to the Play field.
             for (size_t i = 0; i < player.hand.size(); ++i)
             {
@@ -210,11 +235,17 @@ void ExecuteChosenPlayerAction(Player &player, const TurnPhase &turnPhase, GameS
             break;
         }
         case PlayerAction::passTheTurn:
+        {
+            gameStatus.currentTurnOwner = player.id == 1 ? 2 : 1;
+            gameStatus.turnsPlayed++;
+
             break;
+        }
         case PlayerAction::forfeit:
             break;
     }
 
+    LogAction(player, turnPhase, gameStatus);
     player.chosenAction = {PlayerAction::null};
 }
 

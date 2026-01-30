@@ -51,6 +51,7 @@ int run()
     TurnPhase currentTurnPhase{TurnPhase::initialSetup};
 
     GameStatus gameStatus{};
+    gameStatus.currentTurnOwner = 1; // TODO: DELETE LATER
 
     //GameScene::start ---------------------------------------------------------
     constexpr int startGameButtonWidth{200};
