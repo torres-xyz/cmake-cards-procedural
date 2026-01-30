@@ -16,7 +16,7 @@ struct Player
     std::vector<PlayerActionAndHandCardPair> availableActions{};
     PlayerActionAndHandCardPair chosenAction{};
     bool isHoldingACard{};
-    int heldCardIndex{-1};
+    unsigned long int heldCardUid{};
     unsigned long int hoveredCardUid{};
     bool isHoveringOverACard{false};
     bool hasDrawnThisTurn{false};

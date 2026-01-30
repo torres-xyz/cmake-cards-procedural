@@ -29,7 +29,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
 
     auto RemovePlayer1HeldCard{
         [&player1]()-> void {
-            player1.heldCardIndex = -1;
+            player1.heldCardUid = 0;
             player1.isHoldingACard = false;
         }
     };
@@ -38,7 +38,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         [&player1, currentPhase, RemovePlayer1HeldCard]()-> void {
             if (player1.isHoldingACard && !player1HasPlayedThisPhase)
             {
-                const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardIndex));
+                const Card &heldCard = player1.hand.at(static_cast<size_t>(player1.heldCardUid));
 
                 if (CheckCollisionRecs(heldCard.rect, constants::playfieldRec) &&
                     CanCardBePlayedByPlayer(heldCard, player1, currentPhase))
@@ -53,14 +53,14 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         }
     };
 
-    auto SetPlayerHeldCard{
-        [&player1](const int index)-> void {
-            assert(index >= 0 && "Trying to set a Held Card index that is negative.");
-            assert(index < static_cast<int>(player1.hand.size()) && "Trying to set a Held Card index that is outside of the players hand bounds.");
-            player1.heldCardIndex = index;
-            player1.isHoldingACard = true;
-        }
-    };
+    // auto SetPlayerHeldCard{
+    //     [&player1](const int index)-> void {
+    //         assert(index >= 0 && "Trying to set a Held Card index that is negative.");
+    //         assert(index < static_cast<int>(player1.hand.size()) && "Trying to set a Held Card index that is outside of the players hand bounds.");
+    //         player1.heldCardUid = index;
+    //         player1.isHoldingACard = true;
+    //     }
+    // };
 
     //TODO: design problem where this has to always come after UpdateHandAndHeldCard because it
     // depends on it to reset the position of the card, it seems.
@@ -105,26 +105,26 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
     };
 
     auto UpdateHandAndHeldCard{
-        [&player1, mousePosition, SetPlayerHeldCard]()-> void {
+        [&player1, mousePosition /*SetPlayerHeldCard*/]()-> void {
             //Place cards in the Hand Zone or Update Held Card
             for (size_t i = 0; i < player1.hand.size(); ++i)
             {
                 const int int_i = static_cast<int>(i);
 
                 //Move the card we are holding with the mouse
-                if (player1.heldCardIndex == int_i)
-                {
-                    player1.hand.at(i).rect.SetPosition(mousePosition - heldCardOffset);
-                    player1.hand.at(i).rect.SetSize(constants::inHandCardWidth, constants::inHandCardHeight);
-                    continue;
-                }
+                // if (player1.heldCardUid == int_i)
+                // {
+                //     player1.hand.at(i).rect.SetPosition(mousePosition - heldCardOffset);
+                //     player1.hand.at(i).rect.SetSize(constants::inHandCardWidth, constants::inHandCardHeight);
+                //     continue;
+                // }
 
                 //If trying to click and hold a card
                 if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
                     HelperFunctions::CheckCollisionPointCard(mousePosition, player1.hand.at(i)) &&
                     !player1.isHoldingACard)
                 {
-                    SetPlayerHeldCard(int_i);
+                    // SetPlayerHeldCard(int_i);
                     heldCardOffset = mousePosition - player1.hand.at(i).rect.GetPosition();
 
                     //Don't position this card in the hand zone.
@@ -238,14 +238,14 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             UpdateHandAndHeldCard();
 
             //Auto draw initial hand for P2
-            if (player2.hand.size() != constants::initialHandSize)
+            if (static_cast<int>(player2.hand.size()) != gameRules.initialHandSize)
             {
                 ChangePhase(GameplayPhase::playerTwoDrawing);
                 break;
             }
             assert(IsInitialHandValid(player2.hand, gameRules) && "Player 2 initial hand is not valid");
 
-            if (player1.hand.size() != constants::initialHandSize)
+            if (static_cast<int>(player1.hand.size()) != gameRules.initialHandSize)
             {
                 ChangePhase(GameplayPhase::playerOneDrawing);
                 break;
@@ -370,11 +370,11 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             {
                 if (player2.hand.at(i).type == CardType::unit)
                 {
-                    player2.heldCardIndex = static_cast<int>(i);
+                    // player2.heldCardUid = static_cast<int>(i);
                     break;
                 }
             }
-            assert(player2.hand.at(static_cast<size_t>(player2.heldCardIndex)).type == CardType::unit &&
+            assert(player2.hand.at(static_cast<size_t>(player2.heldCardUid)).type == CardType::unit &&
                 "Player 2 was about to play a non-unit card as its first card.");
             PutCardInPlay(player2);
             UpdatePlayer2HandCards();
@@ -459,7 +459,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             {
                 if (player2.hand.at(i).type == CardType::action)
                 {
-                    player2.heldCardIndex = static_cast<int>(i);
+                    // player2.heldCardUid = static_cast<int>(i);
                     PutCardInPlay(player2);
                     UpdatePlayer2HandCards();
 
@@ -539,7 +539,7 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             {
                 if (player2.hand.at(i).type == CardType::action)
                 {
-                    player2.heldCardIndex = static_cast<int>(i);
+                    // player2.heldCardUid = static_cast<int>(i);
                     PutCardInPlay(player2);
                     UpdatePlayer2HandCards();
 
@@ -645,12 +645,12 @@ void DrawCardsFromDeckToHand(Player &player, const int amount)
 
 void PutCardInPlay(Player &player)
 {
-    assert(player.heldCardIndex > -1 && "Trying to play a card of negative index.");
+    // assert(player.heldCardUid > -1 && "Trying to play a card of negative index.");
 
     player.cardsPlayed++;
 
     //Copy the card from the hand to the Play field.
-    player.cardsInPlayStack.emplace_back(player.hand.at(static_cast<size_t>(player.heldCardIndex)));
+    player.cardsInPlayStack.emplace_back(player.hand.at(static_cast<size_t>(player.heldCardUid)));
 
     //Place the cards in their respective player's play zone, and offset them vertically as they stack
     for (size_t i = 0; i < player.cardsInPlayStack.size(); ++i)
@@ -672,9 +672,9 @@ void PutCardInPlay(Player &player)
 
 
     //Then remove that card from the hand.
-    player.hand.erase(player.hand.begin() + player.heldCardIndex);
+    // player.hand.erase(player.hand.begin() + player.heldCardUid);
     //The player is now not holding any card.
-    player.heldCardIndex = -1;
+    // player.heldCardUid = -1;
 
     //Play sound
     PlaySound(GameSound::cardPlace01);

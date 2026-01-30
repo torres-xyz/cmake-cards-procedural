@@ -190,9 +190,10 @@ namespace HelperFunctions
     {
         std::string s{};
 
-        for (const PlayerActionAndHandCardPair &action: player.availableActions)
+        for (const auto &[action, card]: player.availableActions)
         {
             s.append(PlayerActionToString(action));
+            if (!card.name.empty()) s.append(": " + card.name);
             s.append("\n");
         }
 

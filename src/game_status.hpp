@@ -1,11 +1,19 @@
 #pragma once
 #include <string>
 #include <vector>
+
 #include "game_turn.hpp"
 
+enum class TurnPhase;
 
-enum class PlayerAction;
-struct ActionLog;
+struct ActionLog
+{
+    PlayerActionAndHandCardPair actionCardPairTaken{};
+    TurnPhase turnPhase{};
+    int turnNumber{};
+    int roundNumber{};
+    int playerID{};
+};
 
 struct GameStatus
 {
@@ -16,13 +24,5 @@ struct GameStatus
     std::vector<ActionLog> actionLogs{};
 };
 
-struct ActionLog
-{
-    PlayerActionAndHandCardPair actionCardPairTaken{};
-    int turnNumber{};
-    int roundNumber{};
-    int playerID{};
-    std::string details{};
-};
 
 std::string ActionLogEntryToString(ActionLog log);

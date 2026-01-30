@@ -26,7 +26,7 @@ TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]"
             Card{.type = CardType::action},
         },
         .isHoldingACard = true,
-        .heldCardIndex = 2,
+        .heldCardUid = 2,
         .hoveredCardUid = 2,
         .hasDrawnThisTurn = true,
         .hasEndedTheTurn = true,
@@ -49,6 +49,6 @@ TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]"
         REQUIRE(playerUnderTest.score == 0);
         REQUIRE(playerUnderTest.hand.empty() == true);
         REQUIRE(playerUnderTest.isHoldingACard == false);
-        REQUIRE(playerUnderTest.heldCardIndex == -1);
+        REQUIRE(playerUnderTest.heldCardUid == -1);
     }
 }

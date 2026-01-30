@@ -8,9 +8,9 @@ struct Player;
 
 struct GameRules
 {
-    int playerGoingFirst{2}; // CPU plays first
-    int pointsNeededToWin{2}; //Best of 3 rounds game as a default
-    int initialHandSize{5};
+    const int playerGoingFirst{2}; // CPU plays first
+    const int pointsNeededToWin{2}; //Best of 3 rounds game as a default
+    const int initialHandSize{4};
 };
 
 void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_device &rd);

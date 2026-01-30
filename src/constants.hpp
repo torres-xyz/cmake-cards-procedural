@@ -35,10 +35,6 @@ namespace constants
     inline constexpr float zoomedCardWidth{cardWidth * 3.5};
     inline constexpr float zoomedCardHeight{cardHeight * 3.5};
 
-    // Decks
-    inline constexpr int initialDeckSize{10};
-    inline constexpr int initialHandSize{3};
-
     // UI
     //// Player 1 HandZone
     inline constexpr int handZonePaddingRight{200};

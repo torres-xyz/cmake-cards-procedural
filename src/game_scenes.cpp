@@ -48,7 +48,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
         bt.state = ButtonState::disabled;
 
         bool playerHasAvailableAction{false};
-        for (const auto availableActions: p1.availableActions)
+        for (const auto &availableActions: p1.availableActions)
         {
             if (availableActions.action == pAction) playerHasAvailableAction = true;
         }
@@ -66,6 +66,8 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
         }
     };
 
+    static raylib::Vector2 heldCardOffset{};
+
     // UpdateGameplayPhases(playingScene, currentPhase, gameStatus, player1, player2, gameRules, rd);
     // UPDATE ------------------------------------------------------------------
 
@@ -78,11 +80,16 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     if (gameStatus.currentTurnOwner == 1)
     {
         player1.availableActions = CalculateAvailableActions(player1, currentTurnPhase, gameRules);
+
+
         ExecuteTurn(player1, currentTurnPhase, gameRules, gameStatus);
     }
     if (gameStatus.currentTurnOwner == 2)
     {
         player2.availableActions = CalculateAvailableActions(player2, currentTurnPhase, gameRules);
+
+        //Insert CPU brain here
+
         ExecuteTurn(player2, currentTurnPhase, gameRules, gameStatus);
     }
 
@@ -90,12 +97,59 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     UpdateSceneButton(playingScene.endTurnButton, player1, PlayerAction::passTheTurn);
     UpdateSceneButton(playingScene.playerDeckButton, player1, PlayerAction::drawCard);
 
-    //Update Music
+    // Update Music
     PlayMusic(playingScene.music);
-    // Put Player 1's hand cards in place, slightly apart from each other.
+
+    // Update Holding a Card From Hand
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    {
+        for (size_t i = 0; i < player1.hand.size(); ++i)
+        {
+            raylib::Vector2 mousePos = GetMousePosition();
+
+            //Move the card we are holding with the mouse
+            if (player1.heldCardUid == player1.hand.at(i).uid)
+            {
+                player1.hand.at(i).rect.SetPosition(mousePos - heldCardOffset);
+                player1.hand.at(i).rect.SetSize(constants::inHandCardWidth, constants::inHandCardHeight);
+                continue;
+            }
+
+            //If trying to click and hold a card
+            if (HelperFunctions::CheckCollisionPointCard(mousePos, player1.hand.at(i)) &&
+                !player1.isHoldingACard)
+            {
+                player1.heldCardUid = player1.hand.at(i).uid;
+                player1.isHoldingACard = true;
+
+                heldCardOffset = mousePos - player1.hand.at(i).rect.GetPosition();
+            }
+        }
+    }
+    // Update Trying To Play Card
+    else
+    {
+        if (player1.isHoldingACard)
+        {
+            for (const PlayerActionAndHandCardPair &availableAction: player1.availableActions)
+            {
+                if (availableAction.card.uid == player1.heldCardUid)
+                {
+                    player1.chosenAction = availableAction;
+                }
+            }
+        }
+        player1.heldCardUid = 0;
+        player1.isHoldingACard = false;
+    }
+
+    // Update Player 1's hand cards. Put them in place, slightly apart from each other.
     for (size_t i = 0; i < player1.hand.size(); ++i)
     {
         const int int_i = static_cast<int>(i);
+        //except for the held card.
+        if (player1.hand.at(i).uid == player1.heldCardUid) continue;
+
         const raylib::Rectangle newCardRect
         {
             static_cast<float>(constants::handZonePosX + 2 * int_i + 1 + constants::inHandCardWidth * int_i),
@@ -108,6 +162,47 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
         player1.hand.at(i).faceUp = true;
     }
 
+    // Update Players stacks
+    auto UpdatePlayStackCards = [](Player &player)-> void {
+        for (size_t i = 0; i < player.cardsInPlayStack.size(); ++i)
+        {
+            player.cardsInPlayStack.at(i).faceUp = true;
+
+            constexpr float verticalOffset = 30;
+            if (player.id == 1)
+            {
+                player.cardsInPlayStack.at(i).rect = constants::playerOnePlayfieldCardZoneRect;
+            }
+            else if (player.id == 2)
+            {
+                player.cardsInPlayStack.at(i).rect = constants::playerTwoPlayfieldCardZoneRect;
+            }
+
+            player.cardsInPlayStack.at(i).rect.y += verticalOffset * static_cast<float>(i);
+        }
+    };
+    UpdatePlayStackCards(player1);
+    UpdatePlayStackCards(player2);
+
+    // Update Hovered Card
+    player1.isHoveringOverACard = false;
+    if (player1.isHoldingACard == false)
+    {
+        auto CheckHoveringCards = [](Player &p1, const std::vector<Card> &cards)-> void {
+            for (std::size_t i = 0; i < cards.size(); ++i)
+            {
+                //Handle hovering
+                if (HelperFunctions::CheckCollisionPointCard(GetMousePosition(), cards.at(i)))
+                {
+                    p1.hoveredCardUid = cards.at(i).uid;
+                    p1.isHoveringOverACard = true;
+                }
+            }
+        };
+        CheckHoveringCards(player1, player1.hand);
+        CheckHoveringCards(player1, player1.cardsInPlayStack);
+        CheckHoveringCards(player1, player2.cardsInPlayStack);
+    }
     // DRAW ---------------------------------------------------------------------
     GetTexture(playingScene.background).Draw();
     DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
@@ -190,20 +285,33 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     allCards.insert(std::end(allCards), std::begin(player1.cardsInPlayStack), std::end(player1.cardsInPlayStack));
     allCards.insert(std::end(allCards), std::begin(player2.cardsInPlayStack), std::end(player2.cardsInPlayStack));
 
-
+    // Draw all cards
     if (allCards.empty()) return;
     std::size_t hoveredCardIndex{};
+    std::size_t heldCardIndex{};
     for (std::size_t i = 0; i < allCards.size(); ++i)
     {
+        //Hovered cards are drawn differently
         if (player1.isHoveringOverACard && player1.hoveredCardUid == allCards.at(i).uid)
         {
             hoveredCardIndex = i;
             continue;
         }
+        if (player1.isHoldingACard && player1.heldCardUid == allCards.at(i).uid)
+        {
+            heldCardIndex = i;
+            continue;
+        }
 
         RenderCard(allCards.at(i), allCards.at(i).rect);
     }
-    //Draw hovered card last
+    // Draw Held Card
+    if (player1.isHoldingACard)
+    {
+        RenderCard(allCards.at(heldCardIndex), allCards.at(heldCardIndex).rect);
+    }
+
+    // Draw hovered card
     if (player1.isHoveringOverACard)
     {
         if (hoveredCardIndex < playfieldCardsIndexOffset)
@@ -231,6 +339,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
             RenderCard(allCards.at(hoveredCardIndex), expandedCardInFieldRect);
         }
     }
+
     if (currentPhase == GameplayPhase::endPhase)
     {
         //Render a semi-transparent black overlay on the scene

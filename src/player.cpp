@@ -10,7 +10,7 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
     player.hand.clear();
     player.cardsInPlayStack.clear();
     player.isHoldingACard = false;
-    player.heldCardIndex = -1;
+    player.heldCardUid = 0;
     player.hoveredCardUid = 0;
     player.isHoveringOverACard = false;
     //Use default deck for players for now.

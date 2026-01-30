@@ -10,12 +10,13 @@ std::string ActionLogEntryToString(ActionLog log)
 {
     std::string printedLog
     {
-        std::format("[R: {0}, T: {1}] Player {2} did {3} - {4}",
+        std::format("[R: {0}, T: {1}] During {2} Player {3} did {4} - {5}",
                     std::to_string(log.roundNumber),
                     std::to_string(log.turnNumber),
+                    TurnPhaseToString(log.turnPhase),
                     std::to_string(log.playerID),
-                    PlayerActionToString(log.actionCardPairTaken),
-                    log.details)
+                    PlayerActionToString(log.actionCardPairTaken.action),
+                    log.actionCardPairTaken.card.name)
     };
 
     return printedLog;

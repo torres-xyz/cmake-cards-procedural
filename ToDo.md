@@ -1,9 +1,6 @@
 # To Do
 
-Check if a player has already drawn this turn by looking at the actions log and looking for a drawCard action in their
-current turn.
-
-Do a CardsInPlayToStringByUID function.
+## Refactoring to Game Turn
 
 - [ ] Move game logic to use a set of actions that each player can take.
 - [ ] BUG: It is possible to start a Phase with no Units in the hand, bricking the game. (Make player lose the game?)

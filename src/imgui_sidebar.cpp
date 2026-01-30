@@ -39,11 +39,11 @@ namespace ImGuiSideBar
             ImGui::TextUnformatted(("Player 2 hand = " + std::to_string(player2.hand.size())).c_str());
             ImGui::TextUnformatted(("Player 2 deck = " + std::to_string(player2.deck.size())).c_str());
             ImGui::SeparatorText("Turn Phase");
-            ImGui::TextUnformatted(("Turn Phase = " + std::to_string(static_cast<int>(currentTurnPhase))).c_str());
+            ImGui::TextUnformatted(("Turn Phase = " + TurnPhaseToString(currentTurnPhase)).c_str());
             ImGui::SeparatorText("Player 1 available actions");
             ImGui::TextUnformatted(HelperFunctions::PlayerAvailableActionsToString(player1).c_str());
             ImGui::SeparatorText("Actions Log");
-            ImGui::TextUnformatted(HelperFunctions::ActionLogsToString(gameStatus).c_str());
+            ImGui::TextWrapped(HelperFunctions::ActionLogsToString(gameStatus).c_str());
             ImGui::SeparatorText("Options");
             ImGui::Checkbox("Mute", &muteGame);
             ImGui::SeparatorText("Debug Actions");
