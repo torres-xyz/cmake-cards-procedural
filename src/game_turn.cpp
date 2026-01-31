@@ -127,10 +127,19 @@ void ExecuteTurn(Player &player, TurnPhase &currentTurnPhase, const GameRules &g
         return false;
     };
 
+    //If there is a new turn owner, switch the turn phase to initial setup or draw step
+    if (!gameStatus.actionLogs.empty())
+    {
+        if (gameStatus.actionLogs.back().playerID != player.id)
+        {
+            currentTurnPhase = TurnPhase::initialSetup;
+        }
+    }
+
 
     switch (currentTurnPhase)
     {
-        case TurnPhase::initialSetup: //only executed once per round.
+        case TurnPhase::initialSetup: //only executed once per round. but diferent
         {
             ExecuteChosenPlayerAction(player, currentTurnPhase, gameStatus);
 
@@ -166,13 +175,17 @@ void ExecuteTurn(Player &player, TurnPhase &currentTurnPhase, const GameRules &g
         {
             //If both players passed, Battle
 
+
+            gameStatus.currentTurnOwner = player.id == 1 ? 2 : 1;
+            gameStatus.turnsPlayed++;
+
             break;
         }
     }
 }
 
 
-void ExecuteChosenPlayerAction(Player &player, const TurnPhase &turnPhase, GameStatus &gameStatus)
+void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, GameStatus &gameStatus)
 {
     auto LogAction = [](const Player &p, const TurnPhase &tP, GameStatus &gS) {
         gS.actionLogs.push_back(
@@ -199,6 +212,9 @@ void ExecuteChosenPlayerAction(Player &player, const TurnPhase &turnPhase, GameS
         }
     };
 
+    if (player.chosenAction.action != PlayerAction::null)
+        LogAction(player, turnPhase, gameStatus);
+
     switch (player.chosenAction.action)
     {
         case PlayerAction::null:
@@ -208,6 +224,7 @@ void ExecuteChosenPlayerAction(Player &player, const TurnPhase &turnPhase, GameS
         case PlayerAction::drawCard:
         {
             DrawCardsFromDeckToHand(player, 1);
+
             break;
         }
         case PlayerAction::mulligan:
@@ -236,8 +253,7 @@ void ExecuteChosenPlayerAction(Player &player, const TurnPhase &turnPhase, GameS
         }
         case PlayerAction::passTheTurn:
         {
-            gameStatus.currentTurnOwner = player.id == 1 ? 2 : 1;
-            gameStatus.turnsPlayed++;
+            turnPhase = TurnPhase::endPhase;
 
             break;
         }
@@ -245,7 +261,6 @@ void ExecuteChosenPlayerAction(Player &player, const TurnPhase &turnPhase, GameS
             break;
     }
 
-    LogAction(player, turnPhase, gameStatus);
     player.chosenAction = {PlayerAction::null};
 }
 

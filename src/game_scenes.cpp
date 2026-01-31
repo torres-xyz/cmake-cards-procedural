@@ -7,6 +7,7 @@
 
 #include "audio.hpp"
 #include "constants.hpp"
+#include "cpu_brain.hpp"
 #include "game_play_phases.hpp"
 #include "player.hpp"
 #include "textures.hpp"
@@ -75,15 +76,17 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     if (gameStatus.currentTurnOwner == 1)
     {
         player1.availableActions = CalculateAvailableActions(player1, currentTurnPhase, gameRules, gameStatus);
-
+        player2.availableActions.clear(); // No actions for the other player
 
         ExecuteTurn(player1, currentTurnPhase, gameRules, gameStatus);
     }
     if (gameStatus.currentTurnOwner == 2)
     {
         player2.availableActions = CalculateAvailableActions(player2, currentTurnPhase, gameRules, gameStatus);
+        player1.availableActions.clear(); // No actions for the other player
 
         //Insert CPU brain here
+        RunCpuBrain(player2, 0.5f);
 
         ExecuteTurn(player2, currentTurnPhase, gameRules, gameStatus);
     }

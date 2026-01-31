@@ -42,7 +42,7 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
 
 void ExecuteTurn(Player &player, TurnPhase &currentTurnPhase, const GameRules &gameRules, GameStatus &gameStatus);
 
-void ExecuteChosenPlayerAction(Player &player, const TurnPhase &turnPhase, GameStatus &gameStatus);
+void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, GameStatus &gameStatus);
 
 std::string PlayerActionToString(PlayerAction playerAction);
 

@@ -1,0 +1,36 @@
+#include "cpu_brain.hpp"
+
+#include "player.hpp"
+
+void RunCpuBrain(Player &player, const float actionDelay)
+{
+    static float timeSinceLastAction{};
+
+    timeSinceLastAction += GetFrameTime();
+    if (timeSinceLastAction < actionDelay) return;
+
+    // Look at the available actions and pick one.
+    if (player.availableActions.empty()) return;
+
+    for (const PlayerActionAndHandCardPair &actionCardPair: player.availableActions)
+    {
+        if (actionCardPair.action == PlayerAction::null) continue; // Nothing to do.
+        if (actionCardPair.action == PlayerAction::forfeit) continue; // Never forfeit.
+
+        //Always draw a card first
+        if (actionCardPair.action == PlayerAction::drawCard)
+        {
+            player.chosenAction = actionCardPair;
+            break;
+        }
+
+        // Play the first Unit that shows up in the available actions
+        if (actionCardPair.action == PlayerAction::playCard)
+        {
+            player.chosenAction = actionCardPair;
+            break;
+        }
+    }
+
+    timeSinceLastAction = 0;
+}

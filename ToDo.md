@@ -2,6 +2,8 @@
 
 ## Refactoring to Game Turn
 
+    - Draw P2's hand cards.
+
 - [ ] Move game logic to use a set of actions that each player can take.
 - [ ] BUG: It is possible to start a Phase with no Units in the hand, bricking the game. (Make player lose the game?)
     - [ ] Add a log of each action.

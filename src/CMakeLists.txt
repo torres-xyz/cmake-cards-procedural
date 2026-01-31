@@ -26,6 +26,8 @@ add_library(${PROJECT_NAME}
         game_status.hpp
         game_turn.cpp
         game_turn.hpp
+        cpu_brain.cpp
+        cpu_brain.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
