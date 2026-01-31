@@ -62,4 +62,23 @@ static const std::vector<int> deckP2
     StringToCardId("All Plus")
 };
 
-void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd);
+static const std::vector<int> mulliganRequiredDeck
+{
+    StringToCardId("Body Plus Plus"),
+    StringToCardId("Mind Plus"),
+    StringToCardId("Mind Plus Plus Plus"),
+    StringToCardId("Soul Plus Plus"),
+    StringToCardId("Body Mind Plus"),
+    StringToCardId("Mind Soul Plus"),
+    StringToCardId("Body Soul Plus Plus"),
+    StringToCardId("All Plus"),
+    StringToCardId("Blitz Lancer"),
+    StringToCardId("Sand Fang"),
+    StringToCardId("Cephalopriest"),
+    StringToCardId("Biohazard"),
+    StringToCardId("Sand Claw"),
+    StringToCardId("Sand Tusk"),
+    StringToCardId("Temple Shield")
+};
+
+void InitializePlayer(Player &player);

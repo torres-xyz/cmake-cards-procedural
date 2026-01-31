@@ -1,20 +1,50 @@
 #include "game_turn.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <format>
 
 #include "audio.hpp"
 #include "game_rules.hpp"
 #include "game_status.hpp"
+#include "helper_functions.hpp"
 #include "player.hpp"
+
+bool HasACardBeenPlayedThisTurn(const GameStatus &gS)
+{
+    const int currentTurn = gS.turnsPlayed;
+    for (int i = static_cast<int>(gS.actionLogs.size()) - 1; i >= 0; --i)
+    {
+        if (gS.actionLogs.at(static_cast<size_t>(i)).turnNumber == currentTurn &&
+            gS.actionLogs.at(static_cast<size_t>(i)).actionCardPairTaken.action == PlayerAction::playCard)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool HasACardBeenPlayedLastTurn(const GameStatus &gS)
+{
+    const int currentTurn = gS.turnsPlayed;
+    for (int i = static_cast<int>(gS.actionLogs.size()) - 1; i >= 0; --i)
+    {
+        if (gS.actionLogs.at(static_cast<size_t>(i)).turnNumber == currentTurn - 1 &&
+            gS.actionLogs.at(static_cast<size_t>(i)).actionCardPairTaken.action == PlayerAction::playCard)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player &player, const TurnPhase &turnPhase, const GameRules &gameRules, const GameStatus &gameStatus)
 {
     std::vector<PlayerActionAndHandCardPair> possibleActions{};
 
     possibleActions.push_back({PlayerAction::forfeit});
-
-    switch (turnPhase)
+ switch (turnPhase)
     {
         case TurnPhase::initialSetup:
         {
@@ -24,42 +54,15 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
             }
             if (static_cast<int>(player.hand.size()) == gameRules.initialHandSize)
             {
-                if (IsInitialHandValid(player.hand, gameRules))
-                {
-                    //pass the turn?
-                }
-                else
+                if (!IsInitialHandValid(player.hand, gameRules))
                 {
                     possibleActions.push_back({PlayerAction::mulligan});
                 }
             }
             break;
         }
-        case TurnPhase::drawStep:
-        {
-            //If player can draw a card, do it
-            if (!player.deck.empty())
-            {
-                possibleActions.push_back({PlayerAction::drawCard});
-            }
-            break;
-        }
         case TurnPhase::mainPhase:
         {
-            auto HasPlayedACardThisTurn = [](const GameStatus &gS) -> bool {
-                const int currentTurn = gS.turnsPlayed;
-                for (int i = static_cast<int>(gS.actionLogs.size()) - 1; i >= 0; --i)
-                {
-                    if (gS.actionLogs.at(static_cast<size_t>(i)).turnNumber == currentTurn &&
-                        gS.actionLogs.at(static_cast<size_t>(i)).actionCardPairTaken.action == PlayerAction::playCard)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            };
-
-
             //If the player has NO cards in play, they MUST play a Unit
             if (player.cardsInPlayStack.empty())
             {
@@ -79,9 +82,10 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
                 }
             }
 
+
             // You can play Action Cards on your Unit card in play.
             if (!player.cardsInPlayStack.empty() &&
-                !HasPlayedACardThisTurn(gameStatus) &&
+                !HasACardBeenPlayedThisTurn(gameStatus) &&
                 player.cardsInPlayStack.at(0).type == CardType::unit)
             {
                 for (const Card &card: player.hand)
@@ -112,25 +116,32 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
 }
 
 // Make use of the command pattern, so that it is easy to list actions, undo them, and redo them.
-void ExecuteTurn(Player &player, TurnPhase &currentTurnPhase, const GameRules &gameRules, GameStatus &gameStatus)
+void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnPhase, const GameRules &gameRules, GameStatus &gameStatus)
 {
-    auto HasPlayerDrawnForTheTurnThisTurn = [](const GameStatus &gS, const Player &p)-> bool {
-        //Needs to take into account previous actions
-        if (const ActionLog lastLog = gS.actionLogs.back();
-            lastLog.turnPhase == TurnPhase::drawStep &&
-            lastLog.playerID == p.id &&
-            lastLog.turnNumber == gS.turnsPlayed)
-        {
-            return true;
-        }
-
-        return false;
-    };
+    assert(player.id != opponentPlayer.id && "Passing the same player as turn owner and opponent");
 
     //If there is a new turn owner, switch the turn phase to initial setup or draw step
-    if (!gameStatus.actionLogs.empty())
+    if (!gameStatus.actionLogs.empty() &&
+        gameStatus.actionLogs.back().playerID != player.id)
     {
-        if (gameStatus.actionLogs.back().playerID != player.id)
+        //During the current round, have they had an Initial Setup Phase?
+        bool hasHadInitialSetupPhaseThisRound{false};
+        for (const ActionLog &actionLog: gameStatus.actionLogs)
+        {
+            if (actionLog.roundNumber == gameStatus.roundsPlayed &&
+                actionLog.playerID == player.id &&
+                actionLog.turnPhase == TurnPhase::initialSetup)
+            {
+                hasHadInitialSetupPhaseThisRound = true;
+            }
+        }
+
+        if (hasHadInitialSetupPhaseThisRound)
+        {
+            // currentTurnPhase = TurnPhase::drawStep;
+            currentTurnPhase = TurnPhase::mainPhase;
+        }
+        else
         {
             currentTurnPhase = TurnPhase::initialSetup;
         }
@@ -139,27 +150,16 @@ void ExecuteTurn(Player &player, TurnPhase &currentTurnPhase, const GameRules &g
 
     switch (currentTurnPhase)
     {
-        case TurnPhase::initialSetup: //only executed once per round. but diferent
+        case TurnPhase::initialSetup: //only executed once per round. but different
         {
-            ExecuteChosenPlayerAction(player, currentTurnPhase, gameStatus);
+            ExecuteChosenPlayerAction(player, currentTurnPhase, gameRules, gameStatus);
 
             // Auto shuffle deck ?
 
             // Wait for initial hand draw
             if (IsInitialHandValid(player.hand, gameRules))
             {
-                currentTurnPhase = TurnPhase::drawStep;
-            }
-
-            break;
-        }
-        case TurnPhase::drawStep:
-        {
-            ExecuteChosenPlayerAction(player, currentTurnPhase, gameStatus);
-
-            // Wait for draw.
-            if (HasPlayerDrawnForTheTurnThisTurn(gameStatus, player))
-            {
+                // currentTurnPhase = TurnPhase::drawStep;
                 currentTurnPhase = TurnPhase::mainPhase;
             }
 
@@ -167,14 +167,30 @@ void ExecuteTurn(Player &player, TurnPhase &currentTurnPhase, const GameRules &g
         }
         case TurnPhase::mainPhase:
         {
-            ExecuteChosenPlayerAction(player, currentTurnPhase, gameStatus);
+            ExecuteChosenPlayerAction(player, currentTurnPhase, gameRules, gameStatus);
 
             break;
         }
         case TurnPhase::endPhase:
         {
-            //If both players passed, Battle
+            // Battle
+            // If both players passed without playing a card, Battle
+            if (!HasACardBeenPlayedThisTurn(gameStatus) &&
+                !HasACardBeenPlayedLastTurn(gameStatus))
+            {
+                const int winner = CalculateRoundWinner(player.cardsInPlayStack, opponentPlayer.cardsInPlayStack);
+                if (winner == 1) player.score++;
+                if (winner == 2) opponentPlayer.score++;
+                gameStatus.roundsPlayed++;
+                gameStatus.currentTurnOwner = winner == 1 ? 1 : 2; //Winning player starts first the next round.
+                gameStatus.turnsPlayed++;
 
+                //Clear the Fields
+                player.cardsInPlayStack.clear();
+                opponentPlayer.cardsInPlayStack.clear();
+
+                break;
+            }
 
             gameStatus.currentTurnOwner = player.id == 1 ? 2 : 1;
             gameStatus.turnsPlayed++;
@@ -185,7 +201,7 @@ void ExecuteTurn(Player &player, TurnPhase &currentTurnPhase, const GameRules &g
 }
 
 
-void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, GameStatus &gameStatus)
+void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameRules &gameRules, GameStatus &gameStatus)
 {
     auto LogAction = [](const Player &p, const TurnPhase &tP, GameStatus &gS) {
         gS.actionLogs.push_back(
@@ -228,7 +244,20 @@ void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, GameStatus 
             break;
         }
         case PlayerAction::mulligan:
+        {
+            //add hand to deck
+            player.deck.insert(std::begin(player.deck), std::begin(player.hand), std::end(player.hand));
+            player.hand.clear();
+
+            //then shuffle deck
+
+            std::ranges::shuffle(player.deck, HelperFunctions::GetRandomDevice());
+
+            //then draw cards again
+            DrawCardsFromDeckToHand(player, gameRules.initialHandSize);
+
             break;
+        }
         case PlayerAction::shuffleHandIntoDeck:
             break;
         case PlayerAction::shuffleDeck:
@@ -294,8 +323,6 @@ std::string TurnPhaseToString(const TurnPhase phase)
     {
         case TurnPhase::initialSetup:
             return "Initial Setup";
-        case TurnPhase::drawStep:
-            return "Draw Step";
         case TurnPhase::mainPhase:
             return "Main Phase";
         case TurnPhase::endPhase:

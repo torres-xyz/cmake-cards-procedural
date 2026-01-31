@@ -1,10 +1,9 @@
 #include "player.hpp"
 #include <algorithm>
 #include <random>
-#include "constants.hpp"
 #include "helper_functions.hpp"
 
-void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
+void InitializePlayer(Player &player)
 {
     player.score = 0;
     player.hand.clear();
@@ -32,5 +31,5 @@ void InitializePlayerWithAdvancedDeck(Player &player, std::random_device &rd)
         }
     }
 
-    std::ranges::shuffle(player.deck, rd);
+    std::ranges::shuffle(player.deck, HelperFunctions::GetRandomDevice());
 }

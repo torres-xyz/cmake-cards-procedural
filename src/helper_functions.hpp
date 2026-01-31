@@ -204,13 +204,26 @@ namespace HelperFunctions
     {
         std::string s{};
 
-        for (size_t i = 0; i < gameStatus.actionLogs.size(); ++i)
+        for (const auto &actionLog: gameStatus.actionLogs)
         {
-            s.append(std::to_string(i) + " - ");
-            s.append(ActionLogEntryToString(gameStatus.actionLogs.at(i)));
+            s.append(ActionLogEntryToString(actionLog));
             s.append("\n");
         }
 
         return s;
+    }
+
+    inline std::random_device &GetRandomDevice()
+    {
+        static bool initialized{false};
+        static std::random_device rd{};
+
+        if (!initialized)
+        {
+            SetRandomSeed(rd());
+            initialized = true;
+        }
+
+        return rd;
     }
 }

@@ -33,7 +33,7 @@ TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]"
         .cardsPlayed = 10
     };
 
-    InitializePlayerWithAdvancedDeck(playerUnderTest, rd);
+    InitializePlayer(playerUnderTest, rd);
 
     SECTION("Player ID shouldn't change")
     {

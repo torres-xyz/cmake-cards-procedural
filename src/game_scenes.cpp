@@ -43,8 +43,9 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
     DrawButton(startButton, GetTexture(startButton.background));
 }
 
-void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, const GameplayPhase &currentPhase, GameStatus &gameStatus, Player &player1, Player &player2, const GameRules &gameRules, [[maybe_unused]] std::random_device &rd)
+void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, const GameplayPhase &currentPhase, GameStatus &gameStatus, Player &player1, Player &player2, const GameRules &gameRules)
 {
+    // Lambdas
     auto UpdateSceneButton = [](Button &bt, Player &p1, const PlayerAction pAction) {
         bt.state = ButtonState::disabled;
 
@@ -66,19 +67,42 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
             }
         }
     };
+    auto UpdatePlayStackCards = [](Player &player)-> void {
+        for (size_t i = 0; i < player.cardsInPlayStack.size(); ++i)
+        {
+            player.cardsInPlayStack.at(i).faceUp = true;
 
+            constexpr float verticalOffset = 30;
+            if (player.id == 1)
+            {
+                player.cardsInPlayStack.at(i).rect = constants::playerOnePlayfieldCardZoneRect;
+            }
+            else if (player.id == 2)
+            {
+                player.cardsInPlayStack.at(i).rect = constants::playerTwoPlayfieldCardZoneRect;
+            }
+
+            player.cardsInPlayStack.at(i).rect.y += verticalOffset * static_cast<float>(i);
+        }
+    };
+    auto DoesPlayerHaveAvailableAction = [](const Player &player, const PlayerAction &action)-> bool {
+        for (const auto &[playerAction, card]: player.availableActions)
+        {
+            if (playerAction == action) return true;
+        }
+        return false;
+    };
+
+    // Static Variables
     static raylib::Vector2 heldCardOffset{};
 
-    // UpdateGameplayPhases(playingScene, currentPhase, gameStatus, player1, player2, gameRules, rd);
     // UPDATE ------------------------------------------------------------------
-
-
     if (gameStatus.currentTurnOwner == 1)
     {
         player1.availableActions = CalculateAvailableActions(player1, currentTurnPhase, gameRules, gameStatus);
         player2.availableActions.clear(); // No actions for the other player
 
-        ExecuteTurn(player1, currentTurnPhase, gameRules, gameStatus);
+        ExecuteTurn(player1, player2, currentTurnPhase, gameRules, gameStatus);
     }
     if (gameStatus.currentTurnOwner == 2)
     {
@@ -86,14 +110,22 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
         player1.availableActions.clear(); // No actions for the other player
 
         //Insert CPU brain here
-        RunCpuBrain(player2, 0.5f);
+        RunCpuBrain(player2, 0.25f);
 
-        ExecuteTurn(player2, currentTurnPhase, gameRules, gameStatus);
+        ExecuteTurn(player2, player1, currentTurnPhase, gameRules, gameStatus);
     }
 
     // Update the button states
+    if (DoesPlayerHaveAvailableAction(player1, PlayerAction::mulligan))
+    {
+        UpdateSceneButton(playingScene.mulliganButton, player1, PlayerAction::mulligan);
+    }
+    else
+    {
+        UpdateSceneButton(playingScene.playerDeckButton, player1, PlayerAction::drawCard);
+    }
     UpdateSceneButton(playingScene.endTurnButton, player1, PlayerAction::passTheTurn);
-    UpdateSceneButton(playingScene.playerDeckButton, player1, PlayerAction::drawCard);
+
 
     // Update Music
     PlayMusic(playingScene.music);
@@ -160,25 +192,26 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
         player1.hand.at(i).faceUp = true;
     }
 
-    // Update Players stacks
-    auto UpdatePlayStackCards = [](Player &player)-> void {
-        for (size_t i = 0; i < player.cardsInPlayStack.size(); ++i)
+    // Update Player 2's hand cards. Put them in place, slightly apart from each other.
+    for (std::size_t i = 0; i < player2.hand.size(); ++i)
+    {
+        const auto float_i = static_cast<float>(i);
+
+        //Set cards in the hand slightly apart from each other.
+        const raylib::Rectangle newCardRect
         {
-            player.cardsInPlayStack.at(i).faceUp = true;
+            constants::player2HandZone.x + 2 * float_i + 1 + constants::cardWidth * float_i,
+            constants::player2HandZone.y + 4,
+            constants::cardWidth,
+            constants::cardHeight
+        };
 
-            constexpr float verticalOffset = 30;
-            if (player.id == 1)
-            {
-                player.cardsInPlayStack.at(i).rect = constants::playerOnePlayfieldCardZoneRect;
-            }
-            else if (player.id == 2)
-            {
-                player.cardsInPlayStack.at(i).rect = constants::playerTwoPlayfieldCardZoneRect;
-            }
+        player2.hand.at(i).rect = newCardRect;
+        player2.hand.at(i).faceUp = false;
+    }
 
-            player.cardsInPlayStack.at(i).rect.y += verticalOffset * static_cast<float>(i);
-        }
-    };
+
+    // Update Players stacks
     UpdatePlayStackCards(player1);
     UpdatePlayStackCards(player2);
 
@@ -187,12 +220,12 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     if (player1.isHoldingACard == false)
     {
         auto CheckHoveringCards = [](Player &p1, const std::vector<Card> &cards)-> void {
-            for (std::size_t i = 0; i < cards.size(); ++i)
+            for (const auto &card: cards)
             {
                 //Handle hovering
-                if (HelperFunctions::CheckCollisionPointCard(GetMousePosition(), cards.at(i)))
+                if (HelperFunctions::CheckCollisionPointCard(GetMousePosition(), card))
                 {
-                    p1.hoveredCardUid = cards.at(i).uid;
+                    p1.hoveredCardUid = card.uid;
                     p1.isHoveringOverACard = true;
                 }
             }
@@ -203,8 +236,18 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     }
     // DRAW ---------------------------------------------------------------------
     GetTexture(playingScene.background).Draw();
-    DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
     DrawButton(playingScene.endTurnButton, GetTexture(playingScene.endTurnButton.background));
+
+    if (DoesPlayerHaveAvailableAction(player1, PlayerAction::mulligan))
+    {
+        DrawButton(playingScene.mulliganButton, GetTexture(playingScene.mulliganButton.background));
+    }
+    else
+    {
+        DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
+    }
+
+
     GetTexture(playingScene.playfield).Draw(Rectangle{0, 0, constants::playfieldRec.width, constants::playfieldRec.height}, constants::playfieldRec);
     // Draw stack stats total
     //// Rectangle

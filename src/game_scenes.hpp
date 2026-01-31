@@ -36,6 +36,7 @@ struct PlayingScene
     GameTexture playfield{};
     GameMusic music{};
     Button playerDeckButton{};
+    Button mulliganButton{};
     Button endTurnButton{};
     Button nextRoundButton{};
 };
@@ -56,7 +57,7 @@ struct PrototypingScene
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene);
 
 void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, const GameplayPhase &currentPhase, GameStatus &gameStatus,
-                     Player &player1, Player &player2, const GameRules &gameRules, std::random_device &rd);
+                     Player &player1, Player &player2, const GameRules &gameRules);
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
                       const Player &player1, const Player &player2);

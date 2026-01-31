@@ -17,8 +17,6 @@
 int run()
 {
     // Initialization ----------------------------------------------------------
-    std::random_device rd{};
-    SetRandomSeed(rd());
 
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetTraceLogLevel(LOG_ERROR);
@@ -36,8 +34,8 @@ int run()
     Player player1{.id = 1};
     Player player2{.id = 2};
 
-    InitializePlayerWithAdvancedDeck(player1, rd);
-    InitializePlayerWithAdvancedDeck(player2, rd);
+    InitializePlayer(player1);
+    InitializePlayer(player2);
 
     GameRules gameRules
     {
@@ -97,6 +95,20 @@ int run()
                 constants::cardHeight,
             },
             .text = "Deck",
+            .fontSize = 20,
+            .background = GameTexture::panel01,
+            .state = ButtonState::disabled
+        },
+        .mulliganButton
+        {
+            .rectangle
+            {
+                constants::screenWidth - constants::cardWidth * 2 - 50,
+                constants::screenHeight - constants::cardHeight - constants::handZoneBottomPadding,
+                constants::cardWidth * 2,
+                constants::cardHeight,
+            },
+            .text = "Mulligan",
             .fontSize = 20,
             .background = GameTexture::panel01,
             .state = ButtonState::disabled
@@ -183,7 +195,7 @@ int run()
             }
             case GameScene::playing:
             {
-                RunPlayingScene(playingScene, currentTurnPhase, currentPhase, gameStatus, player1, player2, gameRules, rd);
+                RunPlayingScene(playingScene, currentTurnPhase, currentPhase, gameStatus, player1, player2, gameRules);
 
                 if (currentPhase == GameplayPhase::gameOver)
                 {

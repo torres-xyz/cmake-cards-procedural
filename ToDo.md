@@ -2,7 +2,15 @@
 
 ## Refactoring to Game Turn
 
-    - Draw P2's hand cards.
+- [ ] Add back the showing round winner scene.
+    - Figure out a better way to display the overlay.
+- [x] Implement mulligan.
+    - [x] Create mulligan button.
+- [x] Remove "Draw Step" from the phases. There is only the initial setup each turn, otherwise player's would never stop
+  pumping their Units.
+- [ ] Check all the TODOs before merging.
+
+## Regular To Dos
 
 - [ ] Move game logic to use a set of actions that each player can take.
 - [ ] BUG: It is possible to start a Phase with no Units in the hand, bricking the game. (Make player lose the game?)

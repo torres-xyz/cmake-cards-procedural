@@ -12,7 +12,6 @@ struct Player;
 enum class TurnPhase
 {
     initialSetup,
-    drawStep,
     mainPhase, //playing cards
     endPhase
 };
@@ -40,9 +39,9 @@ struct PlayerActionAndHandCardPair
 
 std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player &player, const TurnPhase &turnPhase, const GameRules &gameRules, const GameStatus &gameStatus);
 
-void ExecuteTurn(Player &player, TurnPhase &currentTurnPhase, const GameRules &gameRules, GameStatus &gameStatus);
+void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnPhase, const GameRules &gameRules, GameStatus &gameStatus);
 
-void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, GameStatus &gameStatus);
+void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameRules &gameRules, GameStatus &gameStatus);
 
 std::string PlayerActionToString(PlayerAction playerAction);
 

@@ -25,4 +25,4 @@ struct GameStatus
 };
 
 
-std::string ActionLogEntryToString(ActionLog log);
+std::string ActionLogEntryToString(const ActionLog &log);

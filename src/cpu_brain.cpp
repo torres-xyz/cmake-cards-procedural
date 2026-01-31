@@ -30,6 +30,13 @@ void RunCpuBrain(Player &player, const float actionDelay)
             player.chosenAction = actionCardPair;
             break;
         }
+
+        //If there is nothing else to do, pass the turn
+        if (actionCardPair.action == PlayerAction::passTheTurn)
+        {
+            player.chosenAction = actionCardPair;
+            break;
+        }
     }
 
     timeSinceLastAction = 0;

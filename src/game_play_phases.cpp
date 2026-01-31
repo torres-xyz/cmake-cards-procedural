@@ -212,10 +212,10 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
         case GameplayPhase::uninitialized:
         {
             //Reset everything gameplay wise
-            InitializePlayerWithAdvancedDeck(player1, rd);
+            InitializePlayer(player1);
             ShuffleDeckAndMakeSureTopCardIsAUnit(player1.deck, rd);
 
-            InitializePlayerWithAdvancedDeck(player2, rd);
+            InitializePlayer(player2);
             ShuffleDeckAndMakeSureTopCardIsAUnit(player2.deck, rd);
 
 
