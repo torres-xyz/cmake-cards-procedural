@@ -4,6 +4,7 @@
 #include "game_turn.hpp"
 #include "player.hpp"
 #include "game_status.hpp"
+#include <random>
 
 namespace HelperFunctions
 {

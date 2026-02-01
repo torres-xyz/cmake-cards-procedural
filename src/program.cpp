@@ -34,10 +34,7 @@ int run()
     Player player1{.id = 1};
     Player player2{.id = 2};
 
-    InitializePlayer(player1);
-    InitializePlayer(player2);
-
-    GameRules gameRules
+    constexpr GameRules gameRules
     {
         .playerGoingFirst = 2,
         .pointsNeededToWin = 2 //Best of 3 game
@@ -49,7 +46,6 @@ int run()
     TurnPhase currentTurnPhase{TurnPhase::initialSetup};
 
     GameStatus gameStatus{};
-    gameStatus.currentTurnOwner = 1; // TODO: DELETE LATER
 
     //GameScene::start ---------------------------------------------------------
     constexpr int startGameButtonWidth{200};
@@ -168,7 +164,7 @@ int run()
     };
     //GameScene::gameOver end --------------------------------------------------
 
-    //Prototyping Scene
+    //Prototyping Scene --------------------------------------------------------
     constexpr bool usePrototypingScene{false};
     if (usePrototypingScene)
     {
@@ -178,7 +174,7 @@ int run()
     {
         .background = GameTexture::wood11
     };
-    //Test Scene end
+    //GameScene::prototyping end -----------------------------------------------
 
     while (!window.ShouldClose()) // Detect window close button or ESC key
     {
@@ -190,14 +186,14 @@ int run()
                 break;
             case GameScene::starting:
             {
-                RunStartingScene(startingScene, currentScene);
+                RunStartingScene(startingScene, currentScene, player1, player2, gameStatus);
                 break;
             }
             case GameScene::playing:
             {
-                RunPlayingScene(playingScene, currentTurnPhase, currentPhase, gameStatus, player1, player2, gameRules);
+                RunPlayingScene(playingScene, currentTurnPhase, gameStatus, player1, player2, gameRules);
 
-                if (currentPhase == GameplayPhase::gameOver)
+                if (gameStatus.gameIsOver)
                 {
                     currentScene = GameScene::gameOver;
                 }
@@ -205,7 +201,7 @@ int run()
             }
             case GameScene::gameOver:
             {
-                RunGameOverScene(gameOverScene, currentScene, currentPhase, player1, player2);
+                RunGameOverScene(gameOverScene, currentScene, currentTurnPhase, gameStatus, player1, player2);
                 break;
             }
             case GameScene::prototyping:

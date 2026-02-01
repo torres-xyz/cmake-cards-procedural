@@ -2,12 +2,12 @@
 
 #include "player.hpp"
 
-void RunCpuBrain(Player &player, const float actionDelay)
+void RunCpuBrain(Player &player, const CpuPlayerOptions &options)
 {
     static float timeSinceLastAction{};
 
     timeSinceLastAction += GetFrameTime();
-    if (timeSinceLastAction < actionDelay) return;
+    if (timeSinceLastAction < options.actionDelay) return;
 
     // Look at the available actions and pick one.
     if (player.availableActions.empty()) return;
@@ -36,6 +36,16 @@ void RunCpuBrain(Player &player, const float actionDelay)
         {
             player.chosenAction = actionCardPair;
             break;
+        }
+
+        //Start a new Round
+        if (options.autoStartNewRound)
+        {
+            if (actionCardPair.action == PlayerAction::finishRound)
+            {
+                player.chosenAction = actionCardPair;
+                break;
+            }
         }
     }
 

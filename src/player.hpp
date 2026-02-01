@@ -1,5 +1,4 @@
 #pragma once
-#include <random>
 #include <vector>
 #include "card.hpp"
 #include "game_turn.hpp"
@@ -9,7 +8,6 @@ enum class PlayerAction;
 struct Player
 {
     int id{-1};
-    int score{};
     std::vector<Card> deck{};
     std::vector<Card> hand{};
     std::vector<Card> cardsInPlayStack{};

@@ -3,6 +3,7 @@
 #include <cassert>
 #include "card.hpp"
 #include "game_play_phases.hpp"
+#include "game_status.hpp"
 #include "player.hpp"
 
 struct Card;
@@ -62,35 +63,32 @@ int GetCardStackTotalSoul(const std::vector<Card> &stack)
 }
 
 /**
- *
- * @param stack1 Player 1's card stack on the field
- * @param stack2 Player 2's card stack on the field
  * @return 1 if Player 1 wins, 2 if player 2 wins or 0 if it's a tie.
  */
-int CalculateRoundWinner(const std::vector<Card> &stack1, const std::vector<Card> &stack2)
+int CalculateRoundWinnerId(const Player &playerA, const Player &playerB)
 {
-    const int totalBody1 = GetCardStackTotalBody(stack1);
-    const int totalMind1 = GetCardStackTotalMind(stack1);
-    const int totalSoul1 = GetCardStackTotalSoul(stack1);
+    const int totalBodyA = GetCardStackTotalBody(playerA.cardsInPlayStack);
+    const int totalMindA = GetCardStackTotalMind(playerA.cardsInPlayStack);
+    const int totalSoulA = GetCardStackTotalSoul(playerA.cardsInPlayStack);
 
-    int maxStat1 = totalBody1 > totalMind1 ? totalBody1 : totalMind1;
-    maxStat1 = totalSoul1 > maxStat1 ? totalSoul1 : maxStat1;
+    int maxStatA = totalBodyA > totalMindA ? totalBodyA : totalMindA;
+    maxStatA = totalSoulA > maxStatA ? totalSoulA : maxStatA;
 
-    const int totalBody2 = GetCardStackTotalBody(stack2);
-    const int totalMind2 = GetCardStackTotalMind(stack2);
-    const int totalSoul2 = GetCardStackTotalSoul(stack2);
+    const int totalBodyB = GetCardStackTotalBody(playerB.cardsInPlayStack);
+    const int totalMindB = GetCardStackTotalMind(playerB.cardsInPlayStack);
+    const int totalSoulB = GetCardStackTotalSoul(playerB.cardsInPlayStack);
 
-    int maxStat2 = totalBody2 > totalMind2 ? totalBody2 : totalMind2;
-    maxStat2 = totalSoul2 > maxStat2 ? totalSoul2 : maxStat2;
+    int maxStatB = totalBodyB > totalMindB ? totalBodyB : totalMindB;
+    maxStatB = totalSoulB > maxStatB ? totalSoulB : maxStatB;
 
     //Decide the winner
-    if (maxStat1 > maxStat2)
+    if (maxStatA > maxStatB)
     {
-        return 1;
+        return playerA.id;
     }
-    if (maxStat2 > maxStat1)
+    if (maxStatB > maxStatA)
     {
-        return 2;
+        return playerB.id;;
     }
     //Draw
     return 0;
@@ -140,4 +138,17 @@ bool IsInitialHandValid(const std::vector<Card> &playerHand, const GameRules gam
     }
 
     return false;
+}
+
+int HasAPlayerWon([[maybe_unused]] const Player &playerA, [[maybe_unused]] const Player &playerB, const GameStatus &gameStatus, const GameRules &gameRules)
+{
+    if (gameStatus.pointsPlayer1 >= gameRules.pointsNeededToWin)
+    {
+        return 1;
+    }
+    if (gameStatus.pointsPlayer2 >= gameRules.pointsNeededToWin)
+    {
+        return 2;
+    }
+    return 0;
 }

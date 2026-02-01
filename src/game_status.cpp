@@ -4,7 +4,21 @@
 #include <string>
 
 #include "game_turn.hpp"
+#include "player.hpp"
 
+
+void ResetGame(Player &player1, Player &player2, GameStatus &gameStatus, TurnPhase &turnPhase)
+{
+    const Player resetPlayer1{.id = 1};
+    const Player resetPlayer2{.id = 2};
+    player1 = resetPlayer1;
+    player2 = resetPlayer2;
+
+    const GameStatus newGameStatus{};
+    gameStatus = newGameStatus;
+
+    turnPhase = TurnPhase::initialSetup;
+}
 
 std::string ActionLogEntryToString(const ActionLog &log)
 {

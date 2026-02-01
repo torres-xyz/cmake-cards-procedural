@@ -2,4 +2,10 @@
 
 struct Player;
 
-void RunCpuBrain(Player &player, float actionDelay);
+struct CpuPlayerOptions
+{
+    float actionDelay{0.25f};
+    bool autoStartNewRound{false};
+};
+
+void RunCpuBrain(Player &player, const CpuPlayerOptions &options);

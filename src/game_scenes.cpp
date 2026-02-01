@@ -19,7 +19,7 @@
 
 struct GameStatus;
 
-void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
+void RunStartingScene(StartingScene &startingScene, GameScene &currentScene, Player &player1, Player &player2, GameStatus &gameStatus)
 {
     const raylib::Vector2 mousePosition = GetMousePosition();
     Button &startButton = startingScene.startButton;
@@ -31,6 +31,11 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
                       IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
     if (startButton.wasPressed)
     {
+        // Initialize the gameplay components
+        InitializePlayer(player1);
+        InitializePlayer(player2);
+        gameStatus.currentTurnOwner = GetRandomValue(1, 2);
+
         PlaySound(GameSound::buttonPress01);
         currentScene = GameScene::playing;
     }
@@ -43,7 +48,7 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene)
     DrawButton(startButton, GetTexture(startButton.background));
 }
 
-void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, const GameplayPhase &currentPhase, GameStatus &gameStatus, Player &player1, Player &player2, const GameRules &gameRules)
+void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, GameStatus &gameStatus, Player &player1, Player &player2, const GameRules &gameRules)
 {
     // Lambdas
     auto UpdateSceneButton = [](Button &bt, Player &p1, const PlayerAction pAction) {
@@ -85,7 +90,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
             player.cardsInPlayStack.at(i).rect.y += verticalOffset * static_cast<float>(i);
         }
     };
-    auto DoesPlayerHaveAvailableAction = [](const Player &player, const PlayerAction &action)-> bool {
+    auto PlayerHasAvailableAction = [](const Player &player, const PlayerAction &action)-> bool {
         for (const auto &[playerAction, card]: player.availableActions)
         {
             if (playerAction == action) return true;
@@ -95,12 +100,22 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
 
     // Static Variables
     static raylib::Vector2 heldCardOffset{};
+    static CpuPlayerOptions cpuPlayerOptions
+    {
+        .actionDelay = 0.25f,
+        .autoStartNewRound = true,
+    };
 
     // UPDATE ------------------------------------------------------------------
+
+
     if (gameStatus.currentTurnOwner == 1)
     {
         player1.availableActions = CalculateAvailableActions(player1, currentTurnPhase, gameRules, gameStatus);
         player2.availableActions.clear(); // No actions for the other player
+
+        //Enable to have two CPUs play against each other.
+        RunCpuBrain(player1, cpuPlayerOptions);
 
         ExecuteTurn(player1, player2, currentTurnPhase, gameRules, gameStatus);
     }
@@ -109,14 +124,20 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
         player2.availableActions = CalculateAvailableActions(player2, currentTurnPhase, gameRules, gameStatus);
         player1.availableActions.clear(); // No actions for the other player
 
-        //Insert CPU brain here
-        RunCpuBrain(player2, 0.25f);
+        RunCpuBrain(player2, cpuPlayerOptions);
 
         ExecuteTurn(player2, player1, currentTurnPhase, gameRules, gameStatus);
     }
 
+    //Has the game ended?
+    if (HasAPlayerWon(player1, player2, gameStatus, gameRules) != 0)
+    {
+        gameStatus.gameIsOver = true;
+        return;
+    }
+
     // Update the button states
-    if (DoesPlayerHaveAvailableAction(player1, PlayerAction::mulligan))
+    if (PlayerHasAvailableAction(player1, PlayerAction::mulligan))
     {
         UpdateSceneButton(playingScene.mulliganButton, player1, PlayerAction::mulligan);
     }
@@ -124,8 +145,20 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     {
         UpdateSceneButton(playingScene.playerDeckButton, player1, PlayerAction::drawCard);
     }
-    UpdateSceneButton(playingScene.endTurnButton, player1, PlayerAction::passTheTurn);
+    if (currentTurnPhase == TurnPhase::endRoundPhase)
+    {
+        //Player 1 controls both player's ability to end the round.
+        if (gameStatus.currentTurnOwner == 1)
+        {
+            UpdateSceneButton(playingScene.nextRoundButton, player1, PlayerAction::finishRound);
+        }
+        if (!cpuPlayerOptions.autoStartNewRound && gameStatus.currentTurnOwner == 2)
+        {
+            UpdateSceneButton(playingScene.nextRoundButton, player2, PlayerAction::finishRound);
+        }
+    }
 
+    UpdateSceneButton(playingScene.endTurnButton, player1, PlayerAction::passTheTurn);
 
     // Update Music
     PlayMusic(playingScene.music);
@@ -238,7 +271,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     GetTexture(playingScene.background).Draw();
     DrawButton(playingScene.endTurnButton, GetTexture(playingScene.endTurnButton.background));
 
-    if (DoesPlayerHaveAvailableAction(player1, PlayerAction::mulligan))
+    if (PlayerHasAvailableAction(player1, PlayerAction::mulligan))
     {
         DrawButton(playingScene.mulliganButton, GetTexture(playingScene.mulliganButton.background));
     }
@@ -381,15 +414,14 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
         }
     }
 
-    if (currentPhase == GameplayPhase::endPhase)
+    if (currentTurnPhase == TurnPhase::endRoundPhase)
     {
         //Render a semi-transparent black overlay on the scene
         const raylib::Rectangle endPhaseOverlayRec{0, 0, constants::screenWidth, constants::screenHeight};
         const raylib::Color transparentBlack{0, 0, 0, 180};
         endPhaseOverlayRec.Draw(transparentBlack);
 
-        const Button &nextRoundButton = playingScene.nextRoundButton;
-        DrawButton(nextRoundButton, GetTexture(nextRoundButton.background));
+        DrawButton(playingScene.nextRoundButton, GetTexture(playingScene.nextRoundButton.background));
 
         constexpr float rectLength{200};
         const raylib::Rectangle message
@@ -417,30 +449,30 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, co
     }
 }
 
-void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
-                      const Player &player1, const Player &player2)
+void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, TurnPhase &turnPhase, GameStatus &gameStatus,
+                      Player &player1, Player &player2)
 {
-    const raylib::Vector2 mousePosition = GetMousePosition();
-
+    //  UPDATE -----------------------------------------------------------------
     Button &playAgainButton = gameOverScene.playAgainButton;
     // Update
     // Update Buttons
     UpdateButtonState(playAgainButton,
-                      mousePosition,
+                      GetMousePosition(),
                       IsMouseButtonDown(MOUSE_BUTTON_LEFT),
                       IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
     if (playAgainButton.wasPressed)
     {
         PlaySound(GameSound::buttonPress01);
 
-        gameplayPhase = GameplayPhase::uninitialized;
-        currentScene = GameScene::playing;
+        ResetGame(player1, player2, gameStatus, turnPhase);
+
+        currentScene = GameScene::starting;
     }
 
     // Update Music
     PlayMusic(gameOverScene.music);
 
-    //Draw
+    // DRAW --------------------------------------------------------------------
     GetTexture(gameOverScene.background).Draw();
     DrawButton(playAgainButton, GetTexture(playAgainButton.background));
 
@@ -453,11 +485,11 @@ void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, Gam
         rectLength,
         100
     };
-    if (player1.score > player2.score)
+    if (gameStatus.pointsPlayer1 > gameStatus.pointsPlayer2)
     {
         HelperFunctions::DrawTextCenteredInRec("Player 1 Wins!", 20, BLACK, winMessageRect);
     }
-    else if (player2.score > player1.score)
+    else if (gameStatus.pointsPlayer1 < gameStatus.pointsPlayer2)
     {
         HelperFunctions::DrawTextCenteredInRec("Player 2 Wins!", 20, BLACK, winMessageRect);
     }

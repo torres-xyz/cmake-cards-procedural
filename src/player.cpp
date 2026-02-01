@@ -5,7 +5,6 @@
 
 void InitializePlayer(Player &player)
 {
-    player.score = 0;
     player.hand.clear();
     player.cardsInPlayStack.clear();
     player.isHoldingACard = false;

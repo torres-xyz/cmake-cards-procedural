@@ -44,7 +44,7 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
     std::vector<PlayerActionAndHandCardPair> possibleActions{};
 
     possibleActions.push_back({PlayerAction::forfeit});
- switch (turnPhase)
+    switch (turnPhase)
     {
         case TurnPhase::initialSetup:
         {
@@ -106,8 +106,21 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
 
             break;
         }
-        case TurnPhase::endPhase:
+        case TurnPhase::endTurnPhase:
         {
+            break;
+        }
+        case TurnPhase::battlePhase:
+        {
+            // No actions will ever be available during the Battle Phase.
+            break;
+        }
+        case TurnPhase::endRoundPhase:
+        {
+            //Start new Round
+            possibleActions.push_back({PlayerAction::finishRound});
+
+            //Start new game
             break;
         }
     }
@@ -120,9 +133,8 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
 {
     assert(player.id != opponentPlayer.id && "Passing the same player as turn owner and opponent");
 
-    //If there is a new turn owner, switch the turn phase to initial setup or draw step
-    if (!gameStatus.actionLogs.empty() &&
-        gameStatus.actionLogs.back().playerID != player.id)
+    //If there is a new turn owner
+    if (!gameStatus.actionLogs.empty() && gameStatus.actionLogs.back().playerID != player.id)
     {
         //During the current round, have they had an Initial Setup Phase?
         bool hasHadInitialSetupPhaseThisRound{false};
@@ -171,23 +183,13 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
 
             break;
         }
-        case TurnPhase::endPhase:
+        case TurnPhase::endTurnPhase:
         {
-            // Battle
             // If both players passed without playing a card, Battle
             if (!HasACardBeenPlayedThisTurn(gameStatus) &&
                 !HasACardBeenPlayedLastTurn(gameStatus))
             {
-                const int winner = CalculateRoundWinner(player.cardsInPlayStack, opponentPlayer.cardsInPlayStack);
-                if (winner == 1) player.score++;
-                if (winner == 2) opponentPlayer.score++;
-                gameStatus.roundsPlayed++;
-                gameStatus.currentTurnOwner = winner == 1 ? 1 : 2; //Winning player starts first the next round.
-                gameStatus.turnsPlayed++;
-
-                //Clear the Fields
-                player.cardsInPlayStack.clear();
-                opponentPlayer.cardsInPlayStack.clear();
+                currentTurnPhase = TurnPhase::battlePhase;
 
                 break;
             }
@@ -197,9 +199,38 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
 
             break;
         }
+        case TurnPhase::battlePhase:
+        {
+            // Do Battle then immediately jump to the End Round Phase
+            const int winnerId = CalculateRoundWinnerId(player, opponentPlayer);
+            if (winnerId == 1) gameStatus.pointsPlayer1++;
+            if (winnerId == 2) gameStatus.pointsPlayer2++;
+
+            gameStatus.roundWinnerHistory.push_back(winnerId);
+
+            gameStatus.roundsPlayed++;
+            gameStatus.turnsPlayed++;
+
+
+            //Clear the Fields
+            player.cardsInPlayStack.clear();
+            opponentPlayer.cardsInPlayStack.clear();
+
+            currentTurnPhase = TurnPhase::endRoundPhase;
+            break;
+        }
+        case TurnPhase::endRoundPhase:
+        {
+            // Stop executing turns if there is a winner.
+            if (HasAPlayerWon(player, opponentPlayer, gameStatus, gameRules) != 0)
+                return;
+
+            ExecuteChosenPlayerAction(player, currentTurnPhase, gameRules, gameStatus);
+
+            break;
+        }
     }
 }
-
 
 void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameRules &gameRules, GameStatus &gameStatus)
 {
@@ -259,9 +290,13 @@ void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameR
             break;
         }
         case PlayerAction::shuffleHandIntoDeck:
+        {
             break;
+        }
         case PlayerAction::shuffleDeck:
+        {
             break;
+        }
         case PlayerAction::playCard:
         {
             //Copy the card from the hand to the Play field.
@@ -282,12 +317,25 @@ void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameR
         }
         case PlayerAction::passTheTurn:
         {
-            turnPhase = TurnPhase::endPhase;
+            turnPhase = TurnPhase::endTurnPhase;
 
             break;
         }
         case PlayerAction::forfeit:
+        {
             break;
+        }
+        case PlayerAction::finishRound:
+        {
+            if (gameStatus.pointsPlayer1 >= gameRules.pointsNeededToWin || gameStatus.pointsPlayer2 >= gameRules.pointsNeededToWin)
+            {
+                // The game ends and a winner is declared
+            }
+
+            turnPhase = TurnPhase::initialSetup;
+
+            break;
+        }
     }
 
     player.chosenAction = {PlayerAction::null};
@@ -313,6 +361,8 @@ std::string PlayerActionToString(const PlayerAction playerAction)
             return "Pass The Turn";
         case PlayerAction::forfeit:
             return "Forfeit";
+        case PlayerAction::finishRound:
+            return "Start New Round";
     }
     return "ERROR";
 }
@@ -325,8 +375,12 @@ std::string TurnPhaseToString(const TurnPhase phase)
             return "Initial Setup";
         case TurnPhase::mainPhase:
             return "Main Phase";
-        case TurnPhase::endPhase:
+        case TurnPhase::endTurnPhase:
             return "End Phase";
+        case TurnPhase::battlePhase:
+            return "Battle Phase";
+        case TurnPhase::endRoundPhase:
+            return "End Round Phase";
     }
     return "null";
 }

@@ -560,11 +560,11 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             if (timeSinceStartOfPhase < player2ActionDelay) break;
 
             roundsPlayed++;
-            const int winner = CalculateRoundWinner(player1.cardsInPlayStack, player2.cardsInPlayStack);
+            const int winner = CalculateRoundWinnerId(player1, player2);
             previousRoundWinner = winner;
 
-            if (winner == 1) player1.score++;
-            if (winner == 2) player2.score++;
+            if (winner == 1) gameStatus.pointsPlayer1++;
+            if (winner == 2) gameStatus.pointsPlayer2++;
 
             gameStatus.roundsPlayed++;
             gameStatus.roundWinnerHistory.push_back(winner);
@@ -595,8 +595,8 @@ void UpdateGameplayPhases(PlayingScene &playingScene, GameplayPhase &currentPhas
             player2.hasDrawnThisTurn = false;
 
             //Best of 3 Game
-            if (player1.score >= gameRules.pointsNeededToWin ||
-                player2.score >= gameRules.pointsNeededToWin)
+            if (gameStatus.pointsPlayer1 >= gameRules.pointsNeededToWin ||
+                gameStatus.pointsPlayer2 >= gameRules.pointsNeededToWin)
             {
                 ChangePhase(GameplayPhase::gameOver);
                 break;

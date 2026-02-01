@@ -13,7 +13,9 @@ enum class TurnPhase
 {
     initialSetup,
     mainPhase, //playing cards
-    endPhase
+    endTurnPhase,
+    battlePhase,
+    endRoundPhase
 };
 
 enum class PlayerAction
@@ -25,13 +27,13 @@ enum class PlayerAction
     shuffleDeck,
     playCard,
     passTheTurn,
+    finishRound,
     forfeit,
 };
 
 struct PlayerActionAndHandCardPair
 {
     PlayerAction action{};
-    // Card playableHandCard{};
     Card card{};
     //In the future, this could also include usable cards in the playfield that the player can activate
 };

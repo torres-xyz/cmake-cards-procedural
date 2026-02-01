@@ -54,12 +54,12 @@ struct PrototypingScene
     GameTexture background{};
 };
 
-void RunStartingScene(StartingScene &startingScene, GameScene &currentScene);
+void RunStartingScene(StartingScene &startingScene, GameScene &currentScene, Player &player1, Player &player2, GameStatus &gameStatus);
 
-void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, const GameplayPhase &currentPhase, GameStatus &gameStatus,
+void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, GameStatus &gameStatus,
                      Player &player1, Player &player2, const GameRules &gameRules);
 
-void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, GameplayPhase &gameplayPhase,
-                      const Player &player1, const Player &player2);
+void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, TurnPhase &turnPhase, GameStatus &gameStatus,
+                      Player &player1, Player &player2);
 
 void RunPrototypingScene(const PrototypingScene &scene);

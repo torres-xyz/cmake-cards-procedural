@@ -31,14 +31,14 @@ namespace ImGuiSideBar
             ImGui::TextUnformatted(("Mouse X: " + std::to_string(GetMouseX())
                                     + " / Mouse Y: " + std::to_string(GetMouseY())).c_str());
             ImGui::SeparatorText("Game State");
-            ImGui::TextWrapped(("Game Phase = " + GameplayPhaseToString(currentPhase)).c_str());
-            ImGui::TextUnformatted(("Player 1 score = " + std::to_string(player1.score)).c_str());
+            ImGui::TextUnformatted(("Player 1 points = " + std::to_string(gameStatus.pointsPlayer1)).c_str());
             ImGui::TextUnformatted(("Player 1 hand = " + std::to_string(player1.hand.size())).c_str());
             ImGui::TextUnformatted(("Player 1 deck = " + std::to_string(player1.deck.size())).c_str());
-            ImGui::TextUnformatted(("Player 2 score = " + std::to_string(player2.score)).c_str());
+            ImGui::TextUnformatted(("Player 2 points = " + std::to_string(gameStatus.pointsPlayer2)).c_str());
             ImGui::TextUnformatted(("Player 2 hand = " + std::to_string(player2.hand.size())).c_str());
             ImGui::TextUnformatted(("Player 2 deck = " + std::to_string(player2.deck.size())).c_str());
             ImGui::SeparatorText("Turn Phase");
+            ImGui::TextUnformatted(("Turn Owner = " + std::to_string(gameStatus.currentTurnOwner)).c_str());
             ImGui::TextUnformatted(("Turn Phase = " + TurnPhaseToString(currentTurnPhase)).c_str());
             ImGui::SeparatorText("Player 1 available actions");
             ImGui::TextUnformatted(HelperFunctions::PlayerAvailableActionsToString(player1).c_str());

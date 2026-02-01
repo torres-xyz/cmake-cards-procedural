@@ -2,13 +2,12 @@
 
 ## Refactoring to Game Turn
 
-- [ ] Add back the showing round winner scene.
-    - Figure out a better way to display the overlay.
-- [x] Implement mulligan.
-    - [x] Create mulligan button.
-- [x] Remove "Draw Step" from the phases. There is only the initial setup each turn, otherwise player's would never stop
-  pumping their Units.
+- [x] Make the starting player random.
+- [x] Reset the game after game over.
+- [x] Make the CPU brain auto advance to the next round.
+- [ ] Remove game_play_phases code files.
 - [ ] Check all the TODOs before merging.
+- [ ] Clear commented out code and [[maybe_unused]] usages.
 
 ## Regular To Dos
 
