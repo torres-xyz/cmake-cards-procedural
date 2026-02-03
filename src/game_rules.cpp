@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <cassert>
 #include "card.hpp"
-#include "game_play_phases.hpp"
 #include "game_status.hpp"
 #include "player.hpp"
 
@@ -94,36 +93,6 @@ int CalculateRoundWinnerId(const Player &playerA, const Player &playerB)
     return 0;
 }
 
-bool CanCardBePlayedByPlayer(const Card &selectedCard, const Player &player, [[maybe_unused]] const GameplayPhase &gameplayPhase)
-{
-    //Only 1 card can be played per turn.
-
-    // Play Stack is empty ------------------------------------------------------
-    // The first card in the play stack has to be a Unit.
-    if (player.cardsInPlayStack.empty())
-    {
-        if (selectedCard.type == CardType::unit) return true;
-        return false;
-    }
-
-    // Play stack is NOT empty --------------------------------------------------
-    //On the first turn, players can only play 1 unit.
-
-    if (gameplayPhase == GameplayPhase::playerOneFirstTurn)
-    {
-        return false;
-    }
-
-    //then we can assume (but still verify) the first/bottom card is a Unit.
-    if (player.cardsInPlayStack.at(0).type == CardType::unit)
-    {
-        //only Action cards can be played on top of a Unit card:
-        if (selectedCard.type == CardType::action) return true;
-    }
-
-    return false;
-}
-
 bool IsInitialHandValid(const std::vector<Card> &playerHand, const GameRules gameRules)
 {
     if (static_cast<int>(playerHand.size()) < gameRules.initialHandSize)
@@ -140,7 +109,7 @@ bool IsInitialHandValid(const std::vector<Card> &playerHand, const GameRules gam
     return false;
 }
 
-int HasAPlayerWon([[maybe_unused]] const Player &playerA, [[maybe_unused]] const Player &playerB, const GameStatus &gameStatus, const GameRules &gameRules)
+int HasAPlayerWon(const GameStatus &gameStatus, const GameRules &gameRules)
 {
     if (gameStatus.pointsPlayer1 >= gameRules.pointsNeededToWin)
     {

@@ -1,17 +1,10 @@
 # To Do
 
-## Refactoring to Game Turn
-
-- [x] Make the starting player random.
-- [x] Reset the game after game over.
-- [x] Make the CPU brain auto advance to the next round.
-- [ ] Remove game_play_phases code files.
-- [ ] Check all the TODOs before merging.
-- [ ] Clear commented out code and [[maybe_unused]] usages.
-
 ## Regular To Dos
 
 - [ ] Move game logic to use a set of actions that each player can take.
+- [ ] Build for web.
+    - [ ] Place game in portfolio.
 - [ ] BUG: It is possible to start a Phase with no Units in the hand, bricking the game. (Make player lose the game?)
     - [ ] Add a log of each action.
 - [ ] Redo player_test.cpp.
@@ -105,3 +98,15 @@
         - [x] Test if all the cards in the DB have different ids.
         - [x] Test if all the textures in the DB exist and can be loaded successfully.
         - [x] Test all cards created have a unique uid;
+
+## Refactoring to Game Turn
+
+- [x] Make the starting player random.
+- [x] Reset the game after game over.
+- [x] Make the CPU brain auto advance to the next round.
+- [x] Remove game_play_phases code files.
+- [x] Check all the TODOs before merging.
+- [x] Clear commented out code and [[maybe_unused]] usages.
+- [x] CPU brain cannot auto mulligan yet.
+- [x] Place log at the end of the debug panel.
+- [x] Display the current scene in the debug panel.

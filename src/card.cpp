@@ -133,7 +133,6 @@ std::vector<Card> GetCardDB()
 
         while (in.read_row(cardID, name, cardType, cardBanner, bodyText, body, mind, soul))
         {
-            //TODO: verify that using emplace_back() like this makes sense and does avoid making a copy
             cardDB.emplace_back() = {
                 .type = StringToCardType(cardType),
                 .cardID = cardID,

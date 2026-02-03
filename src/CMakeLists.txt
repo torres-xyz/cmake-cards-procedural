@@ -12,8 +12,6 @@ add_library(${PROJECT_NAME}
         game_scenes.hpp
         textures.cpp
         textures.hpp
-        game_play_phases.cpp
-        game_play_phases.hpp
         player.cpp
         player.hpp
         card.cpp

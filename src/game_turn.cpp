@@ -211,7 +211,6 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
             gameStatus.roundsPlayed++;
             gameStatus.turnsPlayed++;
 
-
             //Clear the Fields
             player.cardsInPlayStack.clear();
             opponentPlayer.cardsInPlayStack.clear();
@@ -222,8 +221,11 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
         case TurnPhase::endRoundPhase:
         {
             // Stop executing turns if there is a winner.
-            if (HasAPlayerWon(player, opponentPlayer, gameStatus, gameRules) != 0)
+            if (HasAPlayerWon(gameStatus, gameRules) != 0)
+            {
+                gameStatus.gameIsOver = true;
                 return;
+            }
 
             ExecuteChosenPlayerAction(player, currentTurnPhase, gameRules, gameStatus);
 

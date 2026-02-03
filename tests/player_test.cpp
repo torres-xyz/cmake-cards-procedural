@@ -1,17 +1,15 @@
 #include <catch2/catch_test_macros.hpp>
 #include "../src/player.hpp"
 
+#include "../src/helper_functions.hpp"
+
 TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]")
 {
-    std::random_device rd{};
-    SetRandomSeed(rd());
-
     constexpr int playerID = 1;
 
     Player playerUnderTest
     {
         .id = playerID,
-        .score = 100,
         .deck = {
             Card{.type = CardType::unit},
             Card{.type = CardType::unit},
@@ -28,12 +26,9 @@ TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]"
         .isHoldingACard = true,
         .heldCardUid = 2,
         .hoveredCardUid = 2,
-        .hasDrawnThisTurn = true,
-        .hasEndedTheTurn = true,
-        .cardsPlayed = 10
     };
 
-    InitializePlayer(playerUnderTest, rd);
+    InitializePlayer(playerUnderTest);
 
     SECTION("Player ID shouldn't change")
     {
@@ -45,10 +40,14 @@ TEST_CASE("InitializePlayer sets player variable to empty defaults ", "[player]"
     }
     SECTION("Everything else should be reset")
     {
-        //TODO: Finish this
-        REQUIRE(playerUnderTest.score == 0);
         REQUIRE(playerUnderTest.hand.empty() == true);
         REQUIRE(playerUnderTest.isHoldingACard == false);
-        REQUIRE(playerUnderTest.heldCardUid == -1);
+        REQUIRE(playerUnderTest.cardsInPlayStack.empty() == true);
+        REQUIRE(playerUnderTest.availableActions.empty() == true);
+        REQUIRE(playerUnderTest.chosenAction.action == PlayerAction::null);
+        REQUIRE(playerUnderTest.isHoldingACard == false);
+        REQUIRE(playerUnderTest.heldCardUid == 0);
+        REQUIRE(playerUnderTest.hoveredCardUid == 0);
+        REQUIRE(playerUnderTest.isHoveringOverACard == false);
     }
 }

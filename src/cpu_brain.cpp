@@ -23,6 +23,12 @@ void RunCpuBrain(Player &player, const CpuPlayerOptions &options)
             player.chosenAction = actionCardPair;
             break;
         }
+        //Mulligan when available
+        if (actionCardPair.action == PlayerAction::mulligan)
+        {
+            player.chosenAction = actionCardPair;
+            break;
+        }
 
         // Play the first Unit that shows up in the available actions
         if (actionCardPair.action == PlayerAction::playCard)

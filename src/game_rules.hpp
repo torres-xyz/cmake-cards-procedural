@@ -24,8 +24,7 @@ int GetCardStackTotalSoul(const std::vector<Card> &stack);
 
 int CalculateRoundWinnerId(const Player &playerA, const Player &playerB);
 
-bool CanCardBePlayedByPlayer(const Card &selectedCard, const Player &player, const GameplayPhase &gameplayPhase);
 
 bool IsInitialHandValid(const std::vector<Card> &playerHand, GameRules gameRules);
 
-int HasAPlayerWon(const Player &playerA, const Player &playerB, const GameStatus &gameStatus, const GameRules &gameRules);
+int HasAPlayerWon(const GameStatus &gameStatus, const GameRules &gameRules);

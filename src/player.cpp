@@ -13,7 +13,6 @@ void InitializePlayer(Player &player)
     player.isHoveringOverACard = false;
     //Use default deck for players for now.
     player.deck.clear();
-    player.cardsPlayed = 0;
 
     if (player.id == 1)
     {

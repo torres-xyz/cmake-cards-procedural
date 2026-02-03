@@ -4,14 +4,14 @@
 #include "rlImGui.h"
 #include "raylib-cpp.hpp"
 #include "constants.hpp"
-#include "game_play_phases.hpp"
+#include "game_scenes.hpp"
 #include "game_status.hpp"
 #include "helper_functions.hpp"
 #include "player.hpp"
 
 namespace ImGuiSideBar
 {
-    void DrawSideBar(bool &muteGame, const TurnPhase &currentTurnPhase, GameplayPhase &currentPhase, GameStatus &gameStatus,
+    void DrawSideBar(bool &muteGame, const GameScene &currentGameScene, const TurnPhase &currentTurnPhase, GameStatus &gameStatus,
                      const Player &player1, const Player &player2)
     {
         // start ImGui Content
@@ -31,6 +31,7 @@ namespace ImGuiSideBar
             ImGui::TextUnformatted(("Mouse X: " + std::to_string(GetMouseX())
                                     + " / Mouse Y: " + std::to_string(GetMouseY())).c_str());
             ImGui::SeparatorText("Game State");
+            ImGui::TextUnformatted(("Game Scene = " + GameSceneToString(currentGameScene)).c_str());
             ImGui::TextUnformatted(("Player 1 points = " + std::to_string(gameStatus.pointsPlayer1)).c_str());
             ImGui::TextUnformatted(("Player 1 hand = " + std::to_string(player1.hand.size())).c_str());
             ImGui::TextUnformatted(("Player 1 deck = " + std::to_string(player1.deck.size())).c_str());
@@ -42,25 +43,14 @@ namespace ImGuiSideBar
             ImGui::TextUnformatted(("Turn Phase = " + TurnPhaseToString(currentTurnPhase)).c_str());
             ImGui::SeparatorText("Player 1 available actions");
             ImGui::TextUnformatted(HelperFunctions::PlayerAvailableActionsToString(player1).c_str());
-            ImGui::SeparatorText("Actions Log");
-            ImGui::TextWrapped(HelperFunctions::ActionLogsToString(gameStatus).c_str());
             ImGui::SeparatorText("Options");
             ImGui::Checkbox("Mute", &muteGame);
             ImGui::SeparatorText("Debug Actions");
-            if (ImGui::Button("Set Game Phase to End Phase"))
+            if (ImGui::Button("Placeholder"))
             {
-                if (gameStatus.roundWinnerHistory.empty())
-                {
-                    gameStatus.roundWinnerHistory.push_back(1);
-                    std::cout << "Added '1' to gameStatus.roundWinnerHistory to test End Phase screen" << std::endl;
-                }
-
-                currentPhase = GameplayPhase::endPhase;
             }
-            if (ImGui::Button("Set Game Phase to Game Over"))
-            {
-                currentPhase = GameplayPhase::gameOver;
-            }
+            ImGui::SeparatorText("Actions Log");
+            ImGui::TextWrapped(HelperFunctions::ActionLogsToString(gameStatus).c_str());
 
             ImGui::TextUnformatted("My Text inside the window");
         }

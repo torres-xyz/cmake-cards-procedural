@@ -5,7 +5,6 @@
 #include "rlImGui.h"
 #include "button.hpp"
 #include "audio.hpp"
-#include "game_play_phases.hpp"
 #include "game_rules.hpp"
 #include "textures.hpp"
 #include "game_scenes.hpp"
@@ -41,7 +40,6 @@ int run()
     };
 
     GameScene currentScene{GameScene::starting};
-    GameplayPhase currentPhase{GameplayPhase::uninitialized}; //TODO: Soon to be deprecated
 
     TurnPhase currentTurnPhase{TurnPhase::initialSetup};
 
@@ -213,7 +211,7 @@ int run()
 
 
 #if (DEBUG)
-        ImGuiSideBar::DrawSideBar(muteGame, currentTurnPhase, currentPhase, gameStatus, player1, player2);
+        ImGuiSideBar::DrawSideBar(muteGame, currentScene, currentTurnPhase, gameStatus, player1, player2);
 #endif
         EndDrawing();
 

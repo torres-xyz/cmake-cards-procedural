@@ -13,13 +13,10 @@ struct Player
     std::vector<Card> cardsInPlayStack{};
     std::vector<PlayerActionAndHandCardPair> availableActions{};
     PlayerActionAndHandCardPair chosenAction{};
-    bool isHoldingACard{};
-    unsigned long int heldCardUid{};
-    unsigned long int hoveredCardUid{};
+    bool isHoldingACard{false};
+    unsigned long int heldCardUid{0};
+    unsigned long int hoveredCardUid{0};
     bool isHoveringOverACard{false};
-    bool hasDrawnThisTurn{false};
-    bool hasEndedTheTurn{false};
-    int cardsPlayed{0};
 };
 
 static const std::vector<int> deckP1

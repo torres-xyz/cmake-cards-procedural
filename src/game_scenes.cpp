@@ -8,7 +8,6 @@
 #include "audio.hpp"
 #include "constants.hpp"
 #include "cpu_brain.hpp"
-#include "game_play_phases.hpp"
 #include "player.hpp"
 #include "textures.hpp"
 #include "helper_functions.hpp"
@@ -127,13 +126,6 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
         RunCpuBrain(player2, cpuPlayerOptions);
 
         ExecuteTurn(player2, player1, currentTurnPhase, gameRules, gameStatus);
-    }
-
-    //Has the game ended?
-    if (HasAPlayerWon(player1, player2, gameStatus, gameRules) != 0)
-    {
-        gameStatus.gameIsOver = true;
-        return;
     }
 
     // Update the button states
@@ -511,4 +503,22 @@ void RunPrototypingScene(const PrototypingScene &scene)
     //Draw
     GetTexture(scene.background).Draw();
     RenderCard(cardProt, cardProt.rect);
+}
+
+std::string GameSceneToString(const GameScene &gameScene)
+{
+    switch (gameScene)
+    {
+        case GameScene::invalid:
+            return "Invalid";
+        case GameScene::starting:
+            return "Starting";
+        case GameScene::playing:
+            return "Playing";
+        case GameScene::gameOver:
+            return "GameOver";
+        case GameScene::prototyping:
+            return "Prototyping";
+    }
+    return "null";
 }

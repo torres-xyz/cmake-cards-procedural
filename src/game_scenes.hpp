@@ -63,3 +63,5 @@ void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, Tur
                       Player &player1, Player &player2);
 
 void RunPrototypingScene(const PrototypingScene &scene);
+
+std::string GameSceneToString(const GameScene &gameScene);
