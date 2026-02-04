@@ -50,7 +50,7 @@ namespace ImGuiSideBar
             {
             }
             ImGui::SeparatorText("Actions Log");
-            ImGui::TextWrapped(HelperFunctions::ActionLogsToString(gameStatus).c_str());
+            ImGui::TextWrapped("%s", HelperFunctions::ActionLogsToString(gameStatus).c_str());
 
             ImGui::TextUnformatted("My Text inside the window");
         }

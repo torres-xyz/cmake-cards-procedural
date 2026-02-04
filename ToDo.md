@@ -2,16 +2,13 @@
 
 ## Regular To Dos
 
-- [ ] Move game logic to use a set of actions that each player can take.
 - [ ] Build for web.
     - [ ] Place game in portfolio.
-- [ ] BUG: It is possible to start a Phase with no Units in the hand, bricking the game. (Make player lose the game?)
-    - [ ] Add a log of each action.
+
 - [ ] Redo player_test.cpp.
-- [ ] Fix the way Action cards are displayed (remove the stats from the bottom).
 - [ ] Add cards of different banners.
     - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
-- [ ] Add current turn indicator.
+- [ ] Add current turn indicator to the UI.
 - [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Animate opponent's cards being played.
 
@@ -101,6 +98,7 @@
 
 ## Refactoring to Game Turn
 
+- [x] Move game logic to use a set of actions that each player can take.
 - [x] Make the starting player random.
 - [x] Reset the game after game over.
 - [x] Make the CPU brain auto advance to the next round.
@@ -110,3 +108,7 @@
 - [x] CPU brain cannot auto mulligan yet.
 - [x] Place log at the end of the debug panel.
 - [x] Display the current scene in the debug panel.
+
+- [x] BUG: It is possible to start a Phase with no Units in the hand, bricking the game. (Make player lose the game?)
+    - [x] Add a log of each action.
+- [x] Fix the way Action cards are displayed (remove the stats from the bottom).

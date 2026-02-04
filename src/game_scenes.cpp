@@ -114,7 +114,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
         player2.availableActions.clear(); // No actions for the other player
 
         //Enable to have two CPUs play against each other.
-        RunCpuBrain(player1, cpuPlayerOptions);
+        // RunCpuBrain(player1, cpuPlayerOptions);
 
         ExecuteTurn(player1, player2, currentTurnPhase, gameRules, gameStatus);
     }
