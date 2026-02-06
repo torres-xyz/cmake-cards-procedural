@@ -329,12 +329,13 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
     DrawRectangleRec(statsTotalRec, statsTotalRecColor);
 
     //// Player 1 Stats
-    const std::string player1TotalCardStats
+    const CardStats player1TotalCardStats = CalculateCardStackTotalStats(player1.cardsInPlayStack);
+    const std::string player1TotalCardStatsMessage
     {
         std::format("Total Stats \nB: {0} | M: {1} | S: {2}",
-                    std::to_string(GetCardStackTotalBody(player1.cardsInPlayStack)),
-                    std::to_string(GetCardStackTotalMind(player1.cardsInPlayStack)),
-                    std::to_string(GetCardStackTotalSoul(player1.cardsInPlayStack)))
+                    std::to_string(player1TotalCardStats.body),
+                    std::to_string(player1TotalCardStats.mind),
+                    std::to_string(player1TotalCardStats.soul))
     };
 
     const raylib::Rectangle player1StatsRec
@@ -347,7 +348,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
     HelperFunctions::DrawTextBoxed
     (
         GetFont(GameFont::aobashiOne),
-        player1TotalCardStats.c_str(),
+        player1TotalCardStatsMessage.c_str(),
         player1StatsRec,
         20,
         0.1f,
@@ -356,11 +357,13 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
         WHITE
     );
     //// Player 2 Stats
-    const std::string player2TotalCardStats{
+    const CardStats player2TotalCardStats = CalculateCardStackTotalStats(player2.cardsInPlayStack);
+    const std::string player2TotalCardStatsMessage
+    {
         std::format("Total Stats \nB: {0} | M: {1} | S: {2}",
-                    std::to_string(GetCardStackTotalBody(player2.cardsInPlayStack)),
-                    std::to_string(GetCardStackTotalMind(player2.cardsInPlayStack)),
-                    std::to_string(GetCardStackTotalSoul(player2.cardsInPlayStack)))
+                    std::to_string(player2TotalCardStats.body),
+                    std::to_string(player2TotalCardStats.mind),
+                    std::to_string(player2TotalCardStats.soul))
     };
     const raylib::Rectangle player2StatsRec
     {
@@ -372,7 +375,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
     HelperFunctions::DrawTextBoxed
     (
         GetFont(GameFont::aobashiOne),
-        player2TotalCardStats.c_str(),
+        player2TotalCardStatsMessage.c_str(),
         player2StatsRec,
         20,
         0.1f,

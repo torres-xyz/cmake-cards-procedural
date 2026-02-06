@@ -1,5 +1,5 @@
 cardID,Name,Type,Banner,Body Text,Body,Mind,Soul,Asset Name
-1,Cancer Pagurus,Unit,Form,,2500,500,1500,cancer_pagurus
+1,Cancer Pagurus,Unit,Form,+500 to Body for each Form Action on this Unit.,2500,500,1500,cancer_pagurus
 2,Pierrotten,Unit,Form,,1200,3000,700,pierrotten
 3,Malmelet,Unit,Form,,2400,2900,1300,malmelet
 4,Twisted Gauntlet,Unit,Form,,2700,1000,900,twisted_gauntlet

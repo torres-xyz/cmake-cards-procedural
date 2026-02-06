@@ -2,6 +2,8 @@
 #include <random>
 #include <vector>
 
+#include "card.hpp"
+
 struct GameStatus;
 enum class GameplayPhase;
 struct Card;
@@ -16,14 +18,9 @@ struct GameRules
 
 void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_device &rd);
 
-int GetCardStackTotalBody(const std::vector<Card> &stack);
-
-int GetCardStackTotalMind(const std::vector<Card> &stack);
-
-int GetCardStackTotalSoul(const std::vector<Card> &stack);
+CardStats CalculateCardStackTotalStats(const std::vector<Card> &stack);
 
 int CalculateRoundWinnerId(const Player &playerA, const Player &playerB);
-
 
 bool IsInitialHandValid(const std::vector<Card> &playerHand, GameRules gameRules);
 

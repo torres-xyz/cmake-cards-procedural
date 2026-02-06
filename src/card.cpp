@@ -112,9 +112,9 @@ void RenderCard(const Card &card, const raylib::Rectangle destinationRect)
     RenderTextInsideCard(card.bodyText.c_str(), destinationRect, 49, 532, 626, 337, margins, 0.06f, false);
 
     if (card.type != CardType::unit) return;
-    RenderTextInsideCard(std::to_string(card.body).c_str(), destinationRect, 65, 894, 161, 77, margins, 0.07f, false);
-    RenderTextInsideCard(std::to_string(card.mind).c_str(), destinationRect, 280, 894, 161, 77, margins, 0.07f, false);
-    RenderTextInsideCard(std::to_string(card.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);
+    RenderTextInsideCard(std::to_string(card.stats.body).c_str(), destinationRect, 65, 894, 161, 77, margins, 0.07f, false);
+    RenderTextInsideCard(std::to_string(card.stats.mind).c_str(), destinationRect, 280, 894, 161, 77, margins, 0.07f, false);
+    RenderTextInsideCard(std::to_string(card.stats.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);
 }
 
 std::vector<Card> GetCardDB()
@@ -142,9 +142,8 @@ std::vector<Card> GetCardDB()
                 .name = name,
                 .bodyText = bodyText,
                 .banner = StringToBanner(cardBanner),
-                .body = body,
-                .mind = mind,
-                .soul = soul,
+                .stats = {.body = body, .mind = mind, .soul = soul}
+
             };
         }
     }
@@ -175,10 +174,8 @@ Card GetCardFromDB(const int id)
         newCard.name = name;
         newCard.bodyText = bodyText;
         newCard.banner = StringToBanner(cardBanner);
-        newCard.body = body;
-        newCard.mind = mind;
-        newCard.soul = soul;
-        newCard.uid = HelperFunctions::GetUID(); //always generate a new UID when creating a new card
+        newCard.stats = {.body = body, .mind = mind, .soul = soul},
+                newCard.uid = HelperFunctions::GetUID(); //always generate a new UID when creating a new card
 
         break;
     }
@@ -200,9 +197,9 @@ void PrintCard(const Card &card)
                     CardTypeToString(card.type),
                     BannerToString(card.banner),
                     card.bodyText,
-                    std::to_string(card.body),
-                    std::to_string(card.mind),
-                    std::to_string(card.soul))
+                    std::to_string(card.stats.body),
+                    std::to_string(card.stats.mind),
+                    std::to_string(card.stats.soul))
     };
 
     std::cout << cardPrint;

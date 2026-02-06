@@ -20,6 +20,13 @@ enum class CardBanner
     despair // Soul - Chaos
 };
 
+struct CardStats
+{
+    int body{0};
+    int mind{0};
+    int soul{0};
+};
+
 struct Card
 {
     raylib::Rectangle rect
@@ -35,9 +42,12 @@ struct Card
     std::string name{};
     std::string bodyText{};
     CardBanner banner{CardBanner::invalid};
-    int body{0};
-    int mind{0};
-    int soul{0};
+    CardStats stats
+    {
+        .body = 0,
+        .mind = 0,
+        .soul = 0
+    };
 };
 
 void RenderCard(const Card &card, raylib::Rectangle destinationRect);

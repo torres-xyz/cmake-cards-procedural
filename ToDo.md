@@ -113,3 +113,5 @@
 - [x] Fix the way Action cards are displayed (remove the stats from the bottom).
 - [x] Add current turn indicator to the UI.
 - [x] Implement undoing playing a card before clicking end turn.
+- [x] Add 1 non-vanilla Unit.
+    - [x] Make "Cancer Pagurus" have an ability.

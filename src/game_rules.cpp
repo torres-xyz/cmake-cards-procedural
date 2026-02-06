@@ -25,40 +25,31 @@ void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_d
     assert(deck.at(0).type == CardType::unit);
 }
 
-int GetCardStackTotalBody(const std::vector<Card> &stack)
+CardStats CalculateCardStackTotalStats(const std::vector<Card> &stack)
 {
-    int bodyStatTotal{0};
+    CardStats totalCardStats{0, 0, 0};
 
     for (const auto &card: stack)
     {
-        bodyStatTotal += card.body;
+        totalCardStats.body += card.stats.body;
+        totalCardStats.mind += card.stats.mind;
+        totalCardStats.soul += card.stats.soul;
     }
 
-    return bodyStatTotal;
-}
+    if (stack.empty()) return totalCardStats;
 
-int GetCardStackTotalMind(const std::vector<Card> &stack)
-{
-    int mindStatTotal{0};
-
-    for (const auto &card: stack)
+    if (stack.at(0).cardID == 1)
     {
-        mindStatTotal += card.mind;
+        for (const auto &card: stack)
+        {
+            if (card.cardID != 1 && card.banner == CardBanner::form)
+            {
+                totalCardStats.body += 500;
+            }
+        }
     }
 
-    return mindStatTotal;
-}
-
-int GetCardStackTotalSoul(const std::vector<Card> &stack)
-{
-    int soulStatTotal{0};
-
-    for (const auto &card: stack)
-    {
-        soulStatTotal += card.soul;
-    }
-
-    return soulStatTotal;
+    return totalCardStats;
 }
 
 /**
@@ -66,19 +57,15 @@ int GetCardStackTotalSoul(const std::vector<Card> &stack)
  */
 int CalculateRoundWinnerId(const Player &playerA, const Player &playerB)
 {
-    const int totalBodyA = GetCardStackTotalBody(playerA.cardsInPlayStack);
-    const int totalMindA = GetCardStackTotalMind(playerA.cardsInPlayStack);
-    const int totalSoulA = GetCardStackTotalSoul(playerA.cardsInPlayStack);
+    const CardStats totalCardStatsA = CalculateCardStackTotalStats(playerA.cardsInPlayStack);
 
-    int maxStatA = totalBodyA > totalMindA ? totalBodyA : totalMindA;
-    maxStatA = totalSoulA > maxStatA ? totalSoulA : maxStatA;
+    int maxStatA = totalCardStatsA.body > totalCardStatsA.mind ? totalCardStatsA.body : totalCardStatsA.mind;
+    maxStatA = totalCardStatsA.soul > maxStatA ? totalCardStatsA.soul : maxStatA;
 
-    const int totalBodyB = GetCardStackTotalBody(playerB.cardsInPlayStack);
-    const int totalMindB = GetCardStackTotalMind(playerB.cardsInPlayStack);
-    const int totalSoulB = GetCardStackTotalSoul(playerB.cardsInPlayStack);
+    const CardStats totalCardStatsB = CalculateCardStackTotalStats(playerB.cardsInPlayStack);
 
-    int maxStatB = totalBodyB > totalMindB ? totalBodyB : totalMindB;
-    maxStatB = totalSoulB > maxStatB ? totalSoulB : maxStatB;
+    int maxStatB = totalCardStatsB.body > totalCardStatsB.mind ? totalCardStatsB.body : totalCardStatsB.mind;
+    maxStatB = totalCardStatsB.soul > maxStatB ? totalCardStatsB.soul : maxStatB;
 
     //Decide the winner
     if (maxStatA > maxStatB)
