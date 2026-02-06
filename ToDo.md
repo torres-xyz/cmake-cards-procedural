@@ -8,9 +8,8 @@
 - [ ] Redo player_test.cpp.
 - [ ] Add cards of different banners.
     - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
-- [x] Add current turn indicator to the UI.
-- [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Animate opponent's cards being played.
+- [ ] UI with https://github.com/nicbarker/clay
 
 ## Lower Priority
 
@@ -112,3 +111,5 @@
 - [x] BUG: It is possible to start a Phase with no Units in the hand, bricking the game. (Make player lose the game?)
     - [x] Add a log of each action.
 - [x] Fix the way Action cards are displayed (remove the stats from the bottom).
+- [x] Add current turn indicator to the UI.
+- [x] Implement undoing playing a card before clicking end turn.

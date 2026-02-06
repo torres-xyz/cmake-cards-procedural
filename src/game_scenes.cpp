@@ -128,7 +128,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
         ExecuteTurn(player2, player1, currentTurnPhase, gameRules, gameStatus);
     }
 
-    // Update the button states
+    // region Update the button states
     if (PlayerHasAvailableAction(player1, PlayerAction::mulligan))
     {
         UpdateSceneButton(playingScene.mulliganButton, player1, PlayerAction::mulligan);
@@ -151,6 +151,31 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
     }
 
     UpdateSceneButton(playingScene.endTurnButton, player1, PlayerAction::passTheTurn);
+
+    //Special button - Undo Action
+    //// Undo-able actions: Play Card
+    playingScene.undoPlayerActionButton.state = ButtonState::disabled;
+    if (!gameStatus.actionLogs.empty())
+    {
+        if (gameStatus.actionLogs.back().playerID == player1.id &&
+            gameStatus.actionLogs.back().actionCardPairTaken.action == PlayerAction::playCard)
+        {
+            playingScene.undoPlayerActionButton.state = ButtonState::enabled;
+            UpdateButtonState(playingScene.undoPlayerActionButton, GetMousePosition(), IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+
+            if (playingScene.undoPlayerActionButton.wasPressed)
+            {
+                player1.hand.emplace_back(player1.cardsInPlayStack.back());
+                player1.cardsInPlayStack.erase(player1.cardsInPlayStack.end() - 1);
+
+                gameStatus.actionLogs.erase(gameStatus.actionLogs.end() - 1);
+
+
+                PlaySound(GameSound::buttonPress01);
+            }
+        }
+    }
+    //endregion Update the button states
 
     // Update Music
     PlayMusic(playingScene.music);
@@ -261,7 +286,20 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
     }
     // DRAW ---------------------------------------------------------------------
     GetTexture(playingScene.background).Draw();
+
+    // Draw Buttons
     DrawButton(playingScene.endTurnButton, GetTexture(playingScene.endTurnButton.background));
+
+    if (PlayerHasAvailableAction(player1, PlayerAction::mulligan))
+    {
+        DrawButton(playingScene.mulliganButton, GetTexture(playingScene.mulliganButton.background));
+    }
+    else
+    {
+        DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
+    }
+    DrawButton(playingScene.undoPlayerActionButton, GetTexture(playingScene.undoPlayerActionButton.background));
+
 
     // Draw turn indicator
     std::string turnIndicatorMessage{gameStatus.currentTurnOwner == 1 ? "Your Turn" : "CPU Turn"};
@@ -276,16 +314,6 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
     DrawRectangleRec(turnIndicatorRect, turnIndicatorRecColor);
     HelperFunctions::DrawTextBoxed(GetFont(GameFont::aobashiOne), turnIndicatorMessage.c_str(),
                                    turnIndicatorRect, 30, 2, 1, false, turnIndicatorTextColor);
-
-    if (PlayerHasAvailableAction(player1, PlayerAction::mulligan))
-    {
-        DrawButton(playingScene.mulliganButton, GetTexture(playingScene.mulliganButton.background));
-    }
-    else
-    {
-        DrawButton(playingScene.playerDeckButton, GetTexture(playingScene.playerDeckButton.background));
-    }
-
 
     GetTexture(playingScene.playfield).Draw(Rectangle{0, 0, constants::playfieldRec.width, constants::playfieldRec.height}, constants::playfieldRec);
     // Draw stack stats total
