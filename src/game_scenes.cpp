@@ -263,6 +263,20 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
     GetTexture(playingScene.background).Draw();
     DrawButton(playingScene.endTurnButton, GetTexture(playingScene.endTurnButton.background));
 
+    // Draw turn indicator
+    std::string turnIndicatorMessage{gameStatus.currentTurnOwner == 1 ? "Your Turn" : "CPU Turn"};
+    raylib::Color turnIndicatorTextColor{gameStatus.currentTurnOwner == 1 ? GREEN : RED};
+    const raylib::Color turnIndicatorRecColor{10, 10, 10, 200};
+    raylib::Rectangle turnIndicatorRect
+    {
+        0, 50,
+        200,
+        40
+    };
+    DrawRectangleRec(turnIndicatorRect, turnIndicatorRecColor);
+    HelperFunctions::DrawTextBoxed(GetFont(GameFont::aobashiOne), turnIndicatorMessage.c_str(),
+                                   turnIndicatorRect, 30, 2, 1, false, turnIndicatorTextColor);
+
     if (PlayerHasAvailableAction(player1, PlayerAction::mulligan))
     {
         DrawButton(playingScene.mulliganButton, GetTexture(playingScene.mulliganButton.background));
@@ -368,7 +382,6 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
             heldCardIndex = i;
             continue;
         }
-
         RenderCard(allCards.at(i), allCards.at(i).rect);
     }
     // Draw Held Card

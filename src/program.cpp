@@ -18,8 +18,9 @@ int run()
     // Initialization ----------------------------------------------------------
 
     SetConfigFlags(FLAG_VSYNC_HINT);
-    SetTraceLogLevel(LOG_ERROR);
-    const raylib::Window window(constants::windowScreenWidth, constants::windowScreenHeight, "Raylib-cpp Template");
+    SetTraceLogLevel(LOG_WARNING);
+
+    const raylib::Window window(constants::windowScreenWidth, constants::windowScreenHeight, "C++ TCG");
     SetTargetFPS(GetMonitorRefreshRate(0));
 #if (DEBUG)
     rlImGuiSetup(true);

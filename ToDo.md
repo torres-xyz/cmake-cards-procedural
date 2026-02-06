@@ -2,13 +2,13 @@
 
 ## Regular To Dos
 
-- [ ] Build for web.
-    - [ ] Place game in portfolio.
-
+- [ ] Add an outline to the player's playable cards, during their turn, to show it is their turn.
+    - [ ] Outline shader?
+        - [ ] Could be reused for a dropdown shadow.
 - [ ] Redo player_test.cpp.
 - [ ] Add cards of different banners.
     - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
-- [ ] Add current turn indicator to the UI.
+- [x] Add current turn indicator to the UI.
 - [ ] Implement undoing playing a card before clicking end turn.
 - [ ] Animate opponent's cards being played.
 
