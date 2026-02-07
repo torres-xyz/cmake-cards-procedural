@@ -29,3 +29,4 @@ cardID,Name,Type,Banner,Body Text,Body,Mind,Soul,Asset Name
 28,Body Soul Plus Plus,Action,Form,Add 1500 to Body and Soul.,1500,0,1500,body_soul_plus_2
 29,Mind Soul Plus Plus,Action,Form,Add 1500 to Mind and Soul.,0,1500,1500,mind_soul_plus_2
 30,All Plus,Action,Form,Add 2500 to all stats.,2500,2500,2500,all_plus
+31,Draw Two,Action,Form,Draw two cards.,,,,draw_two

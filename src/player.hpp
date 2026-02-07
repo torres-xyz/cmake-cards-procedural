@@ -35,7 +35,8 @@ static const std::vector<int> deckP1
     StringToCardId("Soul Plus Plus Plus"),
     StringToCardId("Body Soul Plus"),
     StringToCardId("Body Mind Plus Plus"),
-    StringToCardId("Mind Soul Plus Plus")
+    StringToCardId("Mind Soul Plus Plus"),
+    StringToCardId("Draw Two")
 };
 
 static const std::vector<int> deckP2

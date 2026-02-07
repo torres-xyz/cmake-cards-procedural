@@ -10,6 +10,9 @@
 #include "helper_functions.hpp"
 #include "player.hpp"
 
+// Forward declaration of internal functions.
+void DrawCardsFromDeckToHand(Player &player, int amount);
+
 bool HasACardBeenPlayedThisTurn(const GameStatus &gS)
 {
     const int currentTurn = gS.turnsPlayed;
@@ -234,6 +237,46 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
     }
 }
 
+void ExecutePlayedCardEffects(const int cardID, Player &player, [[maybe_unused]] TurnPhase &turnPhase, [[maybe_unused]] const GameRules &gameRules, [[maybe_unused]] GameStatus &gameStatus)
+{
+    /*
+     * In order to have a single source of truth, the cards database should have a column
+     * that stats what behaviors that card has, in a specific order, in the form of an behaviorID.
+     * This way, we only need to read the cards behaviorID to know what to do with it.
+     * And if we change the card's text in the DB, we can update the behaviorID accordingly instead of hunting
+     * down every instance of an if statement for that card's effects.
+     *
+     * On the other hand, cards will most likely all have very different and unique effects.
+     * If I have to re-write a card's text I probably also have to re-write its implementation.
+     */
+
+    switch (cardID)
+    {
+        case 31: // "Draw Two" - Draw two cards.
+        {
+            DrawCardsFromDeckToHand(player, 2);
+        }
+        default:
+        {
+        }
+    }
+}
+
+void DrawCardsFromDeckToHand(Player &player, const int amount)
+{
+    assert(amount <= static_cast<int>(player.deck.size())
+        && "Trying to draw more cards than player has in its deck.\n");
+
+    for (int i = 0; i < amount; ++i)
+    {
+        Card drawnCard = player.deck.at(0);
+        drawnCard.rect.SetPosition(raylib::Vector2{-1000, -1000});
+        drawnCard.faceUp = false;
+        player.hand.push_back(drawnCard);
+        player.deck.erase(player.deck.begin());
+    }
+}
+
 void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameRules &gameRules, GameStatus &gameStatus)
 {
     auto LogAction = [](const Player &p, const TurnPhase &tP, GameStatus &gS) {
@@ -245,20 +288,6 @@ void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameR
                 gS.roundsPlayed,
                 p.id
             });
-    };
-
-    auto DrawCardsFromDeckToHand = [](Player &p, const int amount) {
-        assert(amount <= static_cast<int>(p.deck.size())
-            && "Trying to draw more cards than player has in its deck.\n");
-
-        for (int i = 0; i < amount; ++i)
-        {
-            Card drawnCard = p.deck.at(0);
-            drawnCard.rect.SetPosition(raylib::Vector2{-1000, -1000});
-            drawnCard.faceUp = false;
-            p.hand.push_back(drawnCard);
-            p.deck.erase(p.deck.begin());
-        }
     };
 
     if (player.chosenAction.action != PlayerAction::null)
@@ -307,9 +336,13 @@ void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameR
                 if (player.hand.at(i).uid != player.chosenAction.card.uid)
                     continue;
 
+                const int cardID = player.hand.at(i).cardID;
                 player.cardsInPlayStack.emplace_back(player.hand.at(i));
                 //Then remove that card from the hand.
                 player.hand.erase(player.hand.begin() + static_cast<long int>(i));
+
+                ExecutePlayedCardEffects(cardID, player, turnPhase, gameRules, gameStatus);
+
                 break;
             }
 

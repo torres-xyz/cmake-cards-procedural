@@ -45,6 +45,8 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
 
 void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameRules &gameRules, GameStatus &gameStatus);
 
+void ExecutePlayedCardEffects(int cardID, Player &player, TurnPhase &turnPhase, const GameRules &gameRules, GameStatus &gameStatus);
+
 std::string PlayerActionToString(PlayerAction playerAction);
 
 std::string TurnPhaseToString(TurnPhase phase);
