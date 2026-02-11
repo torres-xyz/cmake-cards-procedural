@@ -2,9 +2,6 @@
 
 ## Regular To Dos
 
-- [ ] Add an outline to the player's playable cards, during their turn, to show it is their turn.
-    - [ ] Outline shader?
-        - [ ] Could be reused for a dropdown shadow.
 - [ ] Redo player_test.cpp.
 - [ ] Add cards of different banners.
     - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
@@ -116,3 +113,8 @@
 - [x] Add 1 non-vanilla Unit.
     - [x] Make "Cancer Pagurus" have an ability.
 - [x] Add an Action card that lets you draw more cards.
+- [x] BUG - When playing the last card in the hand there is a visual glitch.
+- [x] Add an outline to the player's playable cards, during their turn, to show it is their turn.
+    - [x] Start with something simpler.
+        - [x] Animated background.
+    - [x] Outline shader?

@@ -7,7 +7,7 @@
 #include "helper_functions.hpp"
 #include "textures.hpp"
 
-void RenderCard(const Card &card, const raylib::Rectangle destinationRect)
+void RenderCard(const Card &card, const raylib::Rectangle destinationRect, const bool highlighted)
 {
     auto RenderTextInsideCard = [](const char *text, const raylib::Rectangle &destRect, const float x, const float y,
                                    const float width, const float height, const raylib::Vector2 margins,
@@ -63,6 +63,44 @@ void RenderCard(const Card &card, const raylib::Rectangle destinationRect)
         return;
     }
 
+    // Render highlighting
+    if (highlighted)
+    {
+        static const Shader outlineShader = LoadShader(nullptr, "resources/shaders/card_outline.frag");
+        static const raylib::Texture2D &outlineTex = GetTexture(GameTexture::invalid); //invalid is a 1x1 pixel texture.
+        static const raylib::Rectangle oneByOneRec{0, 0, 1, 1};
+
+        const float outlineSize = destinationRect.height * 0.06f;
+        const raylib::Rectangle outlineRec
+        {
+            destinationRect.x - outlineSize / 2,
+            destinationRect.y - outlineSize / 2,
+            destinationRect.width + outlineSize,
+            destinationRect.height + outlineSize
+        };
+
+        if (static bool initShader{false}; initShader == false)
+        {
+            // Shader uniform values that only need to setup once
+            static const int textureSizeLoc = GetShaderLocation(outlineShader, "textureSize");
+            static const int colorSizeLoc = GetShaderLocation(outlineShader, "color");
+
+            const float textureSize[2] = {outlineRec.width, outlineRec.height};
+            constexpr float outlineColor[3] = {0.863f, 0.396f, 0.961f};
+
+            SetShaderValue(outlineShader, textureSizeLoc, &textureSize, SHADER_UNIFORM_VEC2);
+            SetShaderValue(outlineShader, colorSizeLoc, &outlineColor, SHADER_UNIFORM_VEC3);
+
+            initShader = true;
+        }
+        static const int timeSizeLoc = GetShaderLocation(outlineShader, "time");
+        const auto time = static_cast<float>(GetTime());
+        SetShaderValue(outlineShader, timeSizeLoc, &time, SHADER_UNIFORM_FLOAT);
+
+        BeginShaderMode(outlineShader);
+        outlineTex.Draw(oneByOneRec, outlineRec, {0, 0}, 0, WHITE);
+        EndShaderMode();
+    }
     //Card Art
     const raylib::Texture2D &cardArtTex = GetCardArtTexture(card.cardID);
     const raylib::Rectangle cardArtTexSourceRect

@@ -12,7 +12,6 @@
 int run()
 {
     // Initialization ----------------------------------------------------------
-
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetTraceLogLevel(LOG_WARNING);
 

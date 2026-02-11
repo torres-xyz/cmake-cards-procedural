@@ -37,7 +37,7 @@ struct StartingScene
             200,
             100
         },
-        .text = "Star Game",
+        .text = "Start Game",
         .fontSize = 20,
         .background = GameTexture::panel01,
         .state = ButtonState::enabled

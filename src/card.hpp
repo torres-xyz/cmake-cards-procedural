@@ -50,7 +50,7 @@ struct Card
     };
 };
 
-void RenderCard(const Card &card, raylib::Rectangle destinationRect);
+void RenderCard(const Card &card, raylib::Rectangle destinationRect, bool highlighted = false);
 
 std::vector<Card> GetCardDB();
 
