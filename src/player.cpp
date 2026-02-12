@@ -3,7 +3,7 @@
 #include <random>
 #include "helper_functions.hpp"
 
-void InitializePlayer(Player &player)
+void InitializePlayer(Player &player, const std::vector<int> &deckList)
 {
     player.hand.clear();
     player.cardsInPlayStack.clear();
@@ -14,20 +14,25 @@ void InitializePlayer(Player &player)
     //Use default deck for players for now.
     player.deck.clear();
 
-    if (player.id == 1)
+    for (const int card: deckList)
     {
-        for (const int deck1Card: deckP1)
-        {
-            player.deck.push_back(GetCardFromDB(deck1Card));
-        }
-    }
-    if (player.id == 2)
-    {
-        for (const int deck2Card: deckP2)
-        {
-            player.deck.push_back(GetCardFromDB(deck2Card));
-        }
+        player.deck.push_back(GetCardFromDB(card));
     }
 
     std::ranges::shuffle(player.deck, HelperFunctions::GetRandomDevice());
+}
+
+
+/**
+ * Best used before the initial draw.
+ *
+ */
+void DEBUG_InjectDeckInPlayer(Player &player, const std::vector<int> &deck)
+{
+    player.deck.clear();
+
+    for (const int cardID: deck)
+    {
+        player.deck.push_back(GetCardFromDB(cardID));
+    }
 }

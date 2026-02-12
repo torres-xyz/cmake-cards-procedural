@@ -9,7 +9,7 @@
 #include "csv.h"
 #include "game_turn.hpp"
 
-int run()
+void run()
 {
     // Initialization ----------------------------------------------------------
     SetConfigFlags(FLAG_VSYNC_HINT);
@@ -45,6 +45,7 @@ int run()
     StartingScene startingScene{};
     PlayingScene playingScene{};
     GameOverScene gameOverScene{};
+    // ReSharper disable once CppTooWideScope
     PrototypingScene prototypingScene{};
 
     if (constexpr bool usePrototypingScene{false}; usePrototypingScene)
@@ -96,7 +97,4 @@ int run()
         // De-Initialization -------------------------------------------------------
         // UnloadTexture() and CloseWindow() are called automatically.
     };
-
-
-    return 0;
 }

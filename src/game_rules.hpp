@@ -18,9 +18,9 @@ struct GameRules
 
 void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_device &rd);
 
-CardStats CalculateCardStackTotalStats(const std::vector<Card> &stack);
+CardStats CalculateCardStackTotalStats(const Player &player, const GameStatus &gameStatus);
 
-int CalculateRoundWinnerId(const Player &playerA, const Player &playerB);
+int CalculateRoundWinnerId(const Player &playerA, const Player &playerB, const GameStatus &gameStatus);
 
 bool IsInitialHandValid(const std::vector<Card> &playerHand, GameRules gameRules);
 

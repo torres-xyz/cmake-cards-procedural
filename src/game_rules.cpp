@@ -25,9 +25,11 @@ void ShuffleDeckAndMakeSureTopCardIsAUnit(std::vector<Card> &deck, std::random_d
     assert(deck.at(0).type == CardType::unit);
 }
 
-CardStats CalculateCardStackTotalStats(const std::vector<Card> &stack)
+CardStats CalculateCardStackTotalStats(const Player &player, const GameStatus &gameStatus)
 {
+    const std::vector<Card> &stack = player.cardsInPlayStack;
     CardStats totalCardStats{0, 0, 0};
+    if (stack.empty()) return totalCardStats;
 
     for (const auto &card: stack)
     {
@@ -36,18 +38,30 @@ CardStats CalculateCardStackTotalStats(const std::vector<Card> &stack)
         totalCardStats.soul += card.stats.soul;
     }
 
-    if (stack.empty()) return totalCardStats;
-
-    if (stack.at(0).cardID == 1)
+    switch (stack.at(0).cardID)
     {
-        for (const auto &card: stack)
+        case 1: //Cancer Pagurus - +500 to Body for each Form Action on this Unit.
         {
-            if (card.cardID != 1 && card.banner == CardBanner::form)
+            for (const auto &card: stack)
             {
-                totalCardStats.body += 500;
+                if (card.cardID != 1 && card.banner == CardBanner::form)
+                {
+                    totalCardStats.body += 500;
+                }
             }
+            break;
         }
+        case 4: //Twisted Gauntlet - +2000 to Body if you have lost the previous round.
+        {
+            if (gameStatus.roundWinnerHistory.back() != player.id)
+            {
+                totalCardStats.body += 2000;
+            }
+            break;
+        }
+        default: ;
     }
+
 
     return totalCardStats;
 }
@@ -55,14 +69,14 @@ CardStats CalculateCardStackTotalStats(const std::vector<Card> &stack)
 /**
  * @return 1 if Player 1 wins, 2 if player 2 wins or 0 if it's a tie.
  */
-int CalculateRoundWinnerId(const Player &playerA, const Player &playerB)
+int CalculateRoundWinnerId(const Player &playerA, const Player &playerB, const GameStatus &gameStatus)
 {
-    const CardStats totalCardStatsA = CalculateCardStackTotalStats(playerA.cardsInPlayStack);
+    const CardStats totalCardStatsA = CalculateCardStackTotalStats(playerA, gameStatus);
 
     int maxStatA = totalCardStatsA.body > totalCardStatsA.mind ? totalCardStatsA.body : totalCardStatsA.mind;
     maxStatA = totalCardStatsA.soul > maxStatA ? totalCardStatsA.soul : maxStatA;
 
-    const CardStats totalCardStatsB = CalculateCardStackTotalStats(playerB.cardsInPlayStack);
+    const CardStats totalCardStatsB = CalculateCardStackTotalStats(playerB, gameStatus);
 
     int maxStatB = totalCardStatsB.body > totalCardStatsB.mind ? totalCardStatsB.body : totalCardStatsB.mind;
     maxStatB = totalCardStatsB.soul > maxStatB ? totalCardStatsB.soul : maxStatB;

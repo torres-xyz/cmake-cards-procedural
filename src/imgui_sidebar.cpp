@@ -12,7 +12,7 @@
 namespace ImGuiSideBar
 {
     void DrawSideBar(bool &muteGame, const GameScene &currentGameScene, const TurnPhase &currentTurnPhase, GameStatus &gameStatus,
-                     const Player &player1, const Player &player2)
+                     Player &player1, const Player &player2)
     {
         // start ImGui Content
         rlImGuiBegin();
@@ -46,8 +46,9 @@ namespace ImGuiSideBar
             ImGui::SeparatorText("Options");
             ImGui::Checkbox("Mute", &muteGame);
             ImGui::SeparatorText("Debug Actions");
-            if (ImGui::Button("Placeholder"))
+            if (ImGui::Button("Inject Deck in Player 1"))
             {
+                DEBUG_InjectDeckInPlayer(player1, templeShieldDeck);
             }
             ImGui::SeparatorText("Actions Log");
             ImGui::TextWrapped("%s", HelperFunctions::ActionLogsToString(gameStatus).c_str());

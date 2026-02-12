@@ -6,7 +6,6 @@
 
 - [ ] "Mind Break" - "Play on opponent's Unit. If it has less than 3000 Mind, destroy it."
     - [ ] Create rule for destroying Units. → Player loses the round.
-- [ ] Card ability → "+2000 Body if you have lost the previous match."
 
 - [ ] Redo player_test.cpp.
 - [ ] Add cards of different banners.
@@ -124,3 +123,7 @@
     - [x] Start with something simpler.
         - [x] Animated background.
     - [x] Outline shader?
+
+### Add more card effects
+
+- [x] Card ability → "+2000 Body if you have lost the previous match."

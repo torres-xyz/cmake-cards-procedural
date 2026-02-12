@@ -76,8 +76,8 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene, Pla
     if (startButton.wasPressed)
     {
         // Initialize the gameplay components
-        InitializePlayer(player1);
-        InitializePlayer(player2);
+        InitializePlayer(player1, deckP1);
+        InitializePlayer(player2, deckP2);
         gameStatus.currentTurnOwner = GetRandomValue(1, 2);
 
         PlaySound(GameSound::buttonPress01);
@@ -189,7 +189,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
     // Trying To Play Held Card
     else
     {
-        if (player1.isHoldingACard)
+        if (player1.isHoldingACard && CheckCollisionPointRec(GetMousePosition(), constants::playfieldRec))
         {
             for (const PlayerActionAndHandCardPair &availableAction: player1.availableActions)
             {
@@ -380,7 +380,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
     DrawRectangleRec(statsTotalRec, statsTotalRecColor);
 
     //// Player 1 Stats
-    const CardStats player1TotalCardStats = CalculateCardStackTotalStats(player1.cardsInPlayStack);
+    const CardStats player1TotalCardStats = CalculateCardStackTotalStats(player1, gameStatus);
     const std::string player1TotalCardStatsMessage
     {
         std::format("Total Stats \nB: {0} | M: {1} | S: {2}",
@@ -408,7 +408,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
         WHITE
     );
     //// Player 2 Stats
-    const CardStats player2TotalCardStats = CalculateCardStackTotalStats(player2.cardsInPlayStack);
+    const CardStats player2TotalCardStats = CalculateCardStackTotalStats(player2, gameStatus);
     const std::string player2TotalCardStatsMessage
     {
         std::format("Total Stats \nB: {0} | M: {1} | S: {2}",

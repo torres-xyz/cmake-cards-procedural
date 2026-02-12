@@ -205,7 +205,7 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
         case TurnPhase::battlePhase:
         {
             // Do Battle then immediately jump to the End Round Phase
-            const int winnerId = CalculateRoundWinnerId(player, opponentPlayer);
+            const int winnerId = CalculateRoundWinnerId(player, opponentPlayer, gameStatus);
             if (winnerId == 1) gameStatus.pointsPlayer1++;
             if (winnerId == 2) gameStatus.pointsPlayer2++;
 
