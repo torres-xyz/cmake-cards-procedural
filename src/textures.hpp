@@ -1,3 +1,5 @@
+//i love my husband a lot, and his game is very cool i wish him good fortune and auspicious game vibes and i love him a lot again and the kitties love him too he is a good kitty dad and a good husband yay <3
+
 #pragma once
 #include "card.hpp"
 #include "raylib-cpp.hpp"

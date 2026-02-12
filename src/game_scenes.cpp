@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 #include <format>
 
 #include "audio.hpp"
@@ -29,7 +28,7 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene, Pla
     static const Shader waveShader = LoadShader(nullptr, "resources/shaders/wave.frag");
 
     static const int secondsLoc = GetShaderLocation(waveShader, "seconds");
-    static float seconds = 0.0f;
+    static float seconds{};
 
     if (static bool initShader{false}; initShader == false)
     {
@@ -62,7 +61,10 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene, Pla
     }
 
     // region UPDATE
-    seconds += GetFrameTime();
+
+    //Doing this to avoid a stutter the first time the game loads.
+    if (seconds == 0) seconds += std::min(GetFrameTime(), 1.f / static_cast<float>(GetMonitorRefreshRate(0)));
+    else seconds += GetFrameTime();
 
     SetShaderValue(waveShader, secondsLoc, &seconds, SHADER_UNIFORM_FLOAT);
 
