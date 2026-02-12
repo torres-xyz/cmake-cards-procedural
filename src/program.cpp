@@ -47,8 +47,7 @@ int run()
     GameOverScene gameOverScene{};
     PrototypingScene prototypingScene{};
 
-    constexpr bool usePrototypingScene{false};
-    if (usePrototypingScene)
+    if (constexpr bool usePrototypingScene{false}; usePrototypingScene)
     {
         currentScene = GameScene::prototyping;
     }

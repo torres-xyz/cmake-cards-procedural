@@ -2,6 +2,12 @@
 
 ## Regular To Dos
 
+### Add more card effects
+
+- [ ] "Mind Break" - "Play on opponent's Unit. If it has less than 3000 Mind, destroy it."
+    - [ ] Create rule for destroying Units. → Player loses the round.
+- [ ] Card ability → "+2000 Body if you have lost the previous match."
+
 - [ ] Redo player_test.cpp.
 - [ ] Add cards of different banners.
     - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
@@ -21,7 +27,7 @@
 - [x] Start screen.
 - [x] Announce winner when the game ends.
 - [x] Switch to raylib-cpp for automatic memory management.
-- [x] Integrate Dear Imgui for debugging purposes.
+- [x] Integrate Dear imgui for debugging purposes.
 - [x] Button to restart the game when it ends.
 - [x] Move cards with mouse.
     - [x] Create a Card Manager that deals with moving all the cards around.
@@ -78,7 +84,7 @@
 - [x] Add hovering to the cards in the play zone so we can see all cards in the stacks.
     - [x] Use UIDs to identify which card is being hovered.
     - [x] Center the zoomed in card around its original position.
-- [x] Make the game a best of 3.
+- [x] Make the game best of 3.
 - [x] Add a delay to player 2's actions.
 - [x] Announce round winner every round.
 - [x] Make GetCardArtTexture retrieve the path from the csv file.
