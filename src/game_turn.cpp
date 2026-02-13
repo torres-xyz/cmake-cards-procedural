@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <iostream>
 
 #include "audio.hpp"
 #include "game_rules.hpp"
@@ -41,23 +42,32 @@ bool HasACardBeenPlayedLastTurn(const GameStatus &gS)
     return false;
 }
 
+bool DeckContainsUnits(const std::vector<Card> &deckToCheck)
+{
+    for (const Card &card: deckToCheck)
+    {
+        if (card.type == CardType::unit) return true;
+    }
+    return false;
+}
 
 std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player &player, const TurnPhase &turnPhase, const GameRules &gameRules, const GameStatus &gameStatus)
 {
     std::vector<PlayerActionAndHandCardPair> possibleActions{};
-
-    possibleActions.push_back({PlayerAction::forfeit});
     switch (turnPhase)
     {
         case TurnPhase::initialSetup:
         {
+            possibleActions.push_back({PlayerAction::forfeitTheGame});
+            possibleActions.push_back({PlayerAction::forfeitTheRound});
+
             if (static_cast<int>(player.hand.size()) < gameRules.initialHandSize)
             {
                 possibleActions.push_back({PlayerAction::drawCard});
             }
             if (static_cast<int>(player.hand.size()) == gameRules.initialHandSize)
             {
-                if (!IsInitialHandValid(player.hand, gameRules))
+                if (!IsInitialHandValid(player.hand, gameRules) && DeckContainsUnits(player.deck))
                 {
                     possibleActions.push_back({PlayerAction::mulligan});
                 }
@@ -66,6 +76,9 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
         }
         case TurnPhase::mainPhase:
         {
+            possibleActions.push_back({PlayerAction::forfeitTheGame});
+            possibleActions.push_back({PlayerAction::forfeitTheRound});
+
             //If the player has NO cards in play, they MUST play a Unit
             if (player.cardsInPlayStack.empty())
             {
@@ -84,7 +97,6 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
                     //If the player can't play another Unit, they lose the game.
                 }
             }
-
 
             // You can play Action Cards on your Unit card in play.
             if (!player.cardsInPlayStack.empty() &&
@@ -127,8 +139,34 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
             break;
         }
     }
+    if (possibleActions.size() == 2)
+    {
+        std::cout << "Only 2 actions\n";
+    }
 
     return possibleActions;
+}
+
+void AttributeRoundWinToPlayer(Player &victoriousPlayer, Player &defeatedPlayer, TurnPhase &currentTurnPhase, GameStatus &gameStatus)
+{
+    const int winnerId = victoriousPlayer.id;
+
+    if (winnerId == 1) gameStatus.pointsPlayer1++;
+    if (winnerId == 2) gameStatus.pointsPlayer2++;
+
+    gameStatus.roundWinnerHistory.push_back(winnerId);
+
+    gameStatus.roundsPlayed++;
+    gameStatus.turnsPlayed++;
+
+    //Clear the Fields
+    victoriousPlayer.cardsInPlayStack.clear();
+    defeatedPlayer.cardsInPlayStack.clear();
+
+    gameStatus.currentTurnOwner = defeatedPlayer.id;
+    gameStatus.turnsPlayed++;
+
+    currentTurnPhase = TurnPhase::endRoundPhase;
 }
 
 // Make use of the command pattern, so that it is easy to list actions, undo them, and redo them.
@@ -153,7 +191,6 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
 
         if (hasHadInitialSetupPhaseThisRound)
         {
-            // currentTurnPhase = TurnPhase::drawStep;
             currentTurnPhase = TurnPhase::mainPhase;
         }
         else
@@ -167,7 +204,7 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
     {
         case TurnPhase::initialSetup: //only executed once per round. but different
         {
-            ExecuteChosenPlayerAction(player, currentTurnPhase, gameRules, gameStatus);
+            ExecuteChosenPlayerAction(player, opponentPlayer, currentTurnPhase, gameRules, gameStatus);
 
             // Auto shuffle deck ?
 
@@ -182,7 +219,8 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
         }
         case TurnPhase::mainPhase:
         {
-            ExecuteChosenPlayerAction(player, currentTurnPhase, gameRules, gameStatus);
+
+            ExecuteChosenPlayerAction(player, opponentPlayer, currentTurnPhase, gameRules, gameStatus);
 
             break;
         }
@@ -206,17 +244,8 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
         {
             // Do Battle then immediately jump to the End Round Phase
             const int winnerId = CalculateRoundWinnerId(player, opponentPlayer, gameStatus);
-            if (winnerId == 1) gameStatus.pointsPlayer1++;
-            if (winnerId == 2) gameStatus.pointsPlayer2++;
 
-            gameStatus.roundWinnerHistory.push_back(winnerId);
-
-            gameStatus.roundsPlayed++;
-            gameStatus.turnsPlayed++;
-
-            //Clear the Fields
-            player.cardsInPlayStack.clear();
-            opponentPlayer.cardsInPlayStack.clear();
+            AttributeRoundWinToPlayer(winnerId == 1 ? player : opponentPlayer, winnerId == 1 ? player : opponentPlayer, currentTurnPhase, gameStatus);
 
             currentTurnPhase = TurnPhase::endRoundPhase;
             break;
@@ -230,18 +259,18 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
                 return;
             }
 
-            ExecuteChosenPlayerAction(player, currentTurnPhase, gameRules, gameStatus);
+            ExecuteChosenPlayerAction(player, opponentPlayer, currentTurnPhase, gameRules, gameStatus);
 
             break;
         }
     }
 }
 
-void ExecutePlayedCardEffects(const int cardID, Player &player, [[maybe_unused]] TurnPhase &turnPhase, [[maybe_unused]] const GameRules &gameRules, [[maybe_unused]] GameStatus &gameStatus)
+void ExecutePlayedCardEffects(const int cardID, Player &player, Player &opponent, [[maybe_unused]] TurnPhase &turnPhase, [[maybe_unused]] const GameRules &gameRules, [[maybe_unused]] const GameStatus &gameStatus)
 {
     /*
      * In order to have a single source of truth, the cards database should have a column
-     * that stats what behaviors that card has, in a specific order, in the form of an behaviorID.
+     * that states what behaviors that card has, in a specific order, in the form of a behaviorID.
      * This way, we only need to read the cards behaviorID to know what to do with it.
      * And if we change the card's text in the DB, we can update the behaviorID accordingly instead of hunting
      * down every instance of an if statement for that card's effects.
@@ -255,6 +284,17 @@ void ExecutePlayedCardEffects(const int cardID, Player &player, [[maybe_unused]]
         case 31: // "Draw Two" - Draw two cards.
         {
             DrawCardsFromDeckToHand(player, 2);
+            break;
+        }
+        case 32: //Break The Mind: "Play on opponent's Unit. If it has less than 3000 Mind, destroy it."
+        {
+            const CardStats totalCardStats = CalculateCardStackTotalStats(opponent, gameStatus);
+
+            if (totalCardStats.mind < 3000)
+            {
+                opponent.cardsInPlayStack.clear();
+            }
+            break;
         }
         default:
         {
@@ -277,7 +317,7 @@ void DrawCardsFromDeckToHand(Player &player, const int amount)
     }
 }
 
-void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameRules &gameRules, GameStatus &gameStatus)
+void ExecuteChosenPlayerAction(Player &player, [[maybe_unused]] Player &opponentPlayer, TurnPhase &currentTurnPhase, const GameRules &gameRules, GameStatus &gameStatus)
 {
     auto LogAction = [](const Player &p, const TurnPhase &tP, GameStatus &gS) {
         gS.actionLogs.push_back(
@@ -291,7 +331,7 @@ void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameR
     };
 
     if (player.chosenAction.action != PlayerAction::null)
-        LogAction(player, turnPhase, gameStatus);
+        LogAction(player, currentTurnPhase, gameStatus);
 
     switch (player.chosenAction.action)
     {
@@ -337,11 +377,13 @@ void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameR
                     continue;
 
                 const int cardID = player.hand.at(i).cardID;
+
                 player.cardsInPlayStack.emplace_back(player.hand.at(i));
+
                 //Then remove that card from the hand.
                 player.hand.erase(player.hand.begin() + static_cast<long int>(i));
 
-                ExecutePlayedCardEffects(cardID, player, turnPhase, gameRules, gameStatus);
+                ExecutePlayedCardEffects(cardID, player, opponentPlayer, currentTurnPhase, gameRules, gameStatus);
 
                 break;
             }
@@ -352,11 +394,16 @@ void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameR
         }
         case PlayerAction::passTheTurn:
         {
-            turnPhase = TurnPhase::endTurnPhase;
+            currentTurnPhase = TurnPhase::endTurnPhase;
 
             break;
         }
-        case PlayerAction::forfeit:
+        case PlayerAction::forfeitTheRound:
+        {
+            AttributeRoundWinToPlayer(opponentPlayer, player, currentTurnPhase, gameStatus);
+            break;
+        }
+        case PlayerAction::forfeitTheGame:
         {
             break;
         }
@@ -367,7 +414,7 @@ void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameR
                 // The game ends and a winner is declared
             }
 
-            turnPhase = TurnPhase::initialSetup;
+            currentTurnPhase = TurnPhase::initialSetup;
 
             break;
         }
@@ -394,10 +441,12 @@ std::string PlayerActionToString(const PlayerAction playerAction)
             return "Play Card";
         case PlayerAction::passTheTurn:
             return "Pass The Turn";
-        case PlayerAction::forfeit:
-            return "Forfeit";
         case PlayerAction::finishRound:
             return "Start New Round";
+        case PlayerAction::forfeitTheRound:
+            return "Forfeit the round";
+        case PlayerAction::forfeitTheGame:
+            return "Forfeit the game";
     }
     return "ERROR";
 }

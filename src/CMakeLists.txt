@@ -26,6 +26,7 @@ add_library(${PROJECT_NAME}
         game_turn.hpp
         cpu_brain.cpp
         cpu_brain.hpp
+        debug_globals.hpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

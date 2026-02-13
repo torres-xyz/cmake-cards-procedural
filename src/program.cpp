@@ -7,6 +7,7 @@
 #include "game_status.hpp"
 #include "player.hpp"
 #include "csv.h"
+#include "debug_globals.hpp"
 #include "game_turn.hpp"
 
 void run()
@@ -31,7 +32,6 @@ void run()
 
     constexpr GameRules gameRules
     {
-        .playerGoingFirst = 2,
         .pointsNeededToWin = 2 //Best of 3 game
     };
 

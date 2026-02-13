@@ -52,7 +52,7 @@ struct Card
 
 void RenderCard(const Card &card, raylib::Rectangle destinationRect, bool highlighted = false);
 
-std::vector<Card> GetCardDB();
+const std::vector<Card> &GetCardDB();
 
 Card GetCardFromDB(int id);
 
@@ -60,12 +60,12 @@ Card GetCardFromDB(std::string_view cardName);
 
 void PrintCard(const Card &card);
 
-CardBanner StringToBanner(std::string_view sv);
+constexpr CardBanner StringToBanner(std::string_view sv);
 
-std::string BannerToString(CardBanner banner);
+constexpr std::string BannerToString(CardBanner banner);
 
-CardType StringToCardType(std::string_view sv);
+constexpr CardType StringToCardType(std::string_view sv);
 
-std::string CardTypeToString(CardType cardType);
+constexpr std::string CardTypeToString(CardType cardType);
 
 int StringToCardId(std::string_view cardName);

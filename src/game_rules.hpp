@@ -11,7 +11,6 @@ struct Player;
 
 struct GameRules
 {
-    const int playerGoingFirst{2}; // CPU plays first
     const int pointsNeededToWin{2}; //Best of 3 rounds game as a default
     const int initialHandSize{4};
 };

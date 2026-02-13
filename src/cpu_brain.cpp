@@ -15,7 +15,9 @@ void RunCpuBrain(Player &player, const CpuPlayerOptions &options)
     for (const PlayerActionAndHandCardPair &actionCardPair: player.availableActions)
     {
         if (actionCardPair.action == PlayerAction::null) continue; // Nothing to do.
-        if (actionCardPair.action == PlayerAction::forfeit) continue; // Never forfeit.
+        // Don't forfeit if there are other options
+        if (actionCardPair.action == PlayerAction::forfeitTheGame) continue;
+        if (actionCardPair.action == PlayerAction::forfeitTheRound) continue;
 
         //Always draw a card first
         if (actionCardPair.action == PlayerAction::drawCard)
@@ -52,6 +54,22 @@ void RunCpuBrain(Player &player, const CpuPlayerOptions &options)
                 player.chosenAction = actionCardPair;
                 break;
             }
+        }
+    }
+
+    //If player has only Forfeit Actions available, then they must forfeit.
+    if (player.availableActions.size() == 2)
+    {
+        bool hasForfeitRoundAction{false};
+        bool hasForfeitGameAction{false};
+        for (const auto &[action, card]: player.availableActions)
+        {
+            if (action == PlayerAction::forfeitTheRound) hasForfeitRoundAction = true;
+            if (action == PlayerAction::forfeitTheGame) hasForfeitGameAction = true;
+        }
+        if (hasForfeitRoundAction && hasForfeitGameAction)
+        {
+            player.chosenAction = {PlayerAction::forfeitTheRound};
         }
     }
 

@@ -76,13 +76,13 @@ static const std::vector<int> mulliganRequiredDeck
     StringToCardId("Sand Tusk"),
     StringToCardId("Temple Shield")
 };
-static const std::vector<int> templeShieldDeck
+static const std::vector<int> mindBreakDeck
 {
     StringToCardId("Temple Shield"),
+    StringToCardId("Break The Mind"),
     StringToCardId("Twisted Gauntlet"),
     StringToCardId("Blitz Lancer"),
     StringToCardId("Body Plus Plus"),
-    StringToCardId("Mind Plus"),
     StringToCardId("Mind Plus Plus Plus"),
     StringToCardId("Soul Plus Plus"),
     StringToCardId("Body Mind Plus"),
@@ -94,6 +94,18 @@ static const std::vector<int> templeShieldDeck
     StringToCardId("Biohazard"),
     StringToCardId("Sand Claw"),
     StringToCardId("Sand Tusk"),
+};
+static const std::vector<int> onlyOneUnitDeck
+{
+    StringToCardId("Sand Claw"),
+    StringToCardId("Body Plus Plus"),
+    StringToCardId("Body Plus Plus"),
+    StringToCardId("Body Plus Plus"),
+    StringToCardId("Body Plus Plus"),
+    StringToCardId("Body Plus Plus"),
+    StringToCardId("Soul Plus Plus"),
+    StringToCardId("Body Mind Plus"),
+    StringToCardId("Body Soul Plus Plus"),
 };
 
 void InitializePlayer(Player &player, const std::vector<int> &deckList);

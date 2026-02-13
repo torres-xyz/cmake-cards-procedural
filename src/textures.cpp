@@ -51,12 +51,6 @@ raylib::Texture2D const &GetTexture(const CardBanner banner, const CardType card
         {CardBanner::instinct, GameTexture::cardFrame_Unit_Instinct},
         {CardBanner::strategy, GameTexture::cardFrame_Unit_Strategy},
     };
-    static const std::unordered_map<CardBanner, GameTexture> cardBannerToActionCardFrameTextureMap
-    {
-        {CardBanner::invalid, GameTexture::invalid},
-        {CardBanner::form, GameTexture::cardFrame_Action_Form},
-    };
-
     if (cardType == CardType::unit)
     {
         if (cardBannerToUnitCardFrameTextureMap.contains(banner))
@@ -64,6 +58,12 @@ raylib::Texture2D const &GetTexture(const CardBanner banner, const CardType card
             return GetTexture(cardBannerToUnitCardFrameTextureMap.at(banner));
         }
     }
+
+    static const std::unordered_map<CardBanner, GameTexture> cardBannerToActionCardFrameTextureMap
+    {
+        {CardBanner::invalid, GameTexture::invalid},
+        {CardBanner::form, GameTexture::cardFrame_Action_Form},
+    };
     if (cardType == CardType::action)
     {
         if (cardBannerToActionCardFrameTextureMap.contains(banner))
@@ -71,6 +71,8 @@ raylib::Texture2D const &GetTexture(const CardBanner banner, const CardType card
             return GetTexture(cardBannerToActionCardFrameTextureMap.at(banner));
         }
     }
+
+
     return GetTexture(GameTexture::invalid);
 }
 
@@ -81,7 +83,7 @@ raylib::Texture2D const &GetCardArtTexture(const int cardId)
     //TODO: Consider preloading this as well.
     if (!cardIDToArtTexturePathMap.contains(cardId))
     {
-        io::CSVReader<2> in("resources/csv/cards_db.csv");
+        io::CSVReader<2, io::trim_chars<' ', '\t'>, io::double_quote_escape<',', '"'> > in("resources/csv/cards_db.csv");
         in.read_header(io::ignore_extra_column, "cardID", "Asset Name");
         int cardID{};
         std::string assetName{};

@@ -31,37 +31,36 @@ CardStats CalculateCardStackTotalStats(const Player &player, const GameStatus &g
     CardStats totalCardStats{0, 0, 0};
     if (stack.empty()) return totalCardStats;
 
-    for (const auto &card: stack)
+    for (size_t i = 0; i < stack.size(); ++i)
     {
-        totalCardStats.body += card.stats.body;
-        totalCardStats.mind += card.stats.mind;
-        totalCardStats.soul += card.stats.soul;
-    }
+        totalCardStats.body += stack.at(i).stats.body;
+        totalCardStats.mind += stack.at(i).stats.mind;
+        totalCardStats.soul += stack.at(i).stats.soul;
 
-    switch (stack.at(0).cardID)
-    {
-        case 1: //Cancer Pagurus - +500 to Body for each Form Action on this Unit.
+        switch (stack.at(i).cardID)
         {
-            for (const auto &card: stack)
+            case 1: //Cancer Pagurus: "+500 to Body for each Form Action on this Unit."
             {
-                if (card.cardID != 1 && card.banner == CardBanner::form)
+                for (const auto &card: stack)
                 {
-                    totalCardStats.body += 500;
+                    if (card.cardID != 1 && card.banner == CardBanner::form)
+                    {
+                        totalCardStats.body += 500;
+                    }
                 }
+                break;
             }
-            break;
-        }
-        case 4: //Twisted Gauntlet - +2000 to Body if you have lost the previous round.
-        {
-            if (gameStatus.roundWinnerHistory.back() != player.id)
+            case 4: //Twisted Gauntlet: "+2000 to Body if you have lost the previous round."
             {
-                totalCardStats.body += 2000;
+                if (!gameStatus.roundWinnerHistory.empty() && gameStatus.roundWinnerHistory.back() != player.id)
+                {
+                    totalCardStats.body += 2000;
+                }
+                break;
             }
-            break;
+            default: ;
         }
-        default: ;
     }
-
 
     return totalCardStats;
 }

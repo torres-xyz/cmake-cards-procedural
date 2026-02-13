@@ -30,3 +30,4 @@ cardID,Name,Type,Banner,Body Text,Body,Mind,Soul,Asset Name
 29,Mind Soul Plus Plus,Action,Form,Add 1500 to Mind and Soul.,0,1500,1500,mind_soul_plus_2
 30,All Plus,Action,Form,Add 2500 to all stats.,2500,2500,2500,all_plus
 31,Draw Two,Action,Form,Draw two cards.,,,,draw_two
+32,Break The Mind,Action,Form,"If the opposing Unit has less than 3000 Mind, destroy it.",,,,break_the_mind

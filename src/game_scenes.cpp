@@ -7,6 +7,7 @@
 #include "audio.hpp"
 #include "constants.hpp"
 #include "cpu_brain.hpp"
+#include "debug_globals.hpp"
 #include "player.hpp"
 #include "textures.hpp"
 #include "helper_functions.hpp"
@@ -79,6 +80,10 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene, Pla
         InitializePlayer(player1, deckP1);
         InitializePlayer(player2, deckP2);
         gameStatus.currentTurnOwner = GetRandomValue(1, 2);
+#if (DEBUG)
+        gameStatus.currentTurnOwner = debugGlobals::g_debug_startingPlayer;
+#endif
+
 
         PlaySound(GameSound::buttonPress01);
         currentScene = GameScene::playing;
@@ -151,11 +156,6 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
 
     // Static Variables
     static raylib::Vector2 heldCardOffset{};
-    static CpuPlayerOptions cpuPlayerOptions
-    {
-        .actionDelay = 0.25f,
-        .autoStartNewRound = true,
-    };
 
     // UPDATE ------------------------------------------------------------------
     PlayMusic(playingScene.music);
@@ -210,7 +210,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
         player2.availableActions.clear(); // No actions for the other player
 
         //Enable to have two CPUs play against each other.
-        // RunCpuBrain(player1, cpuPlayerOptions);
+        // RunCpuBrain(player1, constants::cpuPlayerOptions);
 
         ExecuteTurn(player1, player2, currentTurnPhase, gameRules, gameStatus);
     }
@@ -219,7 +219,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
         player2.availableActions = CalculateAvailableActions(player2, currentTurnPhase, gameRules, gameStatus);
         player1.availableActions.clear(); // No actions for the other player
 
-        RunCpuBrain(player2, cpuPlayerOptions);
+        RunCpuBrain(player2, constants::cpuPlayerOptions);
 
         ExecuteTurn(player2, player1, currentTurnPhase, gameRules, gameStatus);
     }
@@ -241,7 +241,7 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
         {
             UpdateSceneButton(playingScene.nextRoundButton, player1, PlayerAction::finishRound);
         }
-        if (!cpuPlayerOptions.autoStartNewRound && gameStatus.currentTurnOwner == 2)
+        if (!constants::cpuPlayerOptions.autoStartNewRound && gameStatus.currentTurnOwner == 2)
         {
             UpdateSceneButton(playingScene.nextRoundButton, player2, PlayerAction::finishRound);
         }
@@ -536,18 +536,31 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
 
         assert(!gameStatus.roundWinnerHistory.empty() && "gameStatus.roundWinnerHistory is empty.");
 
-        if (gameStatus.roundWinnerHistory.back() == 0)
+        std::string endRoundMessage{"Uninitialized"};
+        if (gameStatus.actionLogs.back().actionCardPairTaken.action == PlayerAction::forfeitTheRound)
         {
-            HelperFunctions::DrawTextCenteredInRec("Round ended in a tie.", 20, RAYWHITE, message);
+            endRoundMessage = std::format("Player {0} forfeited because they had no other moves left.\n"
+                                          "Player {1} wind this round",
+                                          std::to_string(gameStatus.actionLogs.back().playerID),
+                                          std::to_string(gameStatus.roundWinnerHistory.back()));
         }
-        if (gameStatus.roundWinnerHistory.back() == 1)
+        else
         {
-            HelperFunctions::DrawTextCenteredInRec("Player 1 wins this round.", 20, RAYWHITE, message);
+            if (gameStatus.roundWinnerHistory.back() == 0)
+            {
+                endRoundMessage = "Round ended in a tie.";
+            }
+            if (gameStatus.roundWinnerHistory.back() == 1)
+            {
+                endRoundMessage = "Player 1 wins this round.";
+            }
+            else if (gameStatus.roundWinnerHistory.back() == 2)
+            {
+                endRoundMessage = "Player 2 wins this round.";
+            }
         }
-        else if (gameStatus.roundWinnerHistory.back() == 2)
-        {
-            HelperFunctions::DrawTextCenteredInRec("Player 2 wins this round.", 20, RAYWHITE, message);
-        }
+
+        HelperFunctions::DrawTextCenteredInRec(endRoundMessage.c_str(), 20, RAYWHITE, message);
     }
 }
 

@@ -1,6 +1,6 @@
 #pragma once
+#include "cpu_brain.hpp"
 #include "raylib-cpp.hpp"
-#include <vector>
 
 /* Inline variables have external linkage by default,
  * so that they are visible to the linker.
@@ -21,6 +21,13 @@ namespace constants
 #endif
     };
     inline constexpr int windowScreenHeight{screenHeight};
+
+    //CPU Players' Options
+    inline constexpr CpuPlayerOptions cpuPlayerOptions
+    {
+        .actionDelay = 0.25f,
+        .autoStartNewRound = false,
+    };
 
     // Card
     inline constexpr int cardWidth{72};

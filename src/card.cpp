@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include "csv.h"
+#include "debug_globals.hpp"
 #include "fonts.hpp"
 #include "helper_functions.hpp"
 #include "textures.hpp"
@@ -41,7 +42,15 @@ void RenderCard(const Card &card, const raylib::Rectangle destinationRect, const
         );
     };
 
-    if (card.faceUp == false)
+    bool isCardFaceUp = card.faceUp;
+#if (DEBUG)
+    if (debugGlobals::g_debug_allCardsVisible == true)
+    {
+        isCardFaceUp = true;
+    }
+#endif
+
+    if (isCardFaceUp == false)
     {
         const raylib::Texture2D &cardBackTex = GetTexture(GameTexture::cardBack);
 
@@ -81,7 +90,7 @@ void RenderCard(const Card &card, const raylib::Rectangle destinationRect, const
 
         if (static bool initShader{false}; initShader == false)
         {
-            // Shader uniform values that only need to setup once
+            // Shader uniform values that only need to be set up once
             static const int textureSizeLoc = GetShaderLocation(outlineShader, "textureSize");
             static const int colorSizeLoc = GetShaderLocation(outlineShader, "color");
 
@@ -101,6 +110,7 @@ void RenderCard(const Card &card, const raylib::Rectangle destinationRect, const
         outlineTex.Draw(oneByOneRec, outlineRec, {0, 0}, 0, WHITE);
         EndShaderMode();
     }
+
     //Card Art
     const raylib::Texture2D &cardArtTex = GetCardArtTexture(card.cardID);
     const raylib::Rectangle cardArtTexSourceRect
@@ -155,12 +165,12 @@ void RenderCard(const Card &card, const raylib::Rectangle destinationRect, const
     RenderTextInsideCard(std::to_string(card.stats.soul).c_str(), destinationRect, 494, 894, 161, 77, margins, 0.07f, false);
 }
 
-std::vector<Card> GetCardDB()
+const std::vector<Card> &GetCardDB()
 {
     static std::vector<Card> cardDB{};
     if (cardDB.empty())
     {
-        io::CSVReader<8> in("resources/csv/cards_db.csv");
+        io::CSVReader<8, io::trim_chars<' ', '\t'>, io::double_quote_escape<',', '"'> > in("resources/csv/cards_db.csv");
         in.read_header(io::ignore_extra_column, "cardID", "Name", "Type", "Banner", "Body Text", "Body", "Mind", "Soul");
         int cardID{};
         std::string name{};
@@ -181,7 +191,6 @@ std::vector<Card> GetCardDB()
                 .bodyText = bodyText,
                 .banner = StringToBanner(cardBanner),
                 .stats = {.body = body, .mind = mind, .soul = soul}
-
             };
         }
     }
@@ -191,34 +200,20 @@ std::vector<Card> GetCardDB()
 
 Card GetCardFromDB(const int id)
 {
-    io::CSVReader<8> in("resources/csv/cards_db.csv");
-    in.read_header(io::ignore_extra_column, "cardID", "Name", "Type", "Banner", "Body Text", "Body", "Mind", "Soul");
-    int cardID{};
-    std::string name{};
-    std::string cardType{};
-    std::string cardBanner{};
-    std::string bodyText{};
-    int body{};
-    int mind{};
-    int soul{};
-
     Card newCard{};
-    while (in.read_row(cardID, name, cardType, cardBanner, bodyText, body, mind, soul))
+    for (const std::vector<Card> &cardDB = GetCardDB(); const Card &card: cardDB)
     {
-        if (cardID != id) continue;
+        if (id == card.cardID)
+        {
+            newCard = card;
+            newCard.uid = HelperFunctions::GetUID();
+            assert(newCard.uid != card.uid && "New card has the same UID than the database card.");
 
-        newCard.type = StringToCardType(cardType);
-        newCard.cardID = cardID;
-        newCard.name = name;
-        newCard.bodyText = bodyText;
-        newCard.banner = StringToBanner(cardBanner);
-        newCard.stats = {.body = body, .mind = mind, .soul = soul},
-                newCard.uid = HelperFunctions::GetUID(); //always generate a new UID when creating a new card
-
-        break;
+            return newCard;
+        }
     }
 
-    return newCard;
+    assert(false && "Could not find card with that ID");
 }
 
 Card GetCardFromDB(const std::string_view cardName)
@@ -231,7 +226,7 @@ void PrintCard(const Card &card)
     const std::string cardPrint{
         std::format("Printing Card [Name: {0}, ID: {1}, Type: {2}, Banner: {3}, Body Text: {4}, Body: {5}, Mind: {6}, Soul: {7}]\n",
                     card.name,
-                    std::to_string(static_cast<int>(card.cardID)),
+                    std::to_string(card.cardID),
                     CardTypeToString(card.type),
                     BannerToString(card.banner),
                     card.bodyText,
@@ -243,24 +238,7 @@ void PrintCard(const Card &card)
     std::cout << cardPrint;
 }
 
-CardBanner StringToBanner(const std::string_view sv)
-{
-    const std::unordered_map<std::string, CardBanner> stringToBannerMap
-    {
-        {"Form", CardBanner::form},
-        {"Flow", CardBanner::flow},
-        {"Strategy", CardBanner::strategy},
-        {"Instinct", CardBanner::instinct},
-        {"Hope", CardBanner::hope},
-        {"Despair", CardBanner::despair},
-    };
-
-    assert(stringToBannerMap.contains(sv.data()) && "No card banner with such name");
-
-    return stringToBannerMap.at(sv.data());
-}
-
-std::string BannerToString(const CardBanner banner)
+constexpr std::string BannerToString(const CardBanner banner)
 {
     const std::unordered_map<CardBanner, std::string> stringToBannerMap
     {
@@ -278,20 +256,25 @@ std::string BannerToString(const CardBanner banner)
     return stringToBannerMap.at(banner);
 }
 
-CardType StringToCardType(const std::string_view sv)
+constexpr CardBanner StringToBanner(const std::string_view sv)
 {
-    const std::unordered_map<std::string, CardType> stringToCardTypeMap
+    const std::unordered_map<std::string, CardBanner> stringToBannerMap
     {
-        {"Unit", CardType::unit},
-        {"Action", CardType::action},
+        {BannerToString(CardBanner::invalid), CardBanner::invalid},
+        {BannerToString(CardBanner::form), CardBanner::form},
+        {BannerToString(CardBanner::flow), CardBanner::flow},
+        {BannerToString(CardBanner::strategy), CardBanner::strategy},
+        {BannerToString(CardBanner::instinct), CardBanner::instinct},
+        {BannerToString(CardBanner::hope), CardBanner::hope},
+        {BannerToString(CardBanner::despair), CardBanner::despair},
     };
 
-    assert(stringToCardTypeMap.contains(sv.data()) && "No card type with such name");
+    assert(stringToBannerMap.contains(sv.data()) && "No card banner with such name");
 
-    return stringToCardTypeMap.at(sv.data());
+    return stringToBannerMap.at(sv.data());
 }
 
-std::string CardTypeToString(const CardType cardType)
+constexpr std::string CardTypeToString(const CardType cardType)
 {
     const std::unordered_map<CardType, std::string> cardTypeToStringMap
     {
@@ -305,11 +288,24 @@ std::string CardTypeToString(const CardType cardType)
     return cardTypeToStringMap.at(cardType);
 }
 
+constexpr CardType StringToCardType(const std::string_view sv)
+{
+    const std::unordered_map<std::string, CardType> stringToCardTypeMap
+    {
+        {CardTypeToString(CardType::invalid), CardType::invalid},
+        {CardTypeToString(CardType::unit), CardType::unit},
+        {CardTypeToString(CardType::action), CardType::action},
+    };
+
+    assert(stringToCardTypeMap.contains(sv.data()) && "No card type with such name");
+
+    return stringToCardTypeMap.at(sv.data());
+}
+
+
 int StringToCardId(const std::string_view cardName)
 {
-    const std::vector<Card> cardDB = GetCardDB();
-
-    for (const Card &card: cardDB)
+    for (const std::vector<Card> &cardDB = GetCardDB(); const Card &card: cardDB)
     {
         if (card.name == cardName)
         {

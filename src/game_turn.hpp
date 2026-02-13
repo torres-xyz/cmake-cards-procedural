@@ -28,7 +28,8 @@ enum class PlayerAction
     playCard,
     passTheTurn,
     finishRound,
-    forfeit,
+    forfeitTheRound,
+    forfeitTheGame,
 };
 
 struct PlayerActionAndHandCardPair
@@ -43,9 +44,9 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
 
 void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnPhase, const GameRules &gameRules, GameStatus &gameStatus);
 
-void ExecuteChosenPlayerAction(Player &player, TurnPhase &turnPhase, const GameRules &gameRules, GameStatus &gameStatus);
+void ExecuteChosenPlayerAction(Player &player, Player &opponentPlayer, TurnPhase &currentTurnPhase, const GameRules &gameRules, GameStatus &gameStatus);
 
-void ExecutePlayedCardEffects(int cardID, Player &player, TurnPhase &turnPhase, const GameRules &gameRules, GameStatus &gameStatus);
+void ExecutePlayedCardEffects(int cardID, Player &player, Player &opponent, TurnPhase &turnPhase, const GameRules &gameRules, const GameStatus &gameStatus);
 
 std::string PlayerActionToString(PlayerAction playerAction);
 

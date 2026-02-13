@@ -4,6 +4,7 @@
 #include "rlImGui.h"
 #include "raylib-cpp.hpp"
 #include "constants.hpp"
+#include "debug_globals.hpp"
 #include "game_scenes.hpp"
 #include "game_status.hpp"
 #include "helper_functions.hpp"
@@ -11,8 +12,8 @@
 
 namespace ImGuiSideBar
 {
-    void DrawSideBar(bool &muteGame, const GameScene &currentGameScene, const TurnPhase &currentTurnPhase, GameStatus &gameStatus,
-                     Player &player1, const Player &player2)
+    void DrawSideBar(bool &muteGame, const GameScene &currentGameScene, const TurnPhase &currentTurnPhase, const GameStatus &gameStatus,
+                     Player &player1, Player &player2)
     {
         // start ImGui Content
         rlImGuiBegin();
@@ -43,12 +44,22 @@ namespace ImGuiSideBar
             ImGui::TextUnformatted(("Turn Phase = " + TurnPhaseToString(currentTurnPhase)).c_str());
             ImGui::SeparatorText("Player 1 available actions");
             ImGui::TextUnformatted(HelperFunctions::PlayerAvailableActionsToString(player1).c_str());
+            ImGui::SeparatorText("Player 2 available actions");
+            ImGui::TextUnformatted(HelperFunctions::PlayerAvailableActionsToString(player2).c_str());
             ImGui::SeparatorText("Options");
             ImGui::Checkbox("Mute", &muteGame);
             ImGui::SeparatorText("Debug Actions");
             if (ImGui::Button("Inject Deck in Player 1"))
             {
-                DEBUG_InjectDeckInPlayer(player1, templeShieldDeck);
+                DEBUG_InjectDeckInPlayer(player1, mindBreakDeck);
+            }
+            if (ImGui::Button("Inject Deck in Player 2"))
+            {
+                DEBUG_InjectDeckInPlayer(player2, onlyOneUnitDeck);
+            }
+            if (ImGui::Button("Toggle All Cards Face Up"))
+            {
+                debugGlobals::g_debug_allCardsVisible = !debugGlobals::g_debug_allCardsVisible;
             }
             ImGui::SeparatorText("Actions Log");
             ImGui::TextWrapped("%s", HelperFunctions::ActionLogsToString(gameStatus).c_str());
