@@ -151,7 +151,7 @@ struct PrototypingScene
 
 void RunStartingScene(StartingScene &startingScene, GameScene &currentScene, Player &player1, Player &player2, GameStatus &gameStatus);
 
-void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, GameStatus &gameStatus,
+void RunPlayingScene(PlayingScene &playingScene, GameScene &currentScene, TurnPhase &currentTurnPhase, GameStatus &gameStatus,
                      Player &player1, Player &player2, const GameRules &gameRules);
 
 void RunGameOverScene(GameOverScene &gameOverScene, GameScene &currentScene, TurnPhase &turnPhase, GameStatus &gameStatus,

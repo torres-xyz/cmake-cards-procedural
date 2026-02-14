@@ -104,27 +104,27 @@ void RunStartingScene(StartingScene &startingScene, GameScene &currentScene, Pla
     DrawButton(startButton, GetTexture(startButton.background));
 }
 
-void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, GameStatus &gameStatus, Player &player1, Player &player2, const GameRules &gameRules)
+void RunPlayingScene(PlayingScene &playingScene, GameScene &currentScene, TurnPhase &currentTurnPhase, GameStatus &gameStatus, Player &player1, Player &player2, const GameRules &gameRules)
 {
-    // Lambdas
-    auto UpdateSceneButton = [](Button &bt, Player &p1, const PlayerAction pAction) {
-        bt.state = ButtonState::disabled;
+    // region Lambdas
+    auto UpdateSceneButton = [](Button &button, Player &player, const PlayerAction playerAction) -> void {
+        button.state = ButtonState::disabled;
 
         bool playerHasAvailableAction{false};
-        for (const auto &availableActions: p1.availableActions)
+        for (const auto &[action, card]: player.availableActions)
         {
-            if (availableActions.action == pAction) playerHasAvailableAction = true;
+            if (action == playerAction) playerHasAvailableAction = true;
         }
 
         if (playerHasAvailableAction)
         {
-            bt.state = ButtonState::enabled;
-            UpdateButtonState(bt, GetMousePosition(), IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
+            button.state = ButtonState::enabled;
+            UpdateButtonState(button, GetMousePosition(), IsMouseButtonDown(MOUSE_BUTTON_LEFT), IsMouseButtonReleased(MOUSE_BUTTON_LEFT));
 
-            if (bt.wasPressed)
+            if (button.wasPressed)
             {
                 PlaySound(GameSound::buttonPress01);
-                p1.chosenAction.action = pAction;
+                player.chosenAction.action = playerAction;
             }
         }
     };
@@ -147,18 +147,24 @@ void RunPlayingScene(PlayingScene &playingScene, TurnPhase &currentTurnPhase, Ga
         }
     };
     auto PlayerHasAvailableAction = [](const Player &player, const PlayerAction &action)-> bool {
-        for (const auto &[playerAction, card]: player.availableActions)
-        {
-            if (playerAction == action) return true;
-        }
-        return false;
+        return std::ranges::any_of(
+            player.availableActions,
+            [action](const PlayerActionAndHandCardPair &actionCardPair) {
+                return actionCardPair.action == action;
+            });
     };
+    //endregion Lambdas
 
     // Static Variables
     static raylib::Vector2 heldCardOffset{};
 
     // UPDATE ------------------------------------------------------------------
     PlayMusic(playingScene.music);
+
+    if (gameStatus.gameIsOver)
+    {
+        currentScene = GameScene::gameOver;
+    }
 
     // Picking up a card from the Hand and Holding it.
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))

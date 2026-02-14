@@ -100,13 +100,9 @@ bool IsInitialHandValid(const std::vector<Card> &playerHand, const GameRules gam
         return false;
     }
 
-    //An initial hand needs to have only one Unit.
-    for (const Card &card: playerHand)
-    {
-        if (card.type == CardType::unit) return true;
-    }
+    //A valid initial hand needs to have at least one Unit.
+    return std::ranges::any_of(playerHand, [](const Card &card) { return card.type == CardType::unit; });
 
-    return false;
 }
 
 int HasAPlayerWon(const GameStatus &gameStatus, const GameRules &gameRules)

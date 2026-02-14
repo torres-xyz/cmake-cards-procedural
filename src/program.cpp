@@ -68,12 +68,8 @@ void run()
             }
             case GameScene::playing:
             {
-                RunPlayingScene(playingScene, currentTurnPhase, gameStatus, player1, player2, gameRules);
+                RunPlayingScene(playingScene, currentScene, currentTurnPhase, gameStatus, player1, player2, gameRules);
 
-                if (gameStatus.gameIsOver)
-                {
-                    currentScene = GameScene::gameOver;
-                }
                 break;
             }
             case GameScene::gameOver:

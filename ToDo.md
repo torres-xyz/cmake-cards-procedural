@@ -2,22 +2,12 @@
 
 ## Regular To Dos
 
-### Add more card effects
+- [ ] Add cards of different banners.
+    - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
 
-- [ ] Check if the deck has Units before performing/allowing a mulligan.
-- [ ] If the CPU forfeits the round and gives the player enough points to win,
-  don't go to the game over screen right away but wait at the round end screen.
-
-- [ ] "Mind Break" - "Play on opponent's Unit. If it has less than 3000 Mind, destroy it."
-    - [ ] Create rule for destroying Units. → Player loses the round if they can't play another from hand.
-
-- [ ] Create card frames for the new type of Actions.
-    - [ ] Add them to textures.cpp → GetTexture().
 - [ ] Sliding texture shader for the game board background.
     - It should slide up when it's the player's turn and down when it is the opponent's turn.
 - [ ] Redo player_test.cpp.
-- [ ] Add cards of different banners.
-    - [ ] Create rule that you can only play Action cards on top of Units of the same Banner.
 - [ ] Animate opponent's cards being played.
 - [ ] UI with https://github.com/nicbarker/clay
 
@@ -135,3 +125,9 @@
 ### Add more card effects
 
 - [x] Card ability → "+2000 Body if you have lost the previous match."
+- [x] "Mind Break" - "Play on opponent's Unit. If it has less than 3000 Mind, destroy it."
+    - [x] Create rule for destroying Units. → Player loses the round if they can't play another from hand.
+
+- [x] Check if the deck has Units before performing/allowing a mulligan.
+- [x] If the CPU forfeits the round and gives the player enough points to win,
+  don't go to the game over screen right away, wait at the round end screen.

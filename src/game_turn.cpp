@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
-#include <iostream>
 
 #include "audio.hpp"
 #include "game_rules.hpp"
@@ -44,11 +43,7 @@ bool HasACardBeenPlayedLastTurn(const GameStatus &gS)
 
 bool DeckContainsUnits(const std::vector<Card> &deckToCheck)
 {
-    for (const Card &card: deckToCheck)
-    {
-        if (card.type == CardType::unit) return true;
-    }
-    return false;
+    return std::ranges::any_of(deckToCheck, [](const Card &card) { return card.type == CardType::unit; });
 }
 
 std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player &player, const TurnPhase &turnPhase, const GameRules &gameRules, const GameStatus &gameStatus)
@@ -139,10 +134,6 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
             break;
         }
     }
-    if (possibleActions.size() == 2)
-    {
-        std::cout << "Only 2 actions\n";
-    }
 
     return possibleActions;
 }
@@ -219,7 +210,6 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
         }
         case TurnPhase::mainPhase:
         {
-
             ExecuteChosenPlayerAction(player, opponentPlayer, currentTurnPhase, gameRules, gameStatus);
 
             break;
@@ -252,13 +242,6 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
         }
         case TurnPhase::endRoundPhase:
         {
-            // Stop executing turns if there is a winner.
-            if (HasAPlayerWon(gameStatus, gameRules) != 0)
-            {
-                gameStatus.gameIsOver = true;
-                return;
-            }
-
             ExecuteChosenPlayerAction(player, opponentPlayer, currentTurnPhase, gameRules, gameStatus);
 
             break;
@@ -347,6 +330,8 @@ void ExecuteChosenPlayerAction(Player &player, [[maybe_unused]] Player &opponent
         }
         case PlayerAction::mulligan:
         {
+            assert(DeckContainsUnits(player.deck) && "Trying to perform a mulligan on a deck with no Units.");
+
             //add hand to deck
             player.deck.insert(std::begin(player.deck), std::begin(player.hand), std::end(player.hand));
             player.hand.clear();
@@ -409,9 +394,11 @@ void ExecuteChosenPlayerAction(Player &player, [[maybe_unused]] Player &opponent
         }
         case PlayerAction::finishRound:
         {
-            if (gameStatus.pointsPlayer1 >= gameRules.pointsNeededToWin || gameStatus.pointsPlayer2 >= gameRules.pointsNeededToWin)
+            // Check if there is a winner and end the game
+            if (HasAPlayerWon(gameStatus, gameRules) != 0)
             {
-                // The game ends and a winner is declared
+                gameStatus.gameIsOver = true;
+                return;
             }
 
             currentTurnPhase = TurnPhase::initialSetup;
