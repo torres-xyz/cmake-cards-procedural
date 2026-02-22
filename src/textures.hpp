@@ -25,6 +25,7 @@ enum class GameTexture
     cardFrame_Unit_Hope,
     cardFrame_Unit_Despair,
     cardFrame_Action_Form,
+    cardFrame_Action_Flow,
 };
 
 raylib::Texture2D const &GetTexture(GameTexture tex);

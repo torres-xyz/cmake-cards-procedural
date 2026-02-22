@@ -1,10 +1,10 @@
 cardID,Name,Type,Banner,Body Text,Body,Mind,Soul,Asset Name
 1,Cancer Pagurus,Unit,Form,+500 to Body for each Form Action on this Unit.,2500,500,1500,cancer_pagurus
-2,Pierrotten,Unit,Form,,1200,3000,700,pierrotten
+2,Pierrotten,Unit,Flow,,1200,3000,700,pierrotten
 3,Malmelet,Unit,Form,,2400,2900,1300,malmelet
-4,Twisted Gauntlet,Unit,Form,+2000 to Body if you have lost the previous round.,2700,1000,900,twisted_gauntlet
+4,Twisted Gauntlet,Unit,Flow,+2000 to Body if you have lost the previous round.,2700,1000,900,twisted_gauntlet
 5,Nether Thief,Unit,Form,,1300,2400,2100,nether_thief
-6,Forgotten Crew Member,Unit,Form,,2900,1200,1400,forgotten_crew_member
+6,Forgotten Crew Member,Unit,Flow,,2900,1200,1400,forgotten_crew_member
 7,Mygalomorphae,Unit,Form,,2600,1300,2300,mygalomorphae
 8,Blitz Lancer,Unit,Form,,1900,1100,800,blitz_lancer
 9,Sand Fang,Unit,Form,,1800,2800,1500,sand_fang
@@ -14,8 +14,8 @@ cardID,Name,Type,Banner,Body Text,Body,Mind,Soul,Asset Name
 13,Sand Tusk,Unit,Form,,2100,900,1300,sand_tusk
 14,Temple Shield,Unit,Form,,2900,1900,1900,temple_shield
 15,Body Plus,Action,Form,Add 1000 to Body.,1000,0,0,body_plus_1
-16,Body Plus Plus,Action,Form,Add 2000 to Body.,2000,0,0,body_plus_2
-17,Body Plus Plus Plus,Action,Form,Add 3000 to Body.,3000,0,0,body_plus_3
+16,Body Plus Plus,Action,Flow,Add 2000 to Body.,2000,0,0,body_plus_2
+17,Body Plus Plus Plus,Action,Flow,Add 3000 to Body.,3000,0,0,body_plus_3
 18,Mind Plus,Action,Form,Add 1000 to Mind.,0,1000,0,mind_plus_1
 19,Mind Plus Plus,Action,Form,Add 2000 to Mind.,0,2000,0,mind_plus_2
 20,Mind Plus Plus Plus,Action,Form,Add 3000 to Mind.,0,3000,0,mind_plus_3

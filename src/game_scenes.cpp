@@ -216,7 +216,7 @@ void RunPlayingScene(PlayingScene &playingScene, GameScene &currentScene, TurnPh
         player2.availableActions.clear(); // No actions for the other player
 
         //Enable to have two CPUs play against each other.
-        // RunCpuBrain(player1, constants::cpuPlayerOptions);
+        //RunCpuBrain(player1, constants::cpuPlayerOptions);
 
         ExecuteTurn(player1, player2, currentTurnPhase, gameRules, gameStatus);
     }
@@ -247,7 +247,8 @@ void RunPlayingScene(PlayingScene &playingScene, GameScene &currentScene, TurnPh
         {
             UpdateSceneButton(playingScene.nextRoundButton, player1, PlayerAction::finishRound);
         }
-        if (!constants::cpuPlayerOptions.autoStartNewRound && gameStatus.currentTurnOwner == 2)
+        //if cpu auto start new round is false then player 1 can manually do that:
+        if (constants::cpuPlayerOptions.autoStartNewRound == false && gameStatus.currentTurnOwner == 2)
         {
             UpdateSceneButton(playingScene.nextRoundButton, player2, PlayerAction::finishRound);
         }
@@ -625,7 +626,7 @@ void RunPrototypingScene(const PrototypingScene &scene)
     // Testing Cards
     static Card cardTest = GetCardFromDB("Cancer Pagurus");
     cardTest.rect.SetPosition(200, 200);
-    cardTest.rect.SetSize(constants::cardTextureWidth / 2, constants::cardTextureHeight / 2);
+    cardTest.rect.SetSize(constants::cardTextureWidth / 2.0, constants::cardTextureHeight / 2.0);
 
     //Draw
     GetTexture(scene.background).Draw();

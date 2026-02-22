@@ -17,13 +17,10 @@ raylib::Texture2D const &GetTexture(const GameTexture tex)
         {GameTexture::panel01, "resources/textures/panel_01.png"},
         {GameTexture::panel05, "resources/textures/panel_05.png"},
         {GameTexture::cardBack, "resources/textures/cards/card_back.png"},
-        {GameTexture::cardFrame_Unit_Form, "resources/textures/card-frames/body_form_min.png"},
-        {GameTexture::cardFrame_Unit_Flow, "resources/textures/card-frames/body_flow_min.png"},
-        {GameTexture::cardFrame_Unit_Strategy, "resources/textures/card-frames/mind_strategy_min.png"},
-        {GameTexture::cardFrame_Unit_Instinct, "resources/textures/card-frames/mind_instinct_min.png"},
-        {GameTexture::cardFrame_Unit_Hope, "resources/textures/card-frames/soul_hope_min.png"},
-        {GameTexture::cardFrame_Unit_Despair, "resources/textures/card-frames/soul_despair_min.png"},
-        {GameTexture::cardFrame_Action_Form, "resources/textures/card-frames/body_form_action_min.png"},
+        {GameTexture::cardFrame_Unit_Form, "resources/textures/card-frames/frame_body_form_unit_min.png"},
+        {GameTexture::cardFrame_Unit_Flow, "resources/textures/card-frames/frame_body_flow_unit_min.png"},
+        {GameTexture::cardFrame_Action_Form, "resources/textures/card-frames/frame_body_form_action_min.png"},
+        {GameTexture::cardFrame_Action_Flow, "resources/textures/card-frames/frame_body_flow_action_min.png"},
     };
     static std::unordered_map<GameTexture, raylib::Texture2D> gameTextureToTexture2DMap{};
 
@@ -63,6 +60,7 @@ raylib::Texture2D const &GetTexture(const CardBanner banner, const CardType card
     {
         {CardBanner::invalid, GameTexture::invalid},
         {CardBanner::form, GameTexture::cardFrame_Action_Form},
+        {CardBanner::flow, GameTexture::cardFrame_Action_Flow},
     };
     if (cardType == CardType::action)
     {

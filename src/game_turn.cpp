@@ -138,7 +138,7 @@ std::vector<PlayerActionAndHandCardPair> CalculateAvailableActions(const Player 
     return possibleActions;
 }
 
-void AttributeRoundWinToPlayer(Player &victoriousPlayer, Player &defeatedPlayer, TurnPhase &currentTurnPhase, GameStatus &gameStatus)
+void AttributeRoundWinToPlayer(Player &victoriousPlayer, Player &defeatedPlayer, [[maybe_unused]] TurnPhase &currentTurnPhase, GameStatus &gameStatus)
 {
     const int winnerId = victoriousPlayer.id;
 
@@ -155,9 +155,6 @@ void AttributeRoundWinToPlayer(Player &victoriousPlayer, Player &defeatedPlayer,
     defeatedPlayer.cardsInPlayStack.clear();
 
     gameStatus.currentTurnOwner = defeatedPlayer.id;
-    gameStatus.turnsPlayed++;
-
-    currentTurnPhase = TurnPhase::endRoundPhase;
 }
 
 // Make use of the command pattern, so that it is easy to list actions, undo them, and redo them.
@@ -190,7 +187,6 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
         }
     }
 
-
     switch (currentTurnPhase)
     {
         case TurnPhase::initialSetup: //only executed once per round. but different
@@ -202,7 +198,6 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
             // Wait for initial hand draw
             if (IsInitialHandValid(player.hand, gameRules))
             {
-                // currentTurnPhase = TurnPhase::drawStep;
                 currentTurnPhase = TurnPhase::mainPhase;
             }
 
@@ -235,13 +230,24 @@ void ExecuteTurn(Player &player, Player &opponentPlayer, TurnPhase &currentTurnP
             // Do Battle then immediately jump to the End Round Phase
             const int winnerId = CalculateRoundWinnerId(player, opponentPlayer, gameStatus);
 
-            AttributeRoundWinToPlayer(winnerId == 1 ? player : opponentPlayer, winnerId == 1 ? player : opponentPlayer, currentTurnPhase, gameStatus);
+            AttributeRoundWinToPlayer(winnerId == player.id ? player : opponentPlayer,
+                                      winnerId == player.id ? opponentPlayer : player,
+                                      currentTurnPhase,
+                                      gameStatus);
 
             currentTurnPhase = TurnPhase::endRoundPhase;
             break;
         }
         case TurnPhase::endRoundPhase:
         {
+            // Check if there is a winner and end the game
+            if (HasAPlayerWon(gameStatus, gameRules) != 0)
+            {
+                gameStatus.gameIsOver = true;
+                return;
+            }
+
+
             ExecuteChosenPlayerAction(player, opponentPlayer, currentTurnPhase, gameRules, gameStatus);
 
             break;
@@ -386,6 +392,8 @@ void ExecuteChosenPlayerAction(Player &player, [[maybe_unused]] Player &opponent
         case PlayerAction::forfeitTheRound:
         {
             AttributeRoundWinToPlayer(opponentPlayer, player, currentTurnPhase, gameStatus);
+            currentTurnPhase = TurnPhase::endRoundPhase;
+
             break;
         }
         case PlayerAction::forfeitTheGame:
@@ -394,13 +402,6 @@ void ExecuteChosenPlayerAction(Player &player, [[maybe_unused]] Player &opponent
         }
         case PlayerAction::finishRound:
         {
-            // Check if there is a winner and end the game
-            if (HasAPlayerWon(gameStatus, gameRules) != 0)
-            {
-                gameStatus.gameIsOver = true;
-                return;
-            }
-
             currentTurnPhase = TurnPhase::initialSetup;
 
             break;

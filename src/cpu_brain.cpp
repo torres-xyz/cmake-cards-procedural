@@ -1,5 +1,7 @@
 #include "cpu_brain.hpp"
 
+#include <iostream>
+
 #include "player.hpp"
 
 void RunCpuBrain(Player &player, const CpuPlayerOptions &options)
@@ -70,6 +72,7 @@ void RunCpuBrain(Player &player, const CpuPlayerOptions &options)
         if (hasForfeitRoundAction && hasForfeitGameAction)
         {
             player.chosenAction = {PlayerAction::forfeitTheRound};
+            std::cout << "CPU Player forfeited\n";
         }
     }
 

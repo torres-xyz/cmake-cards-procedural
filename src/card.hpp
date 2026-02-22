@@ -42,12 +42,7 @@ struct Card
     std::string name{};
     std::string bodyText{};
     CardBanner banner{CardBanner::invalid};
-    CardStats stats
-    {
-        .body = 0,
-        .mind = 0,
-        .soul = 0
-    };
+    CardStats stats{};
 };
 
 void RenderCard(const Card &card, raylib::Rectangle destinationRect, bool highlighted = false);
